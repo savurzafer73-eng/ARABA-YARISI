@@ -2,596 +2,254 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Turbo Araba Yarışı</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Araba Yarışı</title>
 
 <style>
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    -webkit-tap-highlight-color:transparent;
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-    background:#111;
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #111;
+    font-family: Arial, sans-serif;
+    touch-action: none;
 }
 
-body{
-    touch-action:none;
-    user-select:none;
+#game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #555;
 }
 
-#game{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    background:#56a9d8;
+/* Yol */
+#road {
+    position: absolute;
+    left: 15%;
+    width: 70%;
+    height: 100%;
+    background: #333;
+    overflow: hidden;
 }
 
-/* GÖKYÜZÜ */
-
-#sky{
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:55%;
-    background:linear-gradient(#1681c5,#b9ecff);
+/* Yol kenarları */
+.roadEdge {
+    position: absolute;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    background: #fff;
 }
 
-#sun{
-    position:absolute;
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    background:#ffe45c;
-    right:12%;
-    top:8%;
-    box-shadow:0 0 35px #fff3a0;
+.leftEdge {
+    left: 15%;
 }
 
-.cloud{
-    position:absolute;
-    width:120px;
-    height:32px;
-    background:rgba(255,255,255,.8);
-    border-radius:30px;
+.rightEdge {
+    right: 15%;
 }
 
-.cloud:before,
-.cloud:after{
-    content:"";
-    position:absolute;
-    background:inherit;
-    border-radius:50%;
+/* Şerit çizgileri */
+.lane {
+    position: absolute;
+    top: -120px;
+    width: 8px;
+    height: 90px;
+    background: white;
+    border-radius: 5px;
 }
 
-.cloud:before{
-    width:48px;
-    height:48px;
-    left:20px;
-    bottom:5px;
+/* Araba */
+#car {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    width: 48px;
+    height: 82px;
+    transform: translateX(-50%);
+    z-index: 20;
 }
 
-.cloud:after{
-    width:55px;
-    height:55px;
-    right:18px;
-    bottom:3px;
-}
-
-.cloud1{
-    left:8%;
-    top:13%;
-}
-
-.cloud2{
-    right:5%;
-    top:25%;
-    transform:scale(.7);
-}
-
-/* YOL */
-
-#road{
-    position:absolute;
-    width:min(94vw,460px);
-    height:100%;
-    left:50%;
-    transform:translateX(-50%);
-    background:#333;
-    border-left:8px solid white;
-    border-right:8px solid white;
-    overflow:hidden;
-    z-index:2;
-}
-
-/* YOL KENARLARI */
-
-.edge{
-    position:absolute;
-    top:0;
-    width:8px;
-    height:100%;
-    background:repeating-linear-gradient(
-        to bottom,
-        #e53935 0 35px,
-        white 35px 70px
-    );
-    z-index:2;
-}
-
-.edge.left{
-    left:0;
-}
-
-.edge.right{
-    right:0;
-}
-
-/* ŞERİT ÇİZGİLERİ */
-
-.laneLine{
-    position:absolute;
-    top:-150px;
-    width:7px;
-    height:110px;
-    background:white;
-    border-radius:5px;
-    opacity:.9;
-    z-index:1;
-}
-
-.line1{
-    left:33.33%;
-    transform:translateX(-50%);
-}
-
-.line2{
-    left:66.66%;
-    transform:translateX(-50%);
-}
-
-/* HUD */
-
-#hud{
-    position:absolute;
-    top:10px;
-    left:50%;
-    transform:translateX(-50%);
-    width:min(94vw,460px);
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:6px;
-    z-index:30;
-}
-
-.hud{
-    background:rgba(0,0,0,.72);
-    border-radius:10px;
-    padding:7px 4px;
-    text-align:center;
-    color:white;
-    font-size:11px;
-    font-weight:bold;
-}
-
-.hud strong{
-    display:block;
-    font-size:17px;
-    margin-top:2px;
-}
-
-/* ARABALAR */
-
-.car{
-    position:absolute;
-    width:56px;
-    height:105px;
-    border-radius:14px 14px 10px 10px;
-    box-shadow:0 6px 14px rgba(0,0,0,.7);
-}
-
-/* CAM */
-
-.car:before{
-    content:"";
-    position:absolute;
-    left:8px;
-    top:13px;
-    width:40px;
-    height:31px;
-    background:linear-gradient(
-        135deg,
-        #e9fbff,
-        #5b9db8
-    );
-    border:2px solid #222;
-    border-radius:8px;
-}
-
-/* ALT */
-
-.car:after{
-    content:"";
-    position:absolute;
-    left:11px;
-    bottom:15px;
-    width:34px;
-    height:16px;
-    background:#111;
-    border-radius:5px;
-}
-
-/* TEKERLER */
-
-.wheel{
-    position:absolute;
-    width:8px;
-    height:26px;
-    background:#111;
-    border-radius:5px;
-    z-index:5;
-}
-
-.w1{
-    left:-5px;
-    top:27px;
-}
-
-.w2{
-    right:-5px;
-    top:27px;
-}
-
-.w3{
-    left:-5px;
-    bottom:18px;
-}
-
-.w4{
-    right:-5px;
-    bottom:18px;
-}
-
-/* OYUNCU */
-
-#player{
-    left:50%;
-    bottom:140px;
-    transform:translateX(-50%);
-    background:linear-gradient(
+.carBody {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
         90deg,
-        #9d0000,
-        #ff3030,
-        #a00000
+        #8b0000,
+        #ff2222,
+        #8b0000
     );
-    z-index:15;
+    border-radius: 13px 13px 9px 9px;
+    box-shadow: 0 4px 10px #000;
 }
 
-.light{
-    position:absolute;
-    top:5px;
-    width:10px;
-    height:7px;
-    background:#fff9b0;
-    border-radius:4px;
+.window {
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    width: 32px;
+    height: 25px;
+    background: linear-gradient(135deg,#bdefff,#24506b);
+    border-radius: 8px 8px 4px 4px;
 }
 
-.light1{
-    left:10px;
+.window2 {
+    position: absolute;
+    left: 8px;
+    top: 43px;
+    width: 32px;
+    height: 17px;
+    background: #111;
+    border-radius: 3px;
 }
 
-.light2{
-    right:10px;
+.light {
+    position: absolute;
+    width: 9px;
+    height: 7px;
+    background: #fff;
+    border-radius: 3px;
+    top: 4px;
 }
 
-/* RAKİPLER */
-
-.enemy{
-    z-index:10;
+.light.left {
+    left: 6px;
 }
 
-.blue{
-    background:linear-gradient(
+.light.right {
+    right: 6px;
+}
+
+.wheel {
+    position: absolute;
+    width: 8px;
+    height: 22px;
+    background: #111;
+    border-radius: 4px;
+}
+
+.wheel.l1 {
+    left: -5px;
+    top: 15px;
+}
+
+.wheel.l2 {
+    left: -5px;
+    bottom: 15px;
+}
+
+.wheel.r1 {
+    right: -5px;
+    top: 15px;
+}
+
+.wheel.r2 {
+    right: -5px;
+    bottom: 15px;
+}
+
+/* Diğer araçlar */
+.enemy {
+    position: absolute;
+    width: 44px;
+    height: 75px;
+    background: linear-gradient(
         90deg,
-        #064c9a,
-        #258fff,
-        #064c9a
+        #174b9b,
+        #3185ff,
+        #174b9b
     );
+    border-radius: 11px;
+    z-index: 10;
+    box-shadow: 0 3px 8px #000;
 }
 
-.green{
-    background:linear-gradient(
-        90deg,
-        #08752d,
-        #30e86c,
-        #08752d
-    );
+.enemy::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 11px;
+    width: 30px;
+    height: 23px;
+    background: #b8e8ff;
+    border-radius: 6px;
 }
 
-.yellow{
-    background:linear-gradient(
-        90deg,
-        #a37500,
-        #ffe000,
-        #a37500
-    );
+.enemy::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    bottom: 10px;
+    width: 30px;
+    height: 15px;
+    background: #111;
+    border-radius: 3px;
 }
 
-.purple{
-    background:linear-gradient(
-        90deg,
-        #571181,
-        #b43cff,
-        #571181
-    );
+/* Bilgi */
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 2px 2px 3px #000;
 }
 
-/* PARA */
-
-.coin{
-    position:absolute;
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    background:radial-gradient(
-        circle,
-        #fff49c 0 20%,
-        #ffd000 21% 65%,
-        #d58b00 66%
-    );
-    border:3px solid #fff0a0;
-    box-shadow:0 0 15px #ffd000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#956000;
-    font-weight:bold;
-    font-size:17px;
-    z-index:9;
+#hint {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 14px;
+    z-index: 50;
+    text-shadow: 1px 1px 3px #000;
+    white-space: nowrap;
 }
 
-/* NİTRO */
-
-#nitroArea{
-    position:absolute;
-    left:50%;
-    bottom:91px;
-    transform:translateX(-50%);
-    width:min(72vw,320px);
-    z-index:40;
+/* Oyun bitti */
+#gameOver {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,0,0,.75);
+    color: white;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
 }
 
-#nitroText{
-    text-align:center;
-    color:white;
-    font-size:12px;
-    font-weight:bold;
-    margin-bottom:4px;
+#gameOver h1 {
+    font-size: 40px;
+    margin: 0 0 15px;
 }
 
-#nitroBar{
-    width:100%;
-    height:12px;
-    background:#222;
-    border:1px solid #777;
-    border-radius:10px;
-    overflow:hidden;
+#restart {
+    border: 0;
+    padding: 14px 28px;
+    border-radius: 10px;
+    background: #e22;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
 }
-
-#nitroFill{
-    width:100%;
-    height:100%;
-    background:linear-gradient(
-        90deg,
-        #009cff,
-        #00f5ff
-    );
-}
-
-/* NİTRO BUTONU */
-
-#nitroButton{
-    position:absolute;
-    bottom:18px;
-    left:50%;
-    transform:translateX(-50%);
-    width:105px;
-    height:55px;
-    border:2px solid white;
-    border-radius:15px;
-    background:rgba(0,100,255,.75);
-    color:white;
-    font-weight:bold;
-    font-size:15px;
-    z-index:50;
-}
-
-/* EKRAN KONTROL ALANLARI */
-
-#leftArea{
-    position:absolute;
-    left:0;
-    top:0;
-    width:50%;
-    height:100%;
-    z-index:20;
-}
-
-#rightArea{
-    position:absolute;
-    right:0;
-    top:0;
-    width:50%;
-    height:100%;
-    z-index:20;
-}
-
-/* YARDIM YAZILARI */
-
-#leftHint,
-#rightHint{
-    position:absolute;
-    bottom:155px;
-    color:rgba(255,255,255,.35);
-    font-size:13px;
-    font-weight:bold;
-    pointer-events:none;
-    z-index:25;
-}
-
-#leftHint{
-    left:20px;
-}
-
-#rightHint{
-    right:20px;
-}
-
-/* MENÜ */
-
-.screen{
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,.86);
-    z-index:100;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:20px;
-}
-
-#gameOver{
-    display:none;
-}
-
-.logo{
-    font-size:38px;
-    font-weight:900;
-    margin-bottom:10px;
-    text-shadow:0 4px 12px #000;
-}
-
-.subtitle{
-    color:#ddd;
-    margin-bottom:25px;
-}
-
-.startButton{
-    border:0;
-    border-radius:15px;
-    padding:16px 30px;
-    background:#e91e3f;
-    color:white;
-    font-size:19px;
-    font-weight:bold;
-}
-
-.info{
-    color:#bbb;
-    line-height:1.8;
-    font-size:14px;
-    margin-top:18px;
-}
-
-/* ÇARPIŞMA */
-
-#crash{
-    position:absolute;
-    inset:0;
-    z-index:80;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    font-size:70px;
-    background:rgba(255,70,0,.3);
-}
-
-/* NİTRO EFEKTİ */
-
-.nitroActive #player{
-    box-shadow:
-        0 0 15px #00eaff,
-        0 0 35px #00aaff,
-        0 8px 18px #000;
-}
-
-.flame{
-    position:absolute;
-    bottom:-34px;
-    width:15px;
-    height:38px;
-    background:linear-gradient(
-        #fff,
-        #00eaff,
-        #006eff
-    );
-    clip-path:polygon(
-        50% 100%,
-        0 0,
-        100% 0
-    );
-    display:none;
-}
-
-.nitroActive .flame{
-    display:block;
-}
-
-.flame1{
-    left:11px;
-}
-
-.flame2{
-    right:11px;
-}
-
-/* GECE */
-
-.night #sky{
-    background:linear-gradient(
-        #020b24,
-        #173461
-    );
-}
-
-.night #sun{
-    background:#eee;
-    box-shadow:0 0 25px white;
-}
-
-.night .cloud{
-    opacity:.12;
-}
-
-/* BİLGİ */
-
-#message{
-    position:absolute;
-    top:105px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.55);
-    padding:7px 14px;
-    border-radius:10px;
-    color:white;
-    font-size:12px;
-    z-index:35;
-    opacity:0;
-    transition:.3s;
-}
-
 </style>
 </head>
 
@@ -599,1367 +257,312 @@ body{
 
 <div id="game">
 
-    <!-- GÖKYÜZÜ -->
-    <div id="sky">
-        <div id="sun"></div>
-        <div class="cloud cloud1"></div>
-        <div class="cloud cloud2"></div>
-    </div>
+    <div id="road"></div>
 
-    <!-- YOL -->
-    <div id="road">
-
-        <div class="edge left"></div>
-        <div class="edge right"></div>
-
-        <div class="laneLine line1"></div>
-        <div class="laneLine line2"></div>
-
-        <!-- OYUNCU -->
-        <div id="player" class="car">
-
-            <div class="wheel w1"></div>
-            <div class="wheel w2"></div>
-            <div class="wheel w3"></div>
-            <div class="wheel w4"></div>
-
-            <div class="light light1"></div>
-            <div class="light light2"></div>
-
-            <div class="flame flame1"></div>
-            <div class="flame flame2"></div>
-
-        </div>
-
-    </div>
-
-    <!-- HUD -->
+    <div class="roadEdge leftEdge"></div>
+    <div class="roadEdge rightEdge"></div>
 
     <div id="hud">
-
-        <div class="hud">
-            🏆 PUAN
-            <strong id="score">0</strong>
-        </div>
-
-        <div class="hud">
-            🪙 PARA
-            <strong id="money">0</strong>
-        </div>
-
-        <div class="hud">
-            ❤️ CAN
-            <strong id="lives">❤️❤️❤️</strong>
-        </div>
-
+        <div>🏆 Skor: <span id="score">0</span></div>
+        <div>⚡ Hız: <span id="speedText">1</span></div>
     </div>
 
-    <!-- BİLGİ -->
+    <div id="car">
+        <div class="carBody"></div>
+        <div class="window"></div>
+        <div class="window2"></div>
 
-    <div id="message"></div>
+        <div class="light left"></div>
+        <div class="light right"></div>
 
-    <!-- SOL EKRAN -->
-
-    <div id="leftArea"></div>
-
-    <!-- SAĞ EKRAN -->
-
-    <div id="rightArea"></div>
-
-    <div id="leftHint">
-        ⬅ SOL
+        <div class="wheel l1"></div>
+        <div class="wheel l2"></div>
+        <div class="wheel r1"></div>
+        <div class="wheel r2"></div>
     </div>
 
-    <div id="rightHint">
-        SAĞ ➡
+    <div id="hint">
+        👈 Sol tarafa dokun = SOL &nbsp;&nbsp; SAĞ tarafa dokun = SAĞ 👉
     </div>
 
-    <!-- NİTRO -->
-
-    <div id="nitroArea">
-
-        <div id="nitroText">
-            ⚡ NİTRO
-            <span id="levelText">SEVİYE 1</span>
-        </div>
-
-        <div id="nitroBar">
-            <div id="nitroFill"></div>
-        </div>
-
-    </div>
-
-    <button id="nitroButton">
-        ⚡ NİTRO
-    </button>
-
-    <!-- BAŞLANGIÇ -->
-
-    <div id="startScreen" class="screen">
-
-        <div class="logo">
-            🏎️ TURBO YOL
-        </div>
-
-        <div class="subtitle">
-            Sonsuz araba yarışına hazır mısın?
-        </div>
-
-        <button class="startButton" id="startButton">
-            🏁 YARIŞI BAŞLAT
-        </button>
-
-        <div class="info">
-            📱 Ekranın SOLUNA bas → Sola git<br>
-            📱 Ekranın SAĞINA bas → Sağa git<br>
-            ⚡ Nitro → Hızlan<br>
-            🪙 Paraları topla<br>
-            🚗 Rakiplere çarpma
-        </div>
-
-    </div>
-
-    <!-- OYUN BİTTİ -->
-
-    <div id="gameOver" class="screen">
-
-        <div class="logo">
-            💥 KAZA!
-        </div>
-
-        <div class="subtitle">
-            Yarış sona erdi.
-        </div>
-
-        <div class="info">
-
-            🏆 Skor:
-            <b id="finalScore">0</b>
-            <br>
-
-            🪙 Para:
-            <b id="finalMoney">0</b>
-            <br>
-
-            ⭐ Seviye:
-            <b id="finalLevel">1</b>
-            <br>
-
-            🥇 Rekor:
-            <b id="bestScore">0</b>
-
-        </div>
-
-        <br>
-
-        <button class="startButton" id="restartButton">
-            🔄 TEKRAR OYNA
-        </button>
-
-    </div>
-
-    <!-- ÇARPIŞMA -->
-
-    <div id="crash">
-        💥
+    <div id="gameOver">
+        <h1>💥 Oyun Bitti</h1>
+        <p>Skorun: <span id="finalScore">0</span></p>
+        <button id="restart">🔄 Tekrar Oyna</button>
     </div>
 
 </div>
 
 <script>
+const game = document.getElementById("game");
+const car = document.getElementById("car");
+const road = document.getElementById("road");
 
-/* =====================================
-   DEĞİŞKENLER
-===================================== */
+const scoreText = document.getElementById("score");
+const speedText = document.getElementById("speedText");
 
-const game =
-    document.getElementById("game");
+const gameOverScreen = document.getElementById("gameOver");
+const finalScore = document.getElementById("finalScore");
+const restartButton = document.getElementById("restart");
 
-const road =
-    document.getElementById("road");
+let carX = window.innerWidth / 2;
+let direction = 0;
+let score = 0;
+let speed = 5;
+let gameRunning = true;
 
-const player =
-    document.getElementById("player");
+let laneLines = [];
+let enemies = [];
 
-const scoreEl =
-    document.getElementById("score");
+/* Yol çizgileri oluştur */
+for (let i = 0; i < 8; i++) {
+    const line = document.createElement("div");
+    line.className = "lane";
 
-const moneyEl =
-    document.getElementById("money");
+    line.style.left = "50%";
+    line.style.transform = "translateX(-50%)";
+    line.style.top = (i * 130 - 100) + "px";
 
-const livesEl =
-    document.getElementById("lives");
-
-const nitroFill =
-    document.getElementById("nitroFill");
-
-const levelText =
-    document.getElementById("levelText");
-
-const startScreen =
-    document.getElementById("startScreen");
-
-const gameOver =
-    document.getElementById("gameOver");
-
-const crash =
-    document.getElementById("crash");
-
-const leftArea =
-    document.getElementById("leftArea");
-
-const rightArea =
-    document.getElementById("rightArea");
-
-const nitroButton =
-    document.getElementById("nitroButton");
-
-const finalScore =
-    document.getElementById("finalScore");
-
-const finalMoney =
-    document.getElementById("finalMoney");
-
-const finalLevel =
-    document.getElementById("finalLevel");
-
-const bestScoreEl =
-    document.getElementById("bestScore");
-
-let running=false;
-
-let playerX=0;
-
-let score=0;
-
-let money=0;
-
-let lives=3;
-
-let level=1;
-
-let speed=5;
-
-let nitro=100;
-
-let nitroActive=false;
-
-let leftPressed=false;
-
-let rightPressed=false;
-
-let enemies=[];
-
-let coins=[];
-
-let lines=[];
-
-let lastEnemy=0;
-
-let lastCoin=0;
-
-let lastTime=0;
-
-let bestScore =
-    Number(
-        localStorage.getItem(
-            "turboBestScore"
-        ) || 0
-    );
-
-
-/* =====================================
-   SES
-===================================== */
-
-let audioContext=null;
-
-function initAudio(){
-
-    if(!audioContext){
-
-        audioContext =
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
-    }
-
+    road.appendChild(line);
+    laneLines.push({
+        el: line,
+        y: i * 130 - 100
+    });
 }
 
-function sound(
-    frequency,
-    duration,
-    type="sine"
-){
+/* Düşman oluştur */
+function createEnemy() {
+    const enemy = document.createElement("div");
+    enemy.className = "enemy";
 
-    try{
+    const roadLeft = window.innerWidth * 0.15;
+    const roadWidth = window.innerWidth * 0.70;
 
-        initAudio();
+    const minX = roadLeft + 20;
+    const maxX = roadLeft + roadWidth - 65;
 
-        const oscillator =
-            audioContext.createOscillator();
+    const x = minX + Math.random() * (maxX - minX);
 
-        const gain =
-            audioContext.createGain();
+    enemy.style.left = x + "px";
+    enemy.style.top = "-100px";
 
-        oscillator.frequency.value=
-            frequency;
-
-        oscillator.type=type;
-
-        gain.gain.setValueAtTime(
-            .08,
-            audioContext.currentTime
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            .001,
-            audioContext.currentTime+
-            duration
-        );
-
-        oscillator.connect(gain);
-
-        gain.connect(
-            audioContext.destination
-        );
-
-        oscillator.start();
-
-        oscillator.stop(
-            audioContext.currentTime+
-            duration
-        );
-
-    }catch(e){}
-
-}
-
-
-/* =====================================
-   EKRAN KONTROLLERİ
-===================================== */
-
-/*
-   EKRANIN SOL YARISI
-   = SOLA GİT
-
-   EKRANIN SAĞ YARISI
-   = SAĞA GİT
-*/
-
-function startLeft(e){
-
-    e.preventDefault();
-
-    leftPressed=true;
-
-}
-
-function stopLeft(e){
-
-    e.preventDefault();
-
-    leftPressed=false;
-
-}
-
-function startRight(e){
-
-    e.preventDefault();
-
-    rightPressed=true;
-
-}
-
-function stopRight(e){
-
-    e.preventDefault();
-
-    rightPressed=false;
-
-}
-
-
-/* TELEFON */
-
-leftArea.addEventListener(
-    "touchstart",
-    startLeft,
-    {passive:false}
-);
-
-leftArea.addEventListener(
-    "touchend",
-    stopLeft,
-    {passive:false}
-);
-
-leftArea.addEventListener(
-    "touchcancel",
-    stopLeft,
-    {passive:false}
-);
-
-
-rightArea.addEventListener(
-    "touchstart",
-    startRight,
-    {passive:false}
-);
-
-rightArea.addEventListener(
-    "touchend",
-    stopRight,
-    {passive:false}
-);
-
-rightArea.addEventListener(
-    "touchcancel",
-    stopRight,
-    {passive:false}
-);
-
-
-/* BİLGİSAYAR */
-
-document.addEventListener(
-    "keydown",
-    function(e){
-
-        if(
-            e.key==="ArrowLeft" ||
-            e.key.toLowerCase()==="a"
-        ){
-
-            leftPressed=true;
-
-        }
-
-        if(
-            e.key==="ArrowRight" ||
-            e.key.toLowerCase()==="d"
-        ){
-
-            rightPressed=true;
-
-        }
-
-        if(e.code==="Space"){
-
-            activateNitro();
-
-        }
-
-    }
-);
-
-
-document.addEventListener(
-    "keyup",
-    function(e){
-
-        if(
-            e.key==="ArrowLeft" ||
-            e.key.toLowerCase()==="a"
-        ){
-
-            leftPressed=false;
-
-        }
-
-        if(
-            e.key==="ArrowRight" ||
-            e.key.toLowerCase()==="d"
-        ){
-
-            rightPressed=false;
-
-        }
-
-    }
-);
-
-
-/* =====================================
-   NİTRO
-===================================== */
-
-function activateNitro(){
-
-    if(!running)
-        return;
-
-    if(nitro<10)
-        return;
-
-    nitroActive=true;
-
-    game.classList.add(
-        "nitroActive"
-    );
-
-    sound(
-        700,
-        .15,
-        "sawtooth"
-    );
-
-}
-
-
-/* =====================================
-   YOL ÇİZGİLERİ
-===================================== */
-
-function createLines(){
-
-    for(
-        let i=0;
-        i<12;
-        i++
-    ){
-
-        const l1 =
-            document.createElement(
-                "div"
-            );
-
-        const l2 =
-            document.createElement(
-                "div"
-            );
-
-        l1.className=
-            "laneLine line1";
-
-        l2.className=
-            "laneLine line2";
-
-        const y =
-            i*120-150;
-
-        l1.style.top=
-            y+"px";
-
-        l2.style.top=
-            y+"px";
-
-        road.appendChild(l1);
-        road.appendChild(l2);
-
-        lines.push({
-            el:l1,
-            y:y
-        });
-
-        lines.push({
-            el:l2,
-            y:y
-        });
-
-    }
-
-}
-
-
-/* =====================================
-   OYUNCU
-===================================== */
-
-function resetPlayer(){
-
-    playerX =
-        road.clientWidth/2-28;
-
-    player.style.left=
-        playerX+"px";
-
-    player.style.transform=
-        "none";
-
-}
-
-
-/* =====================================
-   RAKİP
-===================================== */
-
-function createEnemy(){
-
-    const enemy =
-        document.createElement(
-            "div"
-        );
-
-    const colors=[
-        "blue",
-        "green",
-        "yellow",
-        "purple"
-    ];
-
-    const color =
-        colors[
-            Math.floor(
-                Math.random()*
-                colors.length
-            )
-        ];
-
-    enemy.className=
-        "car enemy "+color;
-
-    enemy.innerHTML=`
-        <div class="wheel w1"></div>
-        <div class="wheel w2"></div>
-        <div class="wheel w3"></div>
-        <div class="wheel w4"></div>
-    `;
-
-    const lane =
-        Math.floor(
-            Math.random()*3
-        );
-
-    const laneWidth =
-        road.clientWidth/3;
-
-    const x =
-        lane*laneWidth+
-        laneWidth/2-
-        28;
-
-    enemy.style.left=
-        x+"px";
-
-    enemy.style.top=
-        "-120px";
-
-    road.appendChild(enemy);
+    game.appendChild(enemy);
 
     enemies.push({
-
-        el:enemy,
-
-        x:x,
-
-        y:-120
-
+        el: enemy,
+        x: x,
+        y: -100,
+        speed: speed * 0.75
     });
-
 }
 
+/* Dokunmatik kontrol */
+function handleTouch(x) {
 
-/* =====================================
-   PARA
-===================================== */
+    if (!gameRunning) return;
 
-function createCoin(){
+    const screenMiddle = window.innerWidth / 2;
 
-    const coin =
-        document.createElement(
-            "div"
-        );
-
-    coin.className="coin";
-
-    coin.textContent="$";
-
-    const lane =
-        Math.floor(
-            Math.random()*3
-        );
-
-    const laneWidth =
-        road.clientWidth/3;
-
-    const x =
-        lane*laneWidth+
-        laneWidth/2-
-        16;
-
-    coin.style.left=
-        x+"px";
-
-    coin.style.top=
-        "-50px";
-
-    road.appendChild(coin);
-
-    coins.push({
-
-        el:coin,
-
-        x:x,
-
-        y:-50
-
-    });
-
+    if (x < screenMiddle) {
+        direction = -1;
+    } else {
+        direction = 1;
+    }
 }
 
+/* Dokunma */
+game.addEventListener("touchstart", function(e) {
 
-/* =====================================
-   ÇARPIŞMA
-===================================== */
+    e.preventDefault();
 
-function collision(a,b){
+    if (e.touches.length > 0) {
+        handleTouch(e.touches[0].clientX);
+    }
 
-    const A =
-        a.getBoundingClientRect();
+}, { passive: false });
 
-    const B =
-        b.getBoundingClientRect();
+/* Parmağı ekranda sürükleme */
+game.addEventListener("touchmove", function(e) {
+
+    e.preventDefault();
+
+    if (e.touches.length > 0) {
+        handleTouch(e.touches[0].clientX);
+    }
+
+}, { passive: false });
+
+/* Parmağı kaldırınca düz git */
+game.addEventListener("touchend", function(e) {
+    e.preventDefault();
+    direction = 0;
+}, { passive: false });
+
+/* Bilgisayar için mouse */
+game.addEventListener("mousedown", function(e) {
+    handleTouch(e.clientX);
+});
+
+game.addEventListener("mouseup", function() {
+    direction = 0;
+});
+
+/* Klavye */
+document.addEventListener("keydown", function(e) {
+
+    if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
+        direction = -1;
+    }
+
+    if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+        direction = 1;
+    }
+});
+
+document.addEventListener("keyup", function(e) {
+
+    if (
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight" ||
+        e.key.toLowerCase() === "a" ||
+        e.key.toLowerCase() === "d"
+    ) {
+        direction = 0;
+    }
+});
+
+/* Çarpışma kontrolü */
+function collision(a, b) {
+
+    const r1 = a.getBoundingClientRect();
+    const r2 = b.getBoundingClientRect();
 
     return !(
-        A.right < B.left+10 ||
-        A.left > B.right-10 ||
-        A.bottom < B.top+10 ||
-        A.top > B.bottom-10
+        r1.right < r2.left ||
+        r1.left > r2.right ||
+        r1.bottom < r2.top ||
+        r1.top > r2.bottom
     );
-
 }
 
+/* Oyun döngüsü */
+function gameLoop() {
 
-/* =====================================
-   CAN
-===================================== */
+    if (!gameRunning) return;
 
-function updateLives(){
+    /* Araba hareketi */
+    carX += direction * 7;
 
-    livesEl.textContent=
-        "❤️".repeat(lives)+
-        "🖤".repeat(
-            3-lives
-        );
+    const roadLeft = window.innerWidth * 0.15;
+    const roadRight = window.innerWidth * 0.85;
 
-}
+    const carWidth = car.offsetWidth;
 
-
-/* =====================================
-   RAKİBE ÇARPMA
-===================================== */
-
-function hitEnemy(enemy,index){
-
-    lives--;
-
-    updateLives();
-
-    sound(
-        100,
-        .35,
-        "square"
-    );
-
-    crash.style.display=
-        "flex";
-
-    setTimeout(
-        function(){
-
-            crash.style.display=
-                "none";
-
-        },
-        180
-    );
-
-    enemy.el.remove();
-
-    enemies.splice(
-        index,
-        1
-    );
-
-    if(lives<=0){
-
-        endGame();
-
+    if (carX < roadLeft + carWidth / 2) {
+        carX = roadLeft + carWidth / 2;
     }
 
-}
-
-
-/* =====================================
-   PARA TOPLAMA
-===================================== */
-
-function collectCoin(
-    coin,
-    index
-){
-
-    money++;
-
-    score+=25;
-
-    moneyEl.textContent=
-        money;
-
-    scoreEl.textContent=
-        Math.floor(score);
-
-    sound(
-        900,
-        .08
-    );
-
-    coin.el.remove();
-
-    coins.splice(
-        index,
-        1
-    );
-
-}
-
-
-/* =====================================
-   SEVİYE
-===================================== */
-
-function updateLevel(){
-
-    const newLevel =
-        Math.floor(
-            score/500
-        )+1;
-
-    if(
-        newLevel!==level
-    ){
-
-        level=
-            newLevel;
-
-        speed+=.6;
-
-        sound(
-            1000,
-            .18
-        );
-
+    if (carX > roadRight - carWidth / 2) {
+        carX = roadRight - carWidth / 2;
     }
 
-    levelText.textContent=
-        "SEVİYE "+level;
+    car.style.left = carX + "px";
 
-}
-
-
-/* =====================================
-   GÜNDÜZ / GECE
-===================================== */
-
-function updateDayNight(){
-
-    if(
-        Math.floor(
-            score/1000
-        )%2===1
-    ){
-
-        game.classList.add(
-            "night"
-        );
-
-    }else{
-
-        game.classList.remove(
-            "night"
-        );
-
+    /* Hafif dönme efekti */
+    if (direction < 0) {
+        car.style.transform =
+            "translateX(-50%) rotate(-8deg)";
+    } else if (direction > 0) {
+        car.style.transform =
+            "translateX(-50%) rotate(8deg)";
+    } else {
+        car.style.transform =
+            "translateX(-50%) rotate(0deg)";
     }
 
-}
+    /* Yol çizgileri */
+    laneLines.forEach(line => {
 
+        line.y += speed;
 
-/* =====================================
-   OYUNU BAŞLAT
-===================================== */
+        if (line.y > window.innerHeight) {
+            line.y = -100;
+        }
 
-function startGame(){
+        line.el.style.top = line.y + "px";
+    });
 
-    initAudio();
+    /* Düşman araçlar */
+    enemies.forEach((enemy, index) => {
 
-    enemies.forEach(
-        e=>e.el.remove()
-    );
+        enemy.y += enemy.speed;
 
-    coins.forEach(
-        c=>c.el.remove()
-    );
+        enemy.el.style.top = enemy.y + "px";
 
-    enemies=[];
-    coins=[];
+        if (collision(car, enemy.el)) {
+            endGame();
+        }
 
-    score=0;
+        if (enemy.y > window.innerHeight + 100) {
+            enemy.el.remove();
+            enemies.splice(index, 1);
 
-    money=0;
+            score++;
+            scoreText.textContent = score;
 
-    lives=3;
-
-    level=1;
-
-    speed=5;
-
-    nitro=100;
-
-    nitroActive=false;
-
-    leftPressed=false;
-    rightPressed=false;
-
-    game.classList.remove(
-        "nitroActive",
-        "night"
-    );
-
-    scoreEl.textContent=
-        "0";
-
-    moneyEl.textContent=
-        "0";
-
-    nitroFill.style.width=
-        "100%";
-
-    updateLives();
-
-    startScreen.style.display=
-        "none";
-
-    gameOver.style.display=
-        "none";
-
-    resetPlayer();
-
-    running=true;
-
-    lastTime=
-        performance.now();
-
-    lastEnemy=
-        performance.now();
-
-    lastCoin=
-        performance.now();
-
-    requestAnimationFrame(
-        gameLoop
-    );
-
-}
-
-
-/* =====================================
-   OYUN BİTTİ
-===================================== */
-
-function endGame(){
-
-    running=false;
-
-    nitroActive=false;
-
-    game.classList.remove(
-        "nitroActive"
-    );
-
-    const final =
-        Math.floor(score);
-
-    if(
-        final>bestScore
-    ){
-
-        bestScore=
-            final;
-
-        localStorage.setItem(
-            "turboBestScore",
-            bestScore
-        );
-
-    }
-
-    finalScore.textContent=
-        final;
-
-    finalMoney.textContent=
-        money;
-
-    finalLevel.textContent=
-        level;
-
-    bestScoreEl.textContent=
-        bestScore;
-
-    gameOver.style.display=
-        "flex";
-
-}
-
-
-/* =====================================
-   ANA OYUN DÖNGÜSÜ
-===================================== */
-
-function gameLoop(time){
-
-    if(!running)
-        return;
-
-    const dt =
-        Math.min(
-            (time-lastTime)/
-            16.67,
-            2
-        );
-
-    lastTime=time;
-
-
-    /* ARABA HAREKETİ */
-
-    let moveSpeed =
-        6.5*dt;
-
-    if(
-        nitroActive
-    ){
-
-        moveSpeed=
-            11*dt;
-
-    }
-
-    if(leftPressed){
-
-        playerX-=moveSpeed;
-
-    }
-
-    if(rightPressed){
-
-        playerX+=moveSpeed;
-
-    }
-
-
-    /* YOL SINIRI */
-
-    const minX=8;
-
-    const maxX=
-        road.clientWidth-64;
-
-    if(
-        playerX<minX
-    ){
-
-        playerX=minX;
-
-    }
-
-    if(
-        playerX>maxX
-    ){
-
-        playerX=maxX;
-
-    }
-
-    player.style.left=
-        playerX+"px";
-
-
-    /* YOL ÇİZGİLERİ */
-
-    lines.forEach(
-        line=>{
-
-            line.y+=
-                speed*dt;
-
-            if(
-                line.y>
-                window.innerHeight
-            ){
-
-                line.y=-130;
-
+            if (score % 10 === 0) {
+                speed += 0.5;
+                speedText.textContent =
+                    Math.floor(speed);
             }
-
-            line.el.style.top=
-                line.y+"px";
-
         }
-    );
+    });
 
-
-    /* NİTRO */
-
-    if(nitroActive){
-
-        nitro-=
-            1.7*dt;
-
-        if(nitro<=0){
-
-            nitro=0;
-
-            nitroActive=
-                false;
-
-            game.classList.remove(
-                "nitroActive"
-            );
-
-        }
-
-    }else{
-
-        nitro+=
-            .12*dt;
-
-        if(nitro>100)
-            nitro=100;
-
-    }
-
-    nitroFill.style.width=
-        nitro+"%";
-
-
-    /* RAKİP ÜRET */
-
-    const enemyInterval =
-        Math.max(
-            430,
-            1000-level*45
-        );
-
-    if(
-        time-lastEnemy>
-        enemyInterval
-    ){
-
+    /* Yeni araç */
+    if (Math.random() < 0.025) {
         createEnemy();
-
-        lastEnemy=time;
-
     }
 
-
-    /* PARA ÜRET */
-
-    if(
-        time-lastCoin>
-        900
-    ){
-
-        createCoin();
-
-        lastCoin=time;
-
-    }
-
-
-    /* RAKİPLER */
-
-    enemies.forEach(
-        (enemy,index)=>{
-
-            enemy.y+=
-                speed*
-                (nitroActive?
-                    .72:
-                    1
-                )*
-                dt;
-
-            enemy.el.style.top=
-                enemy.y+"px";
-
-            if(
-                collision(
-                    player,
-                    enemy.el
-                )
-            ){
-
-                hitEnemy(
-                    enemy,
-                    index
-                );
-
-            }
-
-        }
-    );
-
-
-    /* RAKİP TEMİZLE */
-
-    enemies =
-        enemies.filter(
-            enemy=>{
-
-                if(
-                    enemy.y>
-                    window.innerHeight+
-                    130
-                ){
-
-                    enemy.el.remove();
-
-                    score+=10;
-
-                    return false;
-
-                }
-
-                return true;
-
-            }
-        );
-
-
-    /* PARALAR */
-
-    coins.forEach(
-        (coin,index)=>{
-
-            coin.y+=
-                speed*dt;
-
-            coin.el.style.top=
-                coin.y+"px";
-
-            if(
-                collision(
-                    player,
-                    coin.el
-                )
-            ){
-
-                collectCoin(
-                    coin,
-                    index
-                );
-
-            }
-
-        }
-    );
-
-
-    /* PARA TEMİZLE */
-
-    coins =
-        coins.filter(
-            coin=>{
-
-                if(
-                    coin.y>
-                    window.innerHeight+
-                    60
-                ){
-
-                    coin.el.remove();
-
-                    return false;
-
-                }
-
-                return true;
-
-            }
-        );
-
-
-    /* PUAN */
-
-    score+=
-        .12*
-        dt*
-        (nitroActive?2:1);
-
-    scoreEl.textContent=
-        Math.floor(score);
-
-
-    updateLevel();
-
-    updateDayNight();
-
-
-    requestAnimationFrame(
-        gameLoop
-    );
-
+    requestAnimationFrame(gameLoop);
 }
 
+/* Oyun bitir */
+function endGame() {
 
-/* =====================================
-   BUTONLAR
-===================================== */
+    gameRunning = false;
+    direction = 0;
 
-document
-    .getElementById("startButton")
-    .addEventListener(
-        "click",
-        startGame
-    );
+    finalScore.textContent = score;
+    gameOverScreen.style.display = "flex";
+}
 
-document
-    .getElementById("restartButton")
-    .addEventListener(
-        "click",
-        startGame
-    );
+/* Yeniden başlat */
+restartButton.addEventListener("click", function() {
 
+    enemies.forEach(e => e.el.remove());
 
-/* NİTRO BUTONU */
+    enemies = [];
 
-nitroButton.addEventListener(
-    "touchstart",
-    function(e){
+    carX = window.innerWidth / 2;
+    score = 0;
+    speed = 5;
+    direction = 0;
+    gameRunning = true;
 
-        e.preventDefault();
+    scoreText.textContent = "0";
+    speedText.textContent = "5";
 
-        activateNitro();
+    car.style.left = carX + "px";
+    car.style.transform =
+        "translateX(-50%) rotate(0deg)";
 
-    },
-    {passive:false}
-);
+    gameOverScreen.style.display = "none";
 
-nitroButton.addEventListener(
-    "click",
-    function(){
+    gameLoop();
+});
 
-        activateNitro();
-
-    }
-);
-
-
-/* =====================================
-   BAŞLANGIÇ
-===================================== */
-
-createLines();
-
-bestScoreEl.textContent=
-    bestScore;
-
-updateLives();
-
+/* Başlat */
+gameLoop();
 </script>
 
 </body>
