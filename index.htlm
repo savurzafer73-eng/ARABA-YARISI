@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hızlı Yarış</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #111;
+}
+
+#game {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #23852c;
+}
+
+/* Yol */
+#road {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(90vw, 500px);
+    height: 100%;
+    background: #3b3b3b;
+    border-left: 8px solid #eee;
+    border-right: 8px solid #eee;
+    overflow: hidden;
+}
+
+/* Yol çizgileri */
+.line {
+    position: absolute;
+    width: 8px;
+    height: 90px;
+    background: white;
+    left: 33.33%;
+    top: -100px;
+    opacity: .9;
+}
+
+.line2 {
+    left: 66.66%;
+}
+
+/* Oyuncu */
+#player {
+    position: absolute;
+    width: 52px;
+    height: 90px;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 12px 12px 8px 8px;
+    background: linear-gradient(90deg,#d00000,#ff3030,#a00000);
+    border: 3px solid #fff;
+    box-shadow: 0 5px 15px #000;
+    z-index: 10;
+}
+
+#player::before {
+    content: "";
+    position: absolute;
+    width: 30px;
+    height: 32px;
+    left: 8px;
+    top: 12px;
+    border-radius: 7px;
+    background: linear-gradient(#bdeaff,#3785a8);
+    border: 2px solid #222;
+}
+
+#player::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 18px;
+    left: -6px;
+    bottom: 15px;
+    background: #111;
+    box-shadow:
+        56px 0 #111,
+        0 -48px #111,
+        56px -48px #111;
+    border-radius: 3px;
+}
+
+/* Rakip araç */
+.enemy {
+    position: absolute;
+    width: 52px;
+    height: 88px;
+    border-radius: 12px;
+    border: 3px solid #fff;
+    box-shadow: 0 5px 15px #000;
+    z-index: 5;
+}
+
+.enemy::before {
+    content: "";
+    position: absolute;
+    width: 29px;
+    height: 30px;
+    left: 8px;
+    top: 11px;
+    border-radius: 6px;
+    background: #222;
+}
+
+/* Üst bilgi */
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px #000;
+}
+
+.hudBox {
+    background: rgba(0,0,0,.45);
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+/* Kontroller */
+.controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+.control {
+    width: 75px;
+    height: 65px;
+    border: none;
+    border-radius: 18px;
+    background: rgba(0,0,0,.65);
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    pointer-events: auto;
+    box-shadow: 0 4px 10px #000;
+}
+
+.control:active {
+    transform: scale(.92);
+    background: rgba(255,255,255,.25);
+}
+
+/* Başlangıç / oyun bitti */
+#menu {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,.72);
+}
+
+.panel {
+    width: min(90%, 380px);
+    padding: 30px 20px;
+    border-radius: 22px;
+    text-align: center;
+    color: white;
+    background: linear-gradient(145deg,#202020,#090909);
+    box-shadow: 0 10px 40px #000;
+}
+
+.panel h1 {
+    margin-top: 0;
+    font-size: 38px;
+    color: #ff3030;
+}
+
+.panel p {
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+#startBtn {
+    border: none;
+    padding: 15px 35px;
+    border-radius: 14px;
+    background: #e60000;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#startBtn:active {
+    transform: scale(.95);
+}
+
+.hidden {
+    display: none !important;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <div id="road">
+        <div class="line"></div>
+        <div class="line line2"></div>
+
+        <div id="player"></div>
+    </div>
+
+    <div id="hud">
+        <div class="hudBox">🏆 Skor: <span id="score">0</span></div>
+        <div class="hudBox">⚡ <span id="speed">1</span></div>
+    </div>
+
+    <div class="controls">
+        <button class="control" id="left">◀</button>
+        <button class="control" id="right">▶</button>
+    </div>
+
+    <div id="menu">
+        <div class="panel">
+            <h1>🏎️ HIZLI YARIŞ</h1>
+            <p id="message">
+                Trafikteki araçlara çarpmadan mümkün olduğunca uzun süre ilerle!
+            </p>
+
+            <button id="startBtn">YARIŞI BAŞLAT</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+const game = document.getElementById("game");
+const road = document.getElementById("road");
+const player = document.getElementById("player");
+
+const scoreText = document.getElementById("score");
+const speedText = document.getElementById("speed");
+
+const menu = document.getElementById("menu");
+const message = document.getElementById("message");
+const startBtn = document.getElementById("startBtn");
+
+const leftBtn = document.getElementById("left");
+const rightBtn = document.getElementById("right");
+
+let playing = false;
+let playerX = 0;
+let score = 0;
+let speed = 5;
+let enemies = [];
+let animation;
+let spawnTimer = 0;
+let roadLines = [];
+
+const colors = [
+    "#1565c0",
+    "#ff9800",
+    "#8e24aa",
+    "#00a67d",
+    "#f5c400",
+    "#555"
+];
+
+/* Yol çizgilerini hazırla */
+document.querySelectorAll(".line").forEach((line, i) => {
+    for(let j = 0; j < 6; j++) {
+
+        const copy = line.cloneNode(true);
+
+        copy.style.top = (j * 130 - 100) + "px";
+
+        if(i === 1)
+            copy.style.left = "66.66%";
+
+        road.appendChild(copy);
+        roadLines.push(copy);
+    }
+
+    line.remove();
+});
+
+/* Başlat */
+startBtn.addEventListener("click", startGame);
+
+function startGame() {
+
+    enemies.forEach(e => e.remove());
+    enemies = [];
+
+    playing = true;
+    score = 0;
+    speed = 5;
+    spawnTimer = 0;
+
+    scoreText.textContent = "0";
+    speedText.textContent = "1";
+
+    menu.classList.add("hidden");
+
+    playerX = road.clientWidth / 2 - player.offsetWidth / 2;
+
+    player.style.left = playerX + "px";
+
+    animation = requestAnimationFrame(gameLoop);
+}
+
+/* Oyun döngüsü */
+function gameLoop() {
+
+    if(!playing) return;
+
+    moveRoad();
+    moveEnemies();
+    spawnTimer++;
+
+    if(spawnTimer > Math.max(35, 90 - speed * 5)) {
+        spawnEnemy();
+        spawnTimer = 0;
+    }
+
+    score += 0.05;
+
+    speed = 5 + Math.floor(score / 100);
+
+    scoreText.textContent = Math.floor(score);
+    speedText.textContent = Math.floor(speed / 5);
+
+    animation = requestAnimationFrame(gameLoop);
+}
+
+/* Yol hareketi */
+let roadOffset = 0;
+
+function moveRoad() {
+
+    roadOffset += speed;
+
+    roadLines.forEach(line => {
+
+        let y = parseFloat(line.style.top);
+
+        y += speed;
+
+        if(y > window.innerHeight)
+            y = -120;
+
+        line.style.top = y + "px";
+    });
+}
+
+/* Rakip oluştur */
+function spawnEnemy() {
+
+    const enemy = document.createElement("div");
+
+    enemy.className = "enemy";
+
+    enemy.style.background =
+        "linear-gradient(90deg," +
+        colors[Math.floor(Math.random()*colors.length)] +
+        ",#222)";
+
+    const lanes = [
+        road.clientWidth * .16,
+        road.clientWidth * .50,
+        road.clientWidth * .82
+    ];
+
+    const lane = Math.floor(Math.random() * lanes.length);
+
+    enemy.style.left =
+        (lanes[lane] - 26) + "px";
+
+    enemy.style.top = "-100px";
+
+    road.appendChild(enemy);
+
+    enemies.push(enemy);
+}
+
+/* Rakip hareketi */
+function moveEnemies() {
+
+    for(let i = enemies.length - 1; i >= 0; i--) {
+
+        const enemy = enemies[i];
+
+        let y = parseFloat(enemy.style.top);
+
+        y += speed;
+
+        enemy.style.top = y + "px";
+
+        if(collision(player, enemy)) {
+            gameOver();
+            return;
+        }
+
+        if(y > road.clientHeight + 100) {
+
+            enemy.remove();
+            enemies.splice(i,1);
+        }
+    }
+}
+
+/* Çarpışma */
+function collision(a,b) {
+
+    const r1 = a.getBoundingClientRect();
+    const r2 = b.getBoundingClientRect();
+
+    return !(
+        r1.right < r2.left + 8 ||
+        r1.left > r2.right - 8 ||
+        r1.bottom < r2.top + 8 ||
+        r1.top > r2.bottom - 8
+    );
+}
+
+/* Oyun bitti */
+function gameOver() {
+
+    playing = false;
+
+    cancelAnimationFrame(animation);
+
+    message.innerHTML =
+        "💥 <b>Kaza yaptın!</b><br><br>" +
+        "Skorun: <strong>" + Math.floor(score) + "</strong>";
+
+    startBtn.textContent = "TEKRAR OYNA";
+
+    menu.classList.remove("hidden");
+}
+
+/* Araba hareketi */
+function moveLeft() {
+
+    if(!playing) return;
+
+    playerX -= 30;
+
+    if(playerX < 8)
+        playerX = 8;
+
+    player.style.left = playerX + "px";
+}
+
+function moveRight() {
+
+    if(!playing) return;
+
+    playerX += 30;
+
+    const max =
+        road.clientWidth - player.offsetWidth - 8;
+
+    if(playerX > max)
+        playerX = max;
+
+    player.style.left = playerX + "px";
+}
+
+/* Dokunmatik */
+leftBtn.addEventListener("touchstart", e => {
+    e.preventDefault();
+    moveLeft();
+});
+
+rightBtn.addEventListener("touchstart", e => {
+    e.preventDefault();
+    moveRight();
+});
+
+/* Fare */
+leftBtn.addEventListener("mousedown", moveLeft);
+rightBtn.addEventListener("mousedown", moveRight);
+
+/* Klavye */
+document.addEventListener("keydown", e => {
+
+    if(e.key === "ArrowLeft" || e.key.toLowerCase() === "a")
+        moveLeft();
+
+    if(e.key === "ArrowRight" || e.key.toLowerCase() === "d")
+        moveRight();
+
+    if(e.key === " " && !playing)
+        startGame();
+});
+
+/* Ekran değişince arabayı yol içinde tut */
+window.addEventListener("resize", () => {
+
+    if(!playing) return;
+
+    const max =
+        road.clientWidth - player.offsetWidth - 8;
+
+    playerX = Math.max(8, Math.min(playerX, max));
+
+    player.style.left = playerX + "px";
+});
+
+</script>
+
+</body>
+</html>
