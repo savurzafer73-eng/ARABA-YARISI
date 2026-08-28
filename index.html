@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Turbo Road 3 Lane</title>
+<title>Turbo Road - 1969 Mustang</title>
 
 <style>
 *{
@@ -29,7 +29,7 @@ html,body{
   width:100vw;
   height:100vh;
   overflow:hidden;
-  background:#222;
+  background:#111;
 }
 
 /* ================= SKY ================= */
@@ -37,44 +37,52 @@ html,body{
 #sky{
   position:absolute;
   inset:0;
-  background:linear-gradient(#55a6d6 0%,#d99455 58%,#777 59%);
+  height:48%;
+  background:
+    linear-gradient(
+      #06152a 0%,
+      #316889 55%,
+      #e38a4b 100%
+    );
+  transition:1s;
 }
 
 #sun{
   position:absolute;
-  width:65px;
-  height:65px;
-  border-radius:50%;
+  width:70px;
+  height:70px;
   right:12%;
   top:10%;
-  background:#fff2a0;
-  box-shadow:0 0 40px #ffd45a;
+  border-radius:50%;
+  background:#fff0a0;
+  box-shadow:0 0 45px #ffd66b;
 }
 
 #moon{
   display:none;
   position:absolute;
-  width:58px;
-  height:58px;
-  right:12%;
-  top:10%;
+  width:62px;
+  height:62px;
+  right:13%;
+  top:9%;
   border-radius:50%;
   background:#eee;
-  box-shadow:0 0 30px #fff;
+  box-shadow:0 0 30px white;
 }
 
 .stars{
-  display:none;
   position:absolute;
   inset:0;
+  opacity:0;
 }
 
 .star{
   position:absolute;
-  width:3px;
-  height:3px;
+  width:2px;
+  height:2px;
+  background:#fff;
   border-radius:50%;
-  background:white;
+  box-shadow:0 0 6px white;
 }
 
 /* ================= CITY ================= */
@@ -83,115 +91,89 @@ html,body{
   position:absolute;
   left:0;
   right:0;
-  bottom:38%;
-  height:22%;
+  bottom:42%;
+  height:18%;
   display:flex;
   align-items:flex-end;
-  gap:5px;
+  gap:4px;
   overflow:hidden;
 }
 
 .building{
+  flex:1;
+  min-width:28px;
+  background:linear-gradient(#17212b,#080d12);
+  border-top:2px solid #263746;
   position:relative;
-  min-width:40px;
-  background:#18222c;
-  border-top:2px solid #394958;
 }
 
 .window{
   position:absolute;
   width:5px;
   height:7px;
-  background:#ffd85a;
-  box-shadow:0 0 5px #ffd85a;
+  background:#ffd95b;
+  box-shadow:0 0 5px #ffd95b;
 }
 
 /* ================= ROAD ================= */
 
 #road{
   position:absolute;
-  left:10%;
-  right:10%;
-  top:35%;
+  left:0;
+  right:0;
+  top:40%;
   bottom:0;
+  overflow:hidden;
+
   background:
     linear-gradient(
       90deg,
-      #555 0%,
-      #292929 3%,
-      #202020 7%,
-      #202020 93%,
-      #292929 97%,
-      #555 100%
+      #5d5d5d 0%,
+      #303030 5%,
+      #202020 10%,
+      #252525 90%,
+      #303030 95%,
+      #5d5d5d 100%
     );
-  border-left:5px solid #ddd;
-  border-right:5px solid #ddd;
-  overflow:hidden;
+
+  clip-path:polygon(
+    25% 0,
+    75% 0,
+    100% 100%,
+    0 100%
+  );
 }
 
-/* 3 lanes */
+/* road shoulder */
 
-.laneLine{
-  position:absolute;
-  top:0;
-  bottom:0;
-  width:5px;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0 55px,
-      #eee 55px 105px
-    );
-  opacity:.95;
-}
-
-.laneLine.left{
-  left:33.333%;
-}
-
-.laneLine.right{
-  left:66.666%;
-}
-
-/* Road side markings */
-
-.roadSide{
-  position:absolute;
-  top:0;
-  bottom:0;
-  width:7px;
-  background:#fff;
-  box-shadow:0 0 6px #fff;
-}
-
-.roadSide.left{
-  left:3%;
-}
-
-.roadSide.right{
-  right:3%;
-}
-
-/* road scenery */
-
-.roadLight{
-  position:absolute;
-  width:5px;
-  height:70px;
-  background:#111;
-  z-index:4;
-}
-
-.roadLight:before{
+#road:before,
+#road:after{
   content:"";
   position:absolute;
-  width:22px;
-  height:15px;
-  left:-8px;
-  top:-5px;
-  border-radius:8px;
-  background:#fff;
-  box-shadow:0 0 12px #fff;
+  top:0;
+  bottom:0;
+  width:5px;
+  background:#eee;
+  box-shadow:0 0 7px #fff;
+}
+
+#road:before{
+  left:25%;
+}
+
+#road:after{
+  right:25%;
+}
+
+/* lane divider */
+
+.roadLine{
+  position:absolute;
+  width:6px;
+  height:90px;
+  background:#f5f5f5;
+  border-radius:5px;
+  box-shadow:0 0 6px rgba(255,255,255,.8);
 }
 
 /* ================= HUD ================= */
@@ -199,116 +181,163 @@ html,body{
 #hud{
   position:absolute;
   z-index:100;
-  top:8px;
+  top:10px;
   left:8px;
   right:8px;
   display:flex;
   justify-content:space-between;
-  gap:4px;
+  gap:5px;
 }
 
-.hudBox{
+.hud{
   padding:7px 9px;
+  border-radius:11px;
   color:white;
-  background:rgba(0,0,0,.62);
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:10px;
   font-size:12px;
   font-weight:bold;
-  text-shadow:0 2px 3px #000;
+  background:rgba(0,0,0,.58);
+  border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(6px);
+  text-shadow:0 2px 4px #000;
 }
 
-/* ================= PLAYER CAR ================= */
+/* ================= PLAYER ================= */
 
 #player{
   position:absolute;
   width:82px;
-  height:132px;
+  height:135px;
   left:50%;
-  bottom:58px;
+  bottom:55px;
   z-index:60;
   transform:translateX(-50%);
-  filter:drop-shadow(0 10px 8px rgba(0,0,0,.8));
-  transition:left .12s ease,transform .12s ease;
+  transition:transform .08s linear;
+  filter:drop-shadow(0 12px 8px rgba(0,0,0,.7));
 }
 
-.carBody{
+.car{
   position:absolute;
-  left:7px;
+  inset:0;
+}
+
+/* wheels */
+
+.wheel{
+  position:absolute;
+  width:13px;
+  height:34px;
+  background:linear-gradient(#111,#020202);
+  border-radius:5px;
+  border:1px solid #555;
+  z-index:20;
+}
+
+.wl1{left:-2px;top:35px}
+.wl2{left:-2px;bottom:22px}
+.wr1{right:-2px;top:35px}
+.wr2{right:-2px;bottom:22px}
+
+/* Mustang body */
+
+.mustangBody{
+  position:absolute;
+  left:8px;
   top:14px;
-  width:68px;
-  height:108px;
-  border-radius:19px 19px 10px 10px;
+  width:66px;
+  height:112px;
+  border-radius:18px 18px 10px 10px;
+
   background:
     linear-gradient(
       90deg,
-      #4e0000 0%,
-      #b80000 15%,
-      #ff2525 45%,
-      #e00000 70%,
-      #600000 100%
+      #520000,
+      #b90000 16%,
+      #ff2525 48%,
+      #d90000 75%,
+      #590000
     );
-  border:2px solid #300;
+
+  border:2px solid #330000;
   box-shadow:
-    inset 0 5px 8px rgba(255,255,255,.25),
-    inset 0 -7px 8px rgba(0,0,0,.4);
+    inset 0 0 8px rgba(255,255,255,.2),
+    inset 0 -10px 12px rgba(0,0,0,.3);
 }
 
-.carHood{
+/* hood */
+
+.mustangHood{
   position:absolute;
-  left:12px;
-  top:7px;
-  width:58px;
-  height:43px;
-  border-radius:19px 19px 8px 8px;
+  left:13px;
+  top:5px;
+  width:56px;
+  height:48px;
+  border-radius:18px 18px 7px 7px;
   background:
     linear-gradient(
       90deg,
-      #810000,
-      #ed1717,
-      #ff4b4b,
-      #b40000
+      #780000,
+      #e31616,
+      #ff3838,
+      #9b0000
     );
-  border-bottom:3px solid #720000;
+  border-bottom:3px solid #690000;
 }
 
-.windshield{
+/* windshield */
+
+.mustangGlass{
   position:absolute;
   left:16px;
-  top:38px;
+  top:39px;
   width:50px;
-  height:32px;
-  border-radius:11px 11px 4px 4px;
+  height:34px;
+  border-radius:12px 12px 4px 4px;
   background:
     linear-gradient(
       135deg,
-      #e5fbff 0%,
-      #4d8ca6 28%,
-      #122f40 60%,
-      #07141d 100%
+      #d8f7ff,
+      #32617d 40%,
+      #071522 100%
     );
   border:2px solid #111;
-  box-shadow:inset 4px 3px 5px rgba(255,255,255,.25);
+  z-index:8;
 }
 
-.windowSplit{
+/* roof */
+
+.mustangRoof{
+  position:absolute;
+  left:15px;
+  top:31px;
+  width:52px;
+  height:42px;
+  border-radius:16px 16px 4px 4px;
+  border-top:4px solid #a40000;
+  z-index:7;
+}
+
+/* center divider */
+
+.mustangDivider{
   position:absolute;
   left:40px;
   top:40px;
   width:3px;
-  height:28px;
+  height:30px;
   background:#111;
   z-index:10;
 }
 
+/* grille */
+
 .grille{
   position:absolute;
-  left:15px;
-  bottom:9px;
-  width:52px;
+  left:17px;
+  bottom:11px;
+  width:48px;
   height:19px;
   background:#080808;
-  border:2px solid #888;
+  border:2px solid #777;
   border-radius:4px;
   z-index:12;
 }
@@ -321,137 +350,115 @@ html,body{
   background:#888;
 }
 
-.grille i:nth-child(1){left:9px}
-.grille i:nth-child(2){left:19px}
-.grille i:nth-child(3){left:29px}
-.grille i:nth-child(4){left:39px}
+.grille i:nth-child(1){left:8px}
+.grille i:nth-child(2){left:17px}
+.grille i:nth-child(3){left:26px}
+.grille i:nth-child(4){left:35px}
 
-.horse{
-  position:absolute;
-  z-index:20;
-  left:35px;
-  bottom:30px;
-  color:white;
-  font-size:12px;
-}
+/* headlights */
 
-.headlight{
+.light{
   position:absolute;
-  width:13px;
+  bottom:13px;
+  width:12px;
   height:9px;
-  bottom:12px;
+  background:#fff;
   border-radius:50%;
-  background:white;
-  box-shadow:0 0 15px white;
-  z-index:20;
-}
-
-.headlight.left{left:10px}
-.headlight.right{right:10px}
-
-.bumper{
-  position:absolute;
-  left:11px;
-  bottom:3px;
-  width:60px;
-  height:7px;
-  border-radius:4px;
-  background:linear-gradient(#eee,#666);
-}
-
-.wheel{
-  position:absolute;
-  width:13px;
-  height:34px;
-  border-radius:5px;
-  background:#050505;
-  border:1px solid #333;
-  box-shadow:inset 0 0 0 2px #151515;
+  box-shadow:0 0 15px #fff;
   z-index:15;
 }
 
-.wheel.a{left:-1px;top:28px}
-.wheel.b{left:-1px;bottom:22px}
-.wheel.c{right:-1px;top:28px}
-.wheel.d{right:-1px;bottom:22px}
+.lightL{left:12px}
+.lightR{right:12px}
 
-.rim{
+/* bumper */
+
+.bumper{
   position:absolute;
-  width:5px;
-  height:12px;
-  left:3px;
-  top:9px;
-  background:#888;
-  border-radius:3px;
+  left:12px;
+  bottom:5px;
+  width:58px;
+  height:7px;
+  border-radius:4px;
+  background:linear-gradient(#eee,#777);
+  z-index:16;
 }
 
-.nitroFlame{
-  display:none;
+/* badge */
+
+.horse{
   position:absolute;
-  left:27px;
-  bottom:-42px;
-  width:28px;
-  height:50px;
-  background:linear-gradient(#fff,#32dfff,#0755ff);
-  clip-path:polygon(25% 0,75% 0,100% 100%,50% 75%,0 100%);
-  filter:drop-shadow(0 0 10px #00aaff);
+  left:34px;
+  bottom:33px;
+  color:white;
+  font-size:12px;
+  z-index:17;
 }
 
-/* ================= TRAFFIC CARS ================= */
+/* ================= OTHER CARS ================= */
 
 .enemy{
   position:absolute;
-  width:60px;
-  height:96px;
-  z-index:45;
-  border-radius:15px 15px 9px 9px;
-  box-shadow:0 8px 12px rgba(0,0,0,.7);
-  border:2px solid rgba(0,0,0,.5);
+  width:62px;
+  height:100px;
+  z-index:40;
+  border-radius:14px 14px 10px 10px;
+  box-shadow:
+    0 7px 12px rgba(0,0,0,.75),
+    inset 0 0 5px rgba(255,255,255,.25);
 }
 
 .enemy.red{
-  background:linear-gradient(90deg,#650000,#f22,#7b0000);
+  background:linear-gradient(
+    90deg,#4c0000,#f21c1c,#ff4747,#6b0000
+  );
 }
 
 .enemy.blue{
-  background:linear-gradient(90deg,#04336d,#188cff,#063b7d);
+  background:linear-gradient(
+    90deg,#06215a,#126ee8,#4ca6ff,#061c50
+  );
 }
 
 .enemy.yellow{
-  background:linear-gradient(90deg,#715300,#ffd21c,#806000);
+  background:linear-gradient(
+    90deg,#5b4100,#e5b900,#ffe04c,#725100
+  );
 }
 
 .enemy.green{
-  background:linear-gradient(90deg,#064427,#18bd69,#075333);
+  background:linear-gradient(
+    90deg,#04391f,#08a855,#43df8b,#03401f
+  );
 }
 
-.enemy.black{
-  background:linear-gradient(90deg,#050505,#555,#111);
-}
-
-.enemyWindow{
+.enemyGlass{
   position:absolute;
-  left:9px;
-  top:13px;
-  width:38px;
-  height:29px;
-  border-radius:8px 8px 4px 4px;
-  background:linear-gradient(135deg,#e5fbff,#1b475b,#081923);
+  left:10px;
+  top:14px;
+  width:42px;
+  height:31px;
+  border-radius:9px;
+  background:linear-gradient(
+    135deg,
+    #d9f8ff,
+    #24536c,
+    #071722
+  );
   border:2px solid #111;
 }
 
-.enemyLight{
+.enemyWheel{
   position:absolute;
-  width:9px;
-  height:7px;
-  bottom:8px;
-  background:#fff;
-  border-radius:50%;
-  box-shadow:0 0 8px white;
+  width:10px;
+  height:27px;
+  background:#050505;
+  border:1px solid #444;
+  border-radius:4px;
 }
 
-.enemyLight.l{left:8px}
-.enemyLight.r{right:8px}
+.enemyWL{left:-4px;top:30px}
+.enemyWR{right:-4px;top:30px}
 
 /* ================= COINS ================= */
 
@@ -459,37 +466,47 @@ html,body{
   position:absolute;
   width:28px;
   height:28px;
+  z-index:42;
   border-radius:50%;
-  z-index:50;
   background:
     radial-gradient(
       circle,
-      #fff8a0 0 18%,
+      #fff9a5 0 18%,
       #ffd000 20% 65%,
-      #9c6700 66%
+      #a66b00 66%
     );
-  border:2px solid #fff3a5;
-  box-shadow:0 0 15px #ffd000;
+  border:2px solid #fff0a0;
+  box-shadow:0 0 16px #ffd000;
+  animation:spin .5s linear infinite;
+}
+
+@keyframes spin{
+  from{transform:rotateY(0)}
+  to{transform:rotateY(360deg)}
 }
 
 /* ================= NITRO ================= */
 
 #nitro{
   position:absolute;
-  left:10px;
-  bottom:14px;
-  z-index:90;
-  width:155px;
+  z-index:100;
+  left:12px;
+  bottom:17px;
+  width:145px;
+}
+
+#nitroText{
   color:white;
   font-size:11px;
   font-weight:bold;
+  margin-bottom:4px;
+  text-shadow:0 2px 4px #000;
 }
 
 #nitroBar{
   height:15px;
-  margin-top:4px;
   background:#111;
-  border:1px solid #777;
+  border:1px solid #666;
   border-radius:10px;
   overflow:hidden;
 }
@@ -497,35 +514,87 @@ html,body{
 #nitroFill{
   width:100%;
   height:100%;
-  background:linear-gradient(90deg,#00bfff,#4b4bff,#bdb3ff);
+  background:linear-gradient(
+    90deg,#00c8ff,#426cff,#bdb7ff
+  );
 }
 
-/* ================= BUTTON ================= */
-
-#pause{
-  position:absolute;
-  right:10px;
-  top:51px;
-  z-index:110;
-  color:white;
-  background:rgba(0,0,0,.7);
-  border-radius:10px;
-  padding:9px 13px;
-  font-size:18px;
-}
-
-/* ================= TOUCH ================= */
+/* ================= CONTROLS ================= */
 
 .touch{
   position:absolute;
   top:0;
   bottom:0;
   width:50%;
-  z-index:30;
+  z-index:20;
 }
 
-#touchLeft{left:0}
-#touchRight{right:0}
+#leftTouch{left:0}
+#rightTouch{right:0}
+
+#controlHint{
+  position:absolute;
+  bottom:93px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:30;
+  color:rgba(255,255,255,.65);
+  font-size:11px;
+  white-space:nowrap;
+}
+
+/* ================= BUTTONS ================= */
+
+#pauseBtn,
+#soundBtn{
+  position:absolute;
+  z-index:110;
+  top:55px;
+  width:43px;
+  height:43px;
+  border:0;
+  border-radius:12px;
+  background:rgba(0,0,0,.62);
+  color:white;
+  font-size:18px;
+}
+
+#pauseBtn{right:10px}
+#soundBtn{right:60px}
+
+/* ================= DAMAGE ================= */
+
+#damage{
+  position:absolute;
+  inset:0;
+  z-index:90;
+  pointer-events:none;
+  background:rgba(255,0,0,.38);
+  opacity:0;
+}
+
+/* ================= RAIN ================= */
+
+#rain{
+  display:none;
+  position:absolute;
+  inset:0;
+  z-index:80;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(
+      105deg,
+      transparent 0 20px,
+      rgba(190,220,255,.4) 21px,
+      transparent 23px 48px
+    );
+  animation:rain .25s linear infinite;
+}
+
+@keyframes rain{
+  from{background-position:0 0}
+  to{background-position:-50px 120px}
+}
 
 /* ================= SCREENS ================= */
 
@@ -535,180 +604,145 @@ html,body{
   z-index:300;
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
-  text-align:center;
+  justify-content:center;
   color:white;
-  background:rgba(0,0,0,.9);
+  text-align:center;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(50,20,10,.35),
+      rgba(0,0,0,.9)
+    );
   padding:20px;
 }
 
 .screen h1{
-  font-size:36px;
+  font-size:38px;
   margin-bottom:12px;
-  text-shadow:0 0 20px #ff3300;
+  text-shadow:
+    0 0 10px #ff2b00,
+    0 0 25px #ff4500;
 }
 
 .screen p{
+  line-height:1.65;
   color:#ddd;
-  line-height:1.6;
-  margin-bottom:15px;
+  margin-bottom:20px;
 }
 
 .btn{
-  width:min(330px,90%);
-  padding:14px;
-  margin:5px;
   border:0;
-  border-radius:13px;
+  border-radius:14px;
+  padding:14px 25px;
   color:white;
-  background:linear-gradient(135deg,#d50000,#ff6500);
   font-size:17px;
+  font-weight:bold;
+  background:
+    linear-gradient(135deg,#d50000,#ff6100);
+  box-shadow:0 7px 25px rgba(255,60,0,.4);
+  margin:5px;
+}
+
+.secondary{
+  background:linear-gradient(135deg,#333,#666);
+}
+
+/* ================= MENU ================= */
+
+#menuScreen{
+  z-index:250;
+}
+
+.menuButtons{
+  display:flex;
+  flex-direction:column;
+  width:min(310px,90vw);
+}
+
+.money{
+  margin-bottom:15px;
+  padding:10px 18px;
+  background:rgba(255,180,0,.12);
+  border:1px solid rgba(255,210,70,.4);
+  border-radius:12px;
+  color:#ffd83d;
   font-weight:bold;
 }
 
-.btn.dark{
-  background:linear-gradient(135deg,#222,#555);
+#garageScreen{
+  z-index:260;
+  overflow:auto;
+  justify-content:flex-start;
+  padding-top:30px;
 }
+
+.garageGrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  width:min(420px,95vw);
+  margin:10px auto;
+}
+
+.carCard{
+  padding:12px;
+  border-radius:15px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+}
+
+.carPreview{
+  height:70px;
+  position:relative;
+  transform:scale(.75);
+}
+
+.carName{
+  font-weight:bold;
+  margin:3px;
+}
+
+.carPrice{
+  color:#ffd53b;
+  font-size:13px;
+  margin-bottom:6px;
+}
+
+.carBtn{
+  border:0;
+  padding:8px 12px;
+  border-radius:9px;
+  background:#d71919;
+  color:#fff;
+  font-weight:bold;
+}
+
+.locked{
+  background:#555;
+}
+
+/* ================= HIDDEN ================= */
 
 .hidden{
   display:none!important;
 }
 
-/* ================= GARAGE ================= */
+/* ================= MOBILE ================= */
 
-.cards{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:8px;
-  max-width:520px;
-  max-height:65vh;
-  overflow:auto;
-}
+@media(max-width:400px){
 
-.card{
-  width:145px;
-  padding:10px;
-  border-radius:14px;
-  background:#1b1b1b;
-  border:1px solid #555;
-}
-
-.preview{
-  width:48px;
-  height:78px;
-  margin:4px auto;
-  border-radius:13px;
-  border:2px solid #222;
-}
-
-.card h3{
-  font-size:13px;
-  margin:5px;
-}
-
-.card small{
-  display:block;
-  color:#aaa;
-  margin:4px;
-}
-
-.card button{
-  padding:8px 12px;
-  border:0;
-  border-radius:8px;
-  color:white;
-  background:#e22;
-  font-weight:bold;
-}
-
-.card button.ok{
-  background:#159447;
-}
-
-/* ================= TRACKS ================= */
-
-.tracks{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  width:min(350px,90%);
-}
-
-.track{
-  padding:17px;
-  border:1px solid #666;
-  border-radius:12px;
-  background:#222;
-  color:white;
-}
-
-.track.selected{
-  border:2px solid #ff4c00;
-  background:#542000;
-}
-
-/* ================= SETTINGS ================= */
-
-.setting{
-  width:min(350px,90%);
-  padding:14px;
-  margin:6px;
-  background:#222;
-  border-radius:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.toggle{
-  padding:9px 15px;
-  border:0;
-  border-radius:9px;
-  background:#666;
-  color:white;
-}
-
-.toggle.on{
-  background:#159447;
-}
-
-/* ================= RAIN ================= */
-
-#rain{
-  display:none;
-  position:absolute;
-  inset:0;
-  z-index:75;
-  pointer-events:none;
-  background:
-    repeating-linear-gradient(
-      105deg,
-      transparent 0 18px,
-      rgba(210,230,255,.35) 20px,
-      transparent 22px 45px
-    );
-  animation:rain .3s linear infinite;
-}
-
-@keyframes rain{
-  from{background-position:0 0}
-  to{background-position:-50px 120px}
-}
-
-@media(max-width:380px){
-  .hudBox{
+  .hud{
+    padding:6px 6px;
     font-size:10px;
-    padding:6px;
+  }
+
+  .screen h1{
+    font-size:32px;
   }
 
   #player{
     transform:translateX(-50%) scale(.9);
-  }
-
-  .screen h1{
-    font-size:29px;
   }
 }
 </style>
@@ -724,12 +758,13 @@ html,body{
   <div id="moon"></div>
 
   <div class="stars">
-    <i class="star" style="left:10%;top:12%"></i>
-    <i class="star" style="left:24%;top:20%"></i>
-    <i class="star" style="left:39%;top:9%"></i>
-    <i class="star" style="left:54%;top:18%"></i>
-    <i class="star" style="left:72%;top:11%"></i>
-    <i class="star" style="left:88%;top:23%"></i>
+    <i class="star" style="left:8%;top:12%"></i>
+    <i class="star" style="left:18%;top:23%"></i>
+    <i class="star" style="left:31%;top:8%"></i>
+    <i class="star" style="left:46%;top:18%"></i>
+    <i class="star" style="left:62%;top:11%"></i>
+    <i class="star" style="left:76%;top:24%"></i>
+    <i class="star" style="left:91%;top:9%"></i>
   </div>
 </div>
 
@@ -737,1448 +772,1722 @@ html,body{
 <div id="city"></div>
 
 <!-- ROAD -->
-<div id="road">
-  <div class="laneLine left"></div>
-  <div class="laneLine right"></div>
+<div id="road"></div>
 
-  <div class="roadSide left"></div>
-  <div class="roadSide right"></div>
-</div>
-
+<!-- RAIN -->
 <div id="rain"></div>
 
 <!-- HUD -->
 <div id="hud">
-  <div class="hudBox">🏆 <span id="score">0</span></div>
-  <div class="hudBox">🪙 <span id="coins">0</span></div>
-  <div class="hudBox">❤️ <span id="lives">3</span></div>
-  <div class="hudBox">⚡ <span id="speed">0</span></div>
+
+  <div class="hud">
+    🏆 <span id="score">0</span>
+  </div>
+
+  <div class="hud">
+    🪙 <span id="coins">0</span>
+  </div>
+
+  <div class="hud">
+    ❤️ <span id="lives">3</span>
+  </div>
+
+  <div class="hud">
+    ⚡ <span id="speed">0</span>
+  </div>
+
 </div>
 
-<button id="pause">Ⅱ</button>
+<button id="soundBtn">🔊</button>
+<button id="pauseBtn">Ⅱ</button>
 
 <!-- PLAYER -->
 <div id="player">
 
-  <div class="carBody"></div>
-  <div class="carHood"></div>
-  <div class="windshield"></div>
-  <div class="windowSplit"></div>
+  <div class="car">
 
-  <div class="headlight left"></div>
-  <div class="headlight right"></div>
+    <div class="mustangBody"></div>
+    <div class="mustangHood"></div>
+    <div class="mustangRoof"></div>
+    <div class="mustangGlass"></div>
+    <div class="mustangDivider"></div>
 
-  <div class="grille">
-    <i></i><i></i><i></i><i></i>
+    <div class="light lightL"></div>
+    <div class="light lightR"></div>
+
+    <div class="grille">
+      <i></i><i></i><i></i><i></i>
+    </div>
+
+    <div class="horse">🐎</div>
+
+    <div class="bumper"></div>
+
+    <div class="wheel wl1"></div>
+    <div class="wheel wl2"></div>
+    <div class="wheel wr1"></div>
+    <div class="wheel wr2"></div>
+
   </div>
-
-  <div class="horse">🐎</div>
-
-  <div class="bumper"></div>
-
-  <div class="wheel a"><span class="rim"></span></div>
-  <div class="wheel b"><span class="rim"></span></div>
-  <div class="wheel c"><span class="rim"></span></div>
-  <div class="wheel d"><span class="rim"></span></div>
-
-  <div id="flame" class="nitroFlame"></div>
 
 </div>
 
 <!-- NITRO -->
 <div id="nitro">
-  🔥 NİTRO
+  <div id="nitroText">🔥 NİTRO</div>
   <div id="nitroBar">
     <div id="nitroFill"></div>
   </div>
 </div>
 
+<div id="controlHint">
+  👈 SOL &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SAĞ 👉
+</div>
+
 <!-- TOUCH -->
-<div id="touchLeft" class="touch"></div>
-<div id="touchRight" class="touch"></div>
+<div id="leftTouch" class="touch"></div>
+<div id="rightTouch" class="touch"></div>
 
-<!-- ================= MENU ================= -->
+<!-- DAMAGE -->
+<div id="damage"></div>
 
-<div id="menu" class="screen">
+<!-- ================= MAIN MENU ================= -->
+
+<div id="menuScreen" class="screen">
 
   <h1>🏎️ TURBO ROAD</h1>
 
   <p>
-    <b>3 ŞERİTLİ YARIŞ</b><br>
-    1969 Mustang ile trafiği geç!
+    <b>1969 MUSTANG EDITION</b><br>
+    3 ŞERİTLİ KLASİK ARABA YARIŞI
   </p>
 
-  <p>🪙 Banka: <b id="bank">0</b></p>
+  <div class="money">
+    🪙 Banka: <span id="menuMoney">0</span>
+  </div>
 
-  <button class="btn" id="start">
-    🚦 YARIŞA BAŞLA
-  </button>
+  <div class="menuButtons">
 
-  <button class="btn" id="garage">
-    🏎️ GARAJ
-  </button>
+    <button class="btn" id="playBtn">
+      🚦 YARIŞA BAŞLA
+    </button>
 
-  <button class="btn" id="tracksBtn">
-    🛣️ PİST SEÇ
-  </button>
+    <button class="btn secondary" id="garageBtn">
+      🚘 GARAGE / ARABA AL
+    </button>
 
-  <button class="btn" id="settingsBtn">
-    ⚙️ AYARLAR
-  </button>
+  </div>
 
 </div>
 
-<!-- GARAGE -->
+<!-- ================= GARAGE ================= -->
 
 <div id="garageScreen" class="screen hidden">
 
-  <h1>🏎️ GARAJ</h1>
+  <h1>🚘 GARAGE</h1>
 
-  <p>🪙 Coin: <b id="garageBank">0</b></p>
+  <div class="money">
+    🪙 Paran: <span id="garageMoney">0</span>
+  </div>
 
-  <div id="cards" class="cards"></div>
+  <div class="garageGrid" id="garageGrid"></div>
 
-  <button class="btn dark" id="garageBack">
+  <button class="btn secondary" id="backGarage">
     ↩ MENÜ
   </button>
 
 </div>
 
-<!-- TRACKS -->
+<!-- ================= START ================= -->
 
-<div id="trackScreen" class="screen hidden">
+<div id="startScreen" class="screen hidden">
 
-  <h1>🛣️ PİST SEÇ</h1>
+  <h1>🏁 HAZIR!</h1>
 
-  <div class="tracks">
+  <p>
+    Trafikten kaç.<br>
+    Coinleri topla.<br>
+    Nitro kullan.<br>
+    En yüksek skoru yap!
+  </p>
 
-    <button class="track" data-track="city">
-      🌆<br>ŞEHİR
-    </button>
+  <button class="btn" id="startRaceBtn">
+    🚦 BAŞLA
+  </button>
 
-    <button class="track" data-track="desert">
-      🏜️<br>ÇÖL
-    </button>
-
-    <button class="track" data-track="night">
-      🌙<br>GECE
-    </button>
-
-    <button class="track" data-track="rain">
-      🌧️<br>YAĞMUR
-    </button>
-
-  </div>
-
-  <button class="btn dark" id="trackBack">
+  <button class="btn secondary" id="startBackBtn">
     ↩ MENÜ
   </button>
 
 </div>
 
-<!-- SETTINGS -->
-
-<div id="settingsScreen" class="screen hidden">
-
-  <h1>⚙️ AYARLAR</h1>
-
-  <div class="setting">
-    🔊 Ses
-    <button id="sound" class="toggle">KAPALI</button>
-  </div>
-
-  <div class="setting">
-    📳 Titreşim
-    <button id="vibration" class="toggle">KAPALI</button>
-  </div>
-
-  <button class="btn dark" id="settingsBack">
-    ↩ MENÜ
-  </button>
-
-</div>
-
-<!-- PAUSE -->
+<!-- ================= PAUSE ================= -->
 
 <div id="pauseScreen" class="screen hidden">
 
   <h1>⏸️ DURAKLATILDI</h1>
 
-  <button class="btn" id="resume">
-    ▶ DEVAM ET
+  <button class="btn" id="continueBtn">
+    ▶ DEVAM
   </button>
 
-  <button class="btn dark" id="pauseMenu">
+  <button class="btn secondary" id="pauseMenuBtn">
     🏠 MENÜ
   </button>
 
 </div>
 
-<!-- GAME OVER -->
+<!-- ================= GAME OVER ================= -->
 
 <div id="gameOver" class="screen hidden">
 
   <h1>💥 KAZA!</h1>
 
   <p>
-    🏆 Skor: <b id="finalScore">0</b><br>
-    🪙 Kazandığın Coin: <b id="finalCoins">0</b><br>
-    🥇 Rekor: <b id="bestScore">0</b>
+    Skor: <b id="finalScore">0</b><br>
+    Coin: <b id="finalCoins">0</b><br>
+    En İyi Skor: <b id="bestScore">0</b>
   </p>
 
-  <button class="btn" id="again">
-    🔄 TEKRAR OYNA
+  <button class="btn" id="restartBtn">
+    🔄 TEKRAR
   </button>
 
-  <button class="btn dark" id="gameOverMenu">
+  <button class="btn secondary" id="gameMenuBtn">
     🏠 MENÜ
   </button>
 
 </div>
 
-<script>
-"use strict";
+</div>
 
-/* =========================
-   TURBO ROAD 3 LANE
-========================= */
+<script>
+
+/* ==========================================
+   TURBO ROAD
+   COMPLETE SINGLE FILE VERSION
+========================================== */
 
 const game=document.getElementById("game");
+const road=document.getElementById("road");
 const player=document.getElementById("player");
+
+const scoreEl=document.getElementById("score");
+const coinsEl=document.getElementById("coins");
+const livesEl=document.getElementById("lives");
+const speedEl=document.getElementById("speed");
+
+const nitroFill=document.getElementById("nitroFill");
+
+const menuScreen=document.getElementById("menuScreen");
+const garageScreen=document.getElementById("garageScreen");
+const startScreen=document.getElementById("startScreen");
+const pauseScreen=document.getElementById("pauseScreen");
+const gameOver=document.getElementById("gameOver");
 
 let running=false;
 let paused=false;
+
+let playerX=innerWidth/2;
 let direction=0;
-let turbo=false;
 
 let score=0;
 let coins=0;
 let lives=3;
-let nitro=100;
 
-let playerLane=1;
+let speed=5;
+let nitro=100;
+let turbo=false;
 
 let enemies=[];
-let coinItems=[];
+let coinList=[];
+let lines=[];
 
 let enemyTimer=0;
 let coinTimer=0;
 
-let bankCoins=
-  Number(localStorage.getItem("turboBank")||0);
+let best=Number(
+  localStorage.getItem("turboBest") || 0
+);
 
-let bestScore=
-  Number(localStorage.getItem("turboBest")||0);
+let bank=Number(
+  localStorage.getItem("turboMoney") || 0
+);
 
-let selectedCar=
-  localStorage.getItem("turboCar")||"mustang";
+let owned=JSON.parse(
+  localStorage.getItem("turboOwned") ||
+  '["mustang"]'
+);
 
-let selectedTrack=
-  localStorage.getItem("turboTrack")||"city";
+let selected=
+  localStorage.getItem("turboSelected") ||
+  "mustang";
 
 let soundOn=
-  localStorage.getItem("turboSound")==="on";
-
-let vibrationOn=
-  localStorage.getItem("turboVibration")==="on";
+  localStorage.getItem("turboSound")!=="off";
 
 let audio=null;
 
-/* ================= CARS ================= */
+let lastTime=0;
+
+/* ==========================================
+   CARS
+========================================== */
 
 const cars={
 
   mustang:{
     name:"1969 Mustang",
     price:0,
-    color:"red",
-    mult:1
+    color:"red"
   },
 
-  blue:{
-    name:"Blue Racer",
-    price:100,
-    color:"blue",
-    mult:1.1
-  },
-
-  yellow:{
-    name:"Golden GT",
-    price:250,
-    color:"yellow",
-    mult:1.25
-  },
-
-  green:{
-    name:"Green Beast",
+  charger:{
+    name:"Muscle Charger",
     price:500,
-    color:"green",
-    mult:1.4
+    color:"blue"
   },
 
-  black:{
-    name:"Black Thunder",
+  cobra:{
+    name:"Street Cobra",
     price:1000,
-    color:"black",
-    mult:1.6
+    color:"green"
+  },
+
+  super:{
+    name:"Turbo Supercar",
+    price:2000,
+    color:"yellow"
   }
 
 };
 
-/* ================= TRACK ================= */
+/* ==========================================
+   AUDIO
+========================================== */
 
-const tracks={
+function startAudio(){
 
- city:{
-   sky:"linear-gradient(#55a6d6 0%,#d99455 58%,#777 59%)",
-   speed:1,
-   city:true,
-   rain:false
- },
+  if(!soundOn)return;
 
- desert:{
-   sky:"linear-gradient(#6f3618 0%,#e99b4d 58%,#a97946 59%)",
-   speed:1.12,
-   city:false,
-   rain:false
- },
+  if(!audio){
 
- night:{
-   sky:"linear-gradient(#02040d 0%,#101d39 58%,#222 59%)",
-   speed:1.08,
-   city:false,
-   rain:false
- },
+    try{
 
- rain:{
-   sky:"linear-gradient(#26343d 0%,#59676f 58%,#303438 59%)",
-   speed:1.2,
-   city:false,
-   rain:true
- }
+      audio=new(
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
 
-};
+    }catch(e){}
 
-/* ================= AUDIO ================= */
+  }
 
-function initAudio(){
-
- if(!soundOn)return;
-
- try{
-
-   if(!audio){
-     audio=
-       new (window.AudioContext||
-       window.webkitAudioContext)();
-   }
-
-   if(audio.state==="suspended")
-     audio.resume();
-
- }catch(e){}
+  if(audio &&
+     audio.state==="suspended"){
+    audio.resume();
+  }
 }
 
-function beep(freq=500,duration=.08){
+function sound(
+  frequency,
+  duration=.1,
+  type="sine"
+){
 
- if(!soundOn||!audio)return;
+  if(!soundOn || !audio)return;
 
- try{
+  try{
 
-   const oscillator=
-     audio.createOscillator();
+    const osc=
+      audio.createOscillator();
 
-   const gain=
-     audio.createGain();
+    const gain=
+      audio.createGain();
 
-   oscillator.frequency.value=freq;
-   oscillator.type="sine";
+    osc.type=type;
+    osc.frequency.value=frequency;
 
-   gain.gain.setValueAtTime(
-     .035,
-     audio.currentTime
-   );
+    gain.gain.setValueAtTime(
+      .05,
+      audio.currentTime
+    );
 
-   gain.gain.exponentialRampToValueAtTime(
-     .001,
-     audio.currentTime+duration
-   );
+    gain.gain.exponentialRampToValueAtTime(
+      .001,
+      audio.currentTime+duration
+    );
 
-   oscillator.connect(gain);
-   gain.connect(audio.destination);
+    osc.connect(gain);
+    gain.connect(audio.destination);
 
-   oscillator.start();
+    osc.start();
+    osc.stop(
+      audio.currentTime+duration
+    );
 
-   oscillator.stop(
-     audio.currentTime+duration
-   );
-
- }catch(e){}
+  }catch(e){}
 }
 
-/* ================= SCREEN ================= */
+/* ==========================================
+   COLLISION SOUND
+========================================== */
 
-function show(id){
+function crashSound(){
 
- document
-   .querySelectorAll(".screen")
-   .forEach(x=>x.classList.add("hidden"));
+  if(!soundOn)return;
 
- document
-   .getElementById(id)
-   .classList.remove("hidden");
+  sound(75,.18,"sawtooth");
+
+  setTimeout(
+    ()=>sound(48,.28,"square"),
+    100
+  );
+
+  setTimeout(
+    ()=>sound(32,.35,"sawtooth"),
+    220
+  );
 }
 
-/* ================= CITY ================= */
+/* ==========================================
+   CITY
+========================================== */
 
-function makeCity(){
+function createCity(){
 
- const city=document.getElementById("city");
+  const city=
+    document.getElementById("city");
 
- city.innerHTML="";
+  city.innerHTML="";
 
- for(let i=0;i<35;i++){
+  for(let i=0;i<40;i++){
 
-   const b=document.createElement("div");
+    const b=
+      document.createElement("div");
 
-   b.className="building";
+    b.className="building";
 
-   b.style.height=
-     (40+Math.random()*110)+"px";
+    b.style.height=
+      (35+Math.random()*120)+"px";
 
-   for(let j=0;j<7;j++){
+    for(let j=0;j<7;j++){
 
-     const w=
-       document.createElement("i");
+      const w=
+        document.createElement("i");
 
-     w.className="window";
+      w.className="window";
 
-     w.style.left=
-       (10+Math.random()*75)+"%";
+      w.style.left=
+        (10+Math.random()*75)+"%";
 
-     w.style.top=
-       (10+Math.random()*75)+"%";
+      w.style.top=
+        (5+Math.random()*80)+"%";
 
-     b.appendChild(w);
+      b.appendChild(w);
+    }
 
-   }
-
-   city.appendChild(b);
-
- }
-
+    city.appendChild(b);
+  }
 }
 
-/* ================= TRACK ================= */
+/* ==========================================
+   ROAD LINES
+========================================== */
 
-function applyTrack(){
+function createRoadLines(){
 
- const t=tracks[selectedTrack];
+  lines.forEach(
+    x=>x.el.remove()
+  );
 
- document.getElementById("sky")
-   .style.background=t.sky;
+  lines=[];
 
- document.getElementById("city")
-   .style.display=t.city?"flex":"none";
+  for(let i=0;i<15;i++){
 
- document.getElementById("sun")
-   .style.display=
-     selectedTrack==="night"?"none":"block";
+    const el=
+      document.createElement("div");
 
- document.getElementById("moon")
-   .style.display=
-     selectedTrack==="night"?"block":"none";
+    el.className="roadLine";
 
- document.querySelector(".stars")
-   .style.display=
-     selectedTrack==="night"?"block":"none";
+    const obj={
+      el:el,
+      y:i*105-100
+    };
 
- document.getElementById("rain")
-   .style.display=
-     t.rain?"block":"none";
+    el.style.left="50%";
+    el.style.top=obj.y+"px";
+
+    road.appendChild(el);
+
+    lines.push(obj);
+  }
 }
 
-/* ================= CAR ================= */
+/* ==========================================
+   ROAD POSITION
+========================================== */
 
-function carGradient(color){
+function roadBoundsAtY(y){
 
- if(color==="red")
-   return "linear-gradient(90deg,#4e0000,#b80000,#ff2525,#e00000,#600000)";
+  const top=innerHeight*.40;
+  const bottom=innerHeight;
 
- if(color==="blue")
-   return "linear-gradient(90deg,#02336d,#087cff,#42b2ff,#087cff,#02336d)";
+  const p=
+    Math.max(
+      0,
+      Math.min(
+        1,
+        (y-top)/(bottom-top)
+      )
+    );
 
- if(color==="yellow")
-   return "linear-gradient(90deg,#715000,#d89b00,#ffe13b,#d89b00,#715000)";
+  const left=
+    innerWidth*(.25*(1-p));
 
- if(color==="green")
-   return "linear-gradient(90deg,#063d25,#079b55,#24d97c,#079b55,#063d25)";
+  const right=
+    innerWidth*(1-.25*(1-p));
 
- return "linear-gradient(90deg,#050505,#222,#777,#222,#050505)";
+  return{
+    left:left,
+    right:right
+  };
 }
 
-function applyCar(){
-
- const c=cars[selectedCar];
-
- document.querySelector(".carBody")
-   .style.background=
-     carGradient(c.color);
-
- document.querySelector(".carHood")
-   .style.background=
-     carGradient(c.color);
-}
-
-/* ================= GARAGE ================= */
-
-function renderGarage(){
-
- document.getElementById("garageBank")
-   .textContent=bankCoins;
-
- const cards=
-   document.getElementById("cards");
-
- cards.innerHTML="";
-
- Object.keys(cars).forEach(key=>{
-
-   const c=cars[key];
-
-   const owned=
-     key==="mustang"||
-     localStorage.getItem("owned_"+key)==="1";
-
-   const selected=
-     selectedCar===key;
-
-   const card=
-     document.createElement("div");
-
-   card.className="card";
-
-   card.innerHTML=`
-     <div class="preview"
-       style="background:${carGradient(c.color)}">
-     </div>
-
-     <h3>${c.name}</h3>
-
-     <small>⚡ x${c.mult}</small>
-
-     <button>
-       ${
-         selected
-         ?"SEÇİLDİ"
-         :owned
-         ?"SEÇ"
-         :"🪙 "+c.price
-       }
-     </button>
-   `;
-
-   const btn=
-     card.querySelector("button");
-
-   if(owned)
-     btn.classList.add("ok");
-
-   btn.onclick=()=>{
-
-     if(owned){
-
-       selectedCar=key;
-
-       localStorage.setItem(
-         "turboCar",
-         key
-       );
-
-       applyCar();
-       renderGarage();
-
-       beep(800);
-
-       return;
-     }
-
-     if(bankCoins<c.price){
-
-       alert(
-         "Yeterli coin yok.\n"+
-         "Gerekli: "+c.price+
-         "\nSende: "+bankCoins
-       );
-
-       return;
-     }
-
-     bankCoins-=c.price;
-
-     localStorage.setItem(
-       "turboBank",
-       bankCoins
-     );
-
-     localStorage.setItem(
-       "owned_"+key,
-       "1"
-     );
-
-     selectedCar=key;
-
-     localStorage.setItem(
-       "turboCar",
-       key
-     );
-
-     applyCar();
-     renderGarage();
-
-     beep(1000,.15);
-
-   };
-
-   cards.appendChild(card);
-
- });
-
-}
-
-/* ================= LANE ================= */
-
-function laneX(lane){
-
- const roadLeft=
-   innerWidth*.10;
-
- const roadWidth=
-   innerWidth*.80;
-
- const laneWidth=
-   roadWidth/3;
-
- return roadLeft+
-        laneWidth*lane+
-        laneWidth/2;
-}
+/* ==========================================
+   PLAYER
+========================================== */
 
 function updatePlayer(){
 
- const x=laneX(playerLane);
+  player.style.left=
+    playerX+"px";
 
- player.style.left=x+"px";
+  player.style.transform=
+    `translateX(-50%) rotate(${direction*7}deg)`;
 
- player.style.transform=
-   `translateX(-50%) rotate(${direction*7}deg)`;
 }
 
-/* ================= CONTROL ================= */
+/* ==========================================
+   CONTROL
+========================================== */
 
-function changeLane(dir){
+function setDirection(x){
 
- if(!running||paused)return;
+  if(!running || paused)return;
 
- const old=playerLane;
-
- playerLane+=dir;
-
- if(playerLane<0)
-   playerLane=0;
-
- if(playerLane>2)
-   playerLane=2;
-
- direction=
-   playerLane>old?1:
-   playerLane<old?-1:0;
-
- updatePlayer();
-
- setTimeout(()=>{
-   direction=0;
-   updatePlayer();
- },130);
+  direction=
+    x<innerWidth/2 ? -1 : 1;
 }
 
-/* TOUCH LEFT / RIGHT */
+function stopDirection(){
+  direction=0;
+}
 
-document.getElementById("touchLeft")
+document
+.getElementById("leftTouch")
 .addEventListener(
- "touchstart",
- e=>{
-   e.preventDefault();
-   changeLane(-1);
- },
- {passive:false}
+  "touchstart",
+  e=>{
+    e.preventDefault();
+    startAudio();
+    setDirection(innerWidth*.2);
+  },
+  {passive:false}
 );
 
-document.getElementById("touchRight")
+document
+.getElementById("rightTouch")
 .addEventListener(
- "touchstart",
- e=>{
-   e.preventDefault();
-   changeLane(1);
- },
- {passive:false}
-);
-
-/* KEYBOARD */
-
-document.addEventListener("keydown",e=>{
-
- if(
-   e.key==="ArrowLeft"||
-   e.key.toLowerCase()==="a"
- ){
-   changeLane(-1);
- }
-
- if(
-   e.key==="ArrowRight"||
-   e.key.toLowerCase()==="d"
- ){
-   changeLane(1);
- }
-
- if(e.code==="Space"){
-   turbo=true;
- }
-
- if(e.key==="Escape"){
-   togglePause();
- }
-
-});
-
-/* NITRO */
-
-document.addEventListener("keyup",e=>{
-
- if(e.code==="Space")
-   turbo=false;
-
-});
-
-game.addEventListener(
- "touchstart",
- e=>{
-
-   if(!running||paused)return;
-
-   const t=e.touches[0];
-
-   if(
-     t.clientY>innerHeight*.78 &&
-     Math.abs(
-       t.clientX-innerWidth/2
-     )<75
-   ){
-
-     turbo=true;
-     document.getElementById("flame")
-       .style.display="block";
-   }
-
- },
- {passive:false}
+  "touchstart",
+  e=>{
+    e.preventDefault();
+    startAudio();
+    setDirection(innerWidth*.8);
+  },
+  {passive:false}
 );
 
 game.addEventListener(
- "touchend",
- ()=>{
-   turbo=false;
-   document.getElementById("flame")
-     .style.display="none";
- }
+  "touchmove",
+  e=>{
+
+    if(!running || paused)return;
+
+    e.preventDefault();
+
+    if(e.touches.length){
+      setDirection(
+        e.touches[0].clientX
+      );
+    }
+
+  },
+  {passive:false}
 );
 
-/* ================= ENEMY ================= */
+game.addEventListener(
+  "touchend",
+  e=>{
+    e.preventDefault();
+    stopDirection();
+  },
+  {passive:false}
+);
 
-function spawnEnemy(){
+/* mouse */
 
- const el=
-   document.createElement("div");
+game.addEventListener(
+  "mousedown",
+  e=>{
+    startAudio();
+    setDirection(e.clientX);
+  }
+);
 
- const colors=[
-   "red",
-   "blue",
-   "yellow",
-   "green",
-   "black"
- ];
+game.addEventListener(
+  "mouseup",
+  stopDirection
+);
 
- const color=
-   colors[
-     Math.floor(
-       Math.random()*colors.length
-     )
-   ];
+/* keyboard */
 
- el.className=
-   "enemy "+color;
+document.addEventListener(
+  "keydown",
+  e=>{
 
- el.innerHTML=`
-   <div class="enemyWindow"></div>
-   <div class="enemyLight l"></div>
-   <div class="enemyLight r"></div>
- `;
+    if(
+      e.key==="ArrowLeft" ||
+      e.key.toLowerCase()==="a"
+    ){
+      direction=-1;
+    }
 
- const lane=
-   Math.floor(Math.random()*3);
+    if(
+      e.key==="ArrowRight" ||
+      e.key.toLowerCase()==="d"
+    ){
+      direction=1;
+    }
 
- const x=
-   laneX(lane);
+    if(e.code==="Space"){
+      nitroActive(true);
+    }
 
- el.style.left=
-   (x-30)+"px";
+    if(e.key==="Escape"){
+      togglePause();
+    }
 
- el.style.top="-110px";
+  }
+);
 
- game.appendChild(el);
+document.addEventListener(
+  "keyup",
+  e=>{
 
- enemies.push({
-   el:el,
-   lane:lane,
-   y:-110,
-   speed:.85+
-     Math.random()*.35
- });
+    if(
+      e.key==="ArrowLeft" ||
+      e.key==="ArrowRight" ||
+      e.key.toLowerCase()==="a" ||
+      e.key.toLowerCase()==="d"
+    ){
+      direction=0;
+    }
+
+    if(e.code==="Space"){
+      nitroActive(false);
+    }
+
+  }
+);
+
+/* ==========================================
+   NITRO
+========================================== */
+
+function nitroActive(value){
+
+  if(!running || paused)return;
+
+  turbo=
+    value &&
+    nitro>0;
 
 }
 
-/* ================= COIN ================= */
+/* ==========================================
+   CREATE ENEMY
+========================================== */
 
-function spawnCoin(){
+function createEnemy(){
 
- const el=
-   document.createElement("div");
+  const el=
+    document.createElement("div");
 
- el.className="coin";
+  const colors=[
+    "red",
+    "blue",
+    "yellow",
+    "green"
+  ];
 
- const lane=
-   Math.floor(Math.random()*3);
+  el.className=
+    "enemy "+
+    colors[
+      Math.floor(
+        Math.random()*colors.length
+      )
+    ];
 
- const x=
-   laneX(lane);
+  const glass=
+    document.createElement("div");
 
- el.style.left=
-   (x-14)+"px";
+  glass.className="enemyGlass";
 
- el.style.top="-40px";
+  const wl=
+    document.createElement("div");
 
- game.appendChild(el);
+  wl.className=
+    "enemyWheel enemyWL";
 
- coinItems.push({
-   el:el,
-   lane:lane,
-   y:-40
- });
+  const wr=
+    document.createElement("div");
 
+  wr.className=
+    "enemyWheel enemyWR";
+
+  el.appendChild(glass);
+  el.appendChild(wl);
+  el.appendChild(wr);
+
+  const lane=
+    Math.floor(Math.random()*3);
+
+  const x=
+    innerWidth*
+    (
+      .25+
+      lane*.166
+    )+
+    innerWidth*.083;
+
+  const enemy={
+    el:el,
+    x:x,
+    y:-130,
+    speed:
+      .75+
+      Math.random()*.45
+  };
+
+  el.style.left=
+    x+"px";
+
+  el.style.top="-130px";
+
+  game.appendChild(el);
+
+  enemies.push(enemy);
 }
 
-/* ================= COLLISION ================= */
+/* ==========================================
+   CREATE COIN
+========================================== */
+
+function createCoin(){
+
+  const el=
+    document.createElement("div");
+
+  el.className="coin";
+
+  const lane=
+    Math.floor(Math.random()*3);
+
+  const x=
+    innerWidth*
+    (
+      .25+
+      lane*.166
+    )+
+    innerWidth*.083;
+
+  const obj={
+    el:el,
+    x:x,
+    y:-40
+  };
+
+  el.style.left=x+"px";
+  el.style.top="-40px";
+
+  game.appendChild(el);
+
+  coinList.push(obj);
+}
+
+/* ==========================================
+   COLLISION
+========================================== */
 
 function collision(a,b){
 
- const r1=
-   a.getBoundingClientRect();
+  const r1=
+    a.getBoundingClientRect();
 
- const r2=
-   b.getBoundingClientRect();
+  const r2=
+    b.getBoundingClientRect();
 
- return !(
-   r1.right<r2.left||
-   r1.left>r2.right||
-   r1.bottom<r2.top||
-   r1.top>r2.bottom
- );
+  return !(
+    r1.right<r2.left ||
+    r1.left>r2.right ||
+    r1.bottom<r2.top ||
+    r1.top>r2.bottom
+  );
 }
 
-/* ================= CRASH ================= */
+/* ==========================================
+   CRASH
+========================================== */
 
 function crash(enemy){
 
- enemy.el.remove();
+  if(enemy.hit)return;
 
- enemies=
-   enemies.filter(x=>x!==enemy);
+  enemy.hit=true;
 
- lives--;
+  lives--;
 
- if(
-   vibrationOn&&
-   navigator.vibrate
- ){
-   navigator.vibrate(
-     [120,60,120]
-   );
- }
+  livesEl.textContent=
+    lives;
 
- beep(90,.3);
+  score=
+    Math.max(
+      0,
+      score-100
+    );
 
- if(lives<=0){
+  scoreEl.textContent=
+    score;
 
-   endGame();
+  crashSound();
 
- }
+  if(navigator.vibrate){
+
+    navigator.vibrate([
+      180,
+      80,
+      180,
+      80,
+      250
+    ]);
+
+  }
+
+  const damage=
+    document.getElementById("damage");
+
+  damage.animate(
+    [
+      {opacity:0},
+      {opacity:1},
+      {opacity:0}
+    ],
+    {
+      duration:600
+    }
+  );
+
+  enemy.el.remove();
+
+  if(lives<=0){
+
+    endGame();
+
+  }
 
 }
 
-/* ================= START ================= */
+/* ==========================================
+   UPDATE ROAD
+========================================== */
+
+function updateRoad(delta){
+
+  const move=
+    speed*
+    (turbo?1.8:1)*
+    delta*
+    .08;
+
+  lines.forEach(
+    obj=>{
+
+      obj.y+=move;
+
+      if(
+        obj.y>
+        innerHeight
+      ){
+
+        obj.y=-110;
+
+      }
+
+      obj.el.style.top=
+        obj.y+"px";
+
+    }
+  );
+
+}
+
+/* ==========================================
+   UPDATE ENEMIES
+========================================== */
+
+function updateEnemies(delta){
+
+  const move=
+    speed*
+    (turbo?1.65:1)*
+    delta*
+    .08;
+
+  enemies.forEach(
+    enemy=>{
+
+      enemy.y+=
+        move+
+        enemy.speed*delta*.05;
+
+      enemy.el.style.top=
+        enemy.y+"px";
+
+      if(
+        collision(
+          player,
+          enemy.el
+        )
+      ){
+
+        crash(enemy);
+
+      }
+
+    }
+  );
+
+  enemies=
+    enemies.filter(
+      enemy=>{
+
+        if(
+          enemy.y>
+          innerHeight+150
+        ){
+
+          enemy.el.remove();
+
+          score+=10;
+
+          return false;
+
+        }
+
+        return true;
+
+      }
+    );
+
+}
+
+/* ==========================================
+   UPDATE COINS
+========================================== */
+
+function updateCoins(delta){
+
+  const move=
+    speed*
+    (turbo?1.65:1)*
+    delta*
+    .08;
+
+  coinList.forEach(
+    coin=>{
+
+      coin.y+=move;
+
+      coin.el.style.top=
+        coin.y+"px";
+
+      if(
+        collision(
+          player,
+          coin.el
+        )
+      ){
+
+        coins++;
+        bank++;
+
+        score+=50;
+
+        coinsEl.textContent=
+          coins;
+
+        scoreEl.textContent=
+          score;
+
+        saveData();
+
+        sound(850,.08,"sine");
+
+        coin.el.remove();
+
+        coin.collected=true;
+
+      }
+
+    }
+  );
+
+  coinList=
+    coinList.filter(
+      coin=>{
+
+        if(
+          coin.collected ||
+          coin.y>
+          innerHeight+50
+        ){
+
+          if(coin.el.parentNode)
+            coin.el.remove();
+
+          return false;
+
+        }
+
+        return true;
+
+      }
+    );
+
+}
+
+/* ==========================================
+   PLAYER MOVEMENT
+========================================== */
+
+function movePlayer(delta){
+
+  if(!running || paused)return;
+
+  const amount=
+    5.5*
+    delta;
+
+  playerX+=
+    direction*
+    amount;
+
+  const y=
+    innerHeight-100;
+
+  const bounds=
+    roadBoundsAtY(y);
+
+  const minX=
+    bounds.left+35;
+
+  const maxX=
+    bounds.right-35;
+
+  playerX=
+    Math.max(
+      minX,
+      Math.min(
+        maxX,
+        playerX
+      )
+    );
+
+  updatePlayer();
+
+}
+
+/* ==========================================
+   GAME LOOP
+========================================== */
+
+function loop(time){
+
+  const delta=
+    Math.min(
+      40,
+      time-lastTime
+    );
+
+  lastTime=time;
+
+  if(
+    running &&
+    !paused
+  ){
+
+    movePlayer(delta);
+
+    updateRoad(delta);
+
+    updateEnemies(delta);
+
+    updateCoins(delta);
+
+    enemyTimer+=delta;
+    coinTimer+=delta;
+
+    if(
+      enemyTimer>
+      Math.max(
+        550,
+        1250-
+        score*.5
+      )
+    ){
+
+      createEnemy();
+
+      enemyTimer=0;
+
+    }
+
+    if(
+      coinTimer>850
+    ){
+
+      createCoin();
+
+      coinTimer=0;
+
+    }
+
+    score+=
+      delta*.012;
+
+    scoreEl.textContent=
+      Math.floor(score);
+
+    speed=
+      5+
+      Math.min(
+        9,
+        score/900
+      );
+
+    if(turbo){
+
+      nitro-=
+        delta*.025;
+
+      if(nitro<=0){
+
+        nitro=0;
+        turbo=false;
+
+      }
+
+    }else{
+
+      nitro+=
+        delta*.007;
+
+      if(nitro>100)
+        nitro=100;
+
+    }
+
+    nitroFill.style.width=
+      nitro+"%";
+
+    speedEl.textContent=
+      Math.floor(
+        speed*
+        (turbo?1.8:1)*
+        12
+      );
+
+  }
+
+  requestAnimationFrame(loop);
+
+}
+
+/* ==========================================
+   START GAME
+========================================== */
+
+function prepareGame(){
+
+  enemies.forEach(
+    e=>e.el.remove()
+  );
+
+  coinList.forEach(
+    c=>c.el.remove()
+  );
+
+  enemies=[];
+  coinList=[];
+
+  score=0;
+  coins=0;
+  lives=3;
+  speed=5;
+  nitro=100;
+
+  scoreEl.textContent="0";
+  coinsEl.textContent="0";
+  livesEl.textContent="3";
+  speedEl.textContent="60";
+
+  nitroFill.style.width="100%";
+
+  playerX=
+    innerWidth/2;
+
+  direction=0;
+
+  updatePlayer();
+
+  createRoadLines();
+
+}
 
 function startGame(){
 
- initAudio();
+  startAudio();
 
- running=true;
- paused=false;
+  prepareGame();
 
- score=0;
- coins=0;
- lives=3;
- nitro=100;
+  menuScreen.classList.add("hidden");
+  garageScreen.classList.add("hidden");
+  startScreen.classList.add("hidden");
+  pauseScreen.classList.add("hidden");
+  gameOver.classList.add("hidden");
 
- playerLane=1;
+  running=true;
+  paused=false;
 
- enemyTimer=0;
- coinTimer=0;
+  lastTime=
+    performance.now();
 
- enemies.forEach(
-   x=>x.el.remove()
- );
-
- coinItems.forEach(
-   x=>x.el.remove()
- );
-
- enemies=[];
- coinItems=[];
-
- updatePlayer();
-
- document.getElementById("nitroFill")
-   .style.width="100%";
-
- applyTrack();
- applyCar();
-
- document
-   .querySelectorAll(".screen")
-   .forEach(x=>x.classList.add("hidden"));
-
- beep(600,.15);
+  weather();
 
 }
 
-/* ================= PAUSE ================= */
-
-function togglePause(){
-
- if(!running)return;
-
- paused=!paused;
-
- if(paused){
-
-   show("pauseScreen");
-
- }else{
-
-   document
-     .querySelectorAll(".screen")
-     .forEach(
-       x=>x.classList.add("hidden")
-     );
-
- }
-
-}
-
-/* ================= END ================= */
+/* ==========================================
+   END GAME
+========================================== */
 
 function endGame(){
 
- running=false;
- paused=false;
+  running=false;
+  paused=false;
 
- turbo=false;
+  const final=
+    Math.floor(score);
 
- document.getElementById("flame")
-   .style.display="none";
+  if(final>best){
 
- if(score>bestScore){
+    best=final;
 
-   bestScore=
-     Math.floor(score);
+    localStorage.setItem(
+      "turboBest",
+      best
+    );
 
-   localStorage.setItem(
-     "turboBest",
-     bestScore
-   );
+  }
 
- }
+  bank+=coins;
 
- bankCoins+=coins;
+  saveData();
 
- localStorage.setItem(
-   "turboBank",
-   bankCoins
- );
+  document.getElementById(
+    "finalScore"
+  ).textContent=final;
 
- document.getElementById("finalScore")
-   .textContent=
-     Math.floor(score);
+  document.getElementById(
+    "finalCoins"
+  ).textContent=coins;
 
- document.getElementById("finalCoins")
-   .textContent=coins;
+  document.getElementById(
+    "bestScore"
+  ).textContent=best;
 
- document.getElementById("bestScore")
-   .textContent=bestScore;
-
- show("gameOver");
+  gameOver.classList.remove(
+    "hidden"
+  );
 
 }
 
-/* ================= UPDATE ================= */
+/* ==========================================
+   PAUSE
+========================================== */
 
-function update(){
+function togglePause(){
 
- if(!running||paused)return;
+  if(!running)return;
 
- const track=
-   tracks[selectedTrack];
+  paused=!paused;
 
- const car=
-   cars[selectedCar];
+  if(paused){
 
- let speed=
-   4.5*
-   track.speed*
-   car.mult;
+    pauseScreen.classList.remove(
+      "hidden"
+    );
 
- if(turbo&&nitro>0){
+  }else{
 
-   speed*=1.6;
+    pauseScreen.classList.add(
+      "hidden"
+    );
 
-   nitro-=.9;
-
-   document.getElementById("flame")
-     .style.display="block";
-
- }else{
-
-   nitro=
-     Math.min(
-       100,
-       nitro+.12
-     );
-
-   document.getElementById("flame")
-     .style.display="none";
-
- }
-
- if(nitro<=0)
-   turbo=false;
-
- /* ROAD ANIMATION */
-
- const lines=
-   document.querySelectorAll(
-     ".laneLine"
-   );
-
- lines.forEach(line=>{
-
-   const current=
-     parseFloat(
-       line.dataset.offset||0
-     );
-
-   let next=
-     current+
-     speed*2.5;
-
-   if(next>100)
-     next=0;
-
-   line.dataset.offset=next;
-
-   line.style.backgroundPosition=
-     `0 ${next}px`;
- });
-
- /* ENEMIES */
-
- enemyTimer++;
-
- const spawnRate=
-   selectedTrack==="rain"
-   ?45
-   :selectedTrack==="night"
-   ?52
-   :62;
-
- if(enemyTimer>spawnRate){
-
-   spawnEnemy();
-
-   enemyTimer=0;
-
- }
-
- enemies
- .slice()
- .forEach(enemy=>{
-
-   enemy.y+=
-     speed*
-     enemy.speed;
-
-   enemy.el.style.top=
-     enemy.y+"px";
-
-   if(
-     collision(
-       player,
-       enemy.el
-     )
-   ){
-
-     crash(enemy);
-
-     return;
-
-   }
-
-   if(
-     enemy.y>
-     innerHeight+120
-   ){
-
-     enemy.el.remove();
-
-     enemies=
-       enemies.filter(
-         x=>x!==enemy
-       );
-
-     score+=10;
-
-   }
-
- });
-
- /* COINS */
-
- coinTimer++;
-
- if(coinTimer>72){
-
-   spawnCoin();
-
-   coinTimer=0;
-
- }
-
- coinItems
- .slice()
- .forEach(c=>{
-
-   c.y+=speed*1.7;
-
-   c.el.style.top=
-     c.y+"px";
-
-   if(
-     collision(
-       player,
-       c.el
-     )
-   ){
-
-     coins++;
-     score+=50;
-
-     c.el.remove();
-
-     coinItems=
-       coinItems.filter(
-         x=>x!==c
-       );
-
-     beep(900);
-
-   }
-
-   if(
-     c.y>
-     innerHeight+50
-   ){
-
-     c.el.remove();
-
-     coinItems=
-       coinItems.filter(
-         x=>x!==c
-       );
-
-   }
-
- });
-
- score+=.15;
-
- document.getElementById("score")
-   .textContent=
-     Math.floor(score);
-
- document.getElementById("coins")
-   .textContent=coins;
-
- document.getElementById("lives")
-   .textContent=lives;
-
- document.getElementById("speed")
-   .textContent=
-     Math.floor(
-       turbo?150*car.mult:105*car.mult
-     );
-
- document.getElementById("nitroFill")
-   .style.width=
-     nitro+"%";
+  }
 
 }
 
-/* ================= LOOP ================= */
+/* ==========================================
+   WEATHER
+========================================== */
 
-function loop(){
+function weather(){
 
- update();
+  const night=
+    Math.random()<.35;
 
- requestAnimationFrame(loop);
+  const rain=
+    Math.random()<.22;
+
+  const sky=
+    document.getElementById("sky");
+
+  const sun=
+    document.getElementById("sun");
+
+  const moon=
+    document.getElementById("moon");
+
+  const stars=
+    document.querySelector(".stars");
+
+  const rainEl=
+    document.getElementById("rain");
+
+  if(night){
+
+    sky.style.background=
+      "linear-gradient(#02040b,#111c30)";
+
+    sun.style.display="none";
+    moon.style.display="block";
+    stars.style.opacity="1";
+
+  }else{
+
+    sky.style.background=
+      "linear-gradient(#06152a,#316889,#e38a4b)";
+
+    sun.style.display="block";
+    moon.style.display="none";
+    stars.style.opacity="0";
+
+  }
+
+  rainEl.style.display=
+    rain ? "block" : "none";
 
 }
 
-/* ================= BUTTONS ================= */
+/* ==========================================
+   GARAGE
+========================================== */
 
-document.getElementById("start")
- .onclick=startGame;
+function renderGarage(){
 
-document.getElementById("garage")
- .onclick=()=>{
-   renderGarage();
-   show("garageScreen");
- };
+  const grid=
+    document.getElementById(
+      "garageGrid"
+    );
 
-document.getElementById("tracksBtn")
- .onclick=()=>{
-   show("trackScreen");
- };
+  grid.innerHTML="";
 
-document.getElementById("settingsBtn")
- .onclick=()=>{
+  Object.entries(cars)
+  .forEach(
+    ([id,car])=>{
 
-   const s=
-     document.getElementById("sound");
+      const card=
+        document.createElement("div");
 
-   const v=
-     document.getElementById("vibration");
+      card.className="carCard";
 
-   s.textContent=
-     soundOn?"AÇIK":"KAPALI";
+      const preview=
+        document.createElement("div");
 
-   v.textContent=
-     vibrationOn?"AÇIK":"KAPALI";
+      preview.className=
+        "carPreview";
 
-   s.classList.toggle(
-     "on",
-     soundOn
-   );
+      preview.innerHTML=`
+        <div class="enemy ${car.color}"
+             style="
+               width:45px;
+               height:70px;
+               left:50%;
+               transform:translateX(-50%);
+             ">
+          <div class="enemyGlass"></div>
+        </div>
+      `;
 
-   v.classList.toggle(
-     "on",
-     vibrationOn
-   );
+      const name=
+        document.createElement("div");
 
-   show("settingsScreen");
+      name.className="carName";
+      name.textContent=
+        car.name;
 
- };
+      const price=
+        document.createElement("div");
 
-document.getElementById("garageBack")
- .onclick=()=>{
-   show("menu");
- };
+      price.className="carPrice";
 
-document.getElementById("trackBack")
- .onclick=()=>{
-   show("menu");
- };
+      if(car.price===0){
 
-document.getElementById("settingsBack")
- .onclick=()=>{
-   show("menu");
- };
+        price.textContent=
+          "BAŞLANGIÇ ARABASI";
 
-/* ================= TRACK BUTTONS ================= */
+      }else{
 
-document
-.querySelectorAll(".track")
-.forEach(btn=>{
+        price.textContent=
+          "🪙 "+car.price;
 
- btn.onclick=()=>{
+      }
 
-   selectedTrack=
-     btn.dataset.track;
+      const btn=
+        document.createElement("button");
 
-   localStorage.setItem(
-     "turboTrack",
-     selectedTrack
-   );
+      btn.className="carBtn";
 
-   document
-     .querySelectorAll(".track")
-     .forEach(
-       x=>x.classList.remove(
-         "selected"
-       )
-     );
+      if(selected===id){
 
-   btn.classList.add("selected");
+        btn.textContent=
+          "✓ SEÇİLİ";
 
-   applyTrack();
+        btn.disabled=true;
 
-   beep(650);
+      }else if(
+        owned.includes(id)
+      ){
 
- };
+        btn.textContent=
+          "SEÇ";
 
-});
+        btn.onclick=()=>{
 
-/* ================= SETTINGS ================= */
+          selected=id;
 
-document.getElementById("sound")
- .onclick=()=>{
+          localStorage.setItem(
+            "turboSelected",
+            selected
+          );
 
-   soundOn=!soundOn;
+          renderGarage();
 
-   localStorage.setItem(
-     "turboSound",
-     soundOn?"on":"off"
-   );
+          sound(600,.1);
 
-   const b=
-     document.getElementById("sound");
+        };
 
-   b.textContent=
-     soundOn?"AÇIK":"KAPALI";
+      }else{
 
-   b.classList.toggle(
-     "on",
-     soundOn
-   );
+        btn.textContent=
+          "🪙 SATIN AL";
 
-   if(soundOn)
-     initAudio();
+        if(bank<car.price){
 
- };
+          btn.classList.add(
+            "locked"
+          );
 
-document.getElementById("vibration")
- .onclick=()=>{
+          btn.textContent=
+            "🔒 YETERSİZ";
 
-   vibrationOn=!vibrationOn;
+        }else{
 
-   localStorage.setItem(
-     "turboVibration",
-     vibrationOn?"on":"off"
-   );
+          btn.onclick=()=>{
 
-   const b=
-     document.getElementById(
-       "vibration"
-     );
+            bank-=car.price;
 
-   b.textContent=
-     vibrationOn?"AÇIK":"KAPALI";
+            owned.push(id);
 
-   b.classList.toggle(
-     "on",
-     vibrationOn
-   );
+            selected=id;
 
- };
+            saveData();
 
-/* ================= PAUSE ================= */
+            renderGarage();
 
-document.getElementById("pause")
- .onclick=togglePause;
+            sound(
+              1000,
+              .15
+            );
 
-document.getElementById("resume")
- .onclick=togglePause;
+          };
 
-document.getElementById("pauseMenu")
- .onclick=()=>{
+        }
 
-   running=false;
-   paused=false;
+      }
 
-   enemies.forEach(
-     x=>x.el.remove()
-   );
+      card.appendChild(preview);
+      card.appendChild(name);
+      card.appendChild(price);
+      card.appendChild(btn);
 
-   coinItems.forEach(
-     x=>x.el.remove()
-   );
+      grid.appendChild(card);
 
-   enemies=[];
-   coinItems=[];
+    }
+  );
 
-   show("menu");
+  document.getElementById(
+    "garageMoney"
+  ).textContent=bank;
 
- };
+}
 
-/* ================= GAME OVER ================= */
+/* ==========================================
+   SAVE
+========================================== */
 
-document.getElementById("again")
- .onclick=startGame;
+function saveData(){
 
-document.getElementById("gameOverMenu")
- .onclick=()=>{
-   document.getElementById("bank")
-     .textContent=bankCoins;
+  localStorage.setItem(
+    "turboMoney",
+    bank
+  );
 
-   show("menu");
- };
+  localStorage.setItem(
+    "turboOwned",
+    JSON.stringify(owned)
+  );
 
-/* ================= INITIAL ================= */
+  localStorage.setItem(
+    "turboSelected",
+    selected
+  );
 
-makeCity();
-applyCar();
-applyTrack();
+  localStorage.setItem(
+    "turboSound",
+    soundOn ?
+      "on" :
+      "off"
+  );
 
-document
-.querySelectorAll(".track")
-.forEach(btn=>{
+  document.getElementById(
+    "menuMoney"
+  ).textContent=bank;
 
- btn.classList.toggle(
-   "selected",
-   btn.dataset.track===selectedTrack
- );
+}
 
-});
+/* ==========================================
+   SOUND BUTTON
+========================================== */
 
-document.getElementById("bank")
- .textContent=bankCoins;
+function updateSoundButton(){
 
-updatePlayer();
+  document.getElementById(
+    "soundBtn"
+  ).textContent=
+    soundOn ?
+      "🔊" :
+      "🔇";
 
-loop();
+}
+
+document.getElementById(
+  "soundBtn"
+).onclick=()=>{
+
+  soundOn=!soundOn;
+
+  saveData();
+
+  updateSoundButton();
+
+  if(soundOn){
+
+    startAudio();
+    sound(700,.1);
+
+  }
+
+};
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+document.getElementById(
+  "playBtn"
+).onclick=()=>{
+
+  startAudio();
+
+  menuScreen.classList.add(
+    "hidden"
+  );
+
+  startScreen.classList.remove(
+    "hidden"
+  );
+
+};
+
+document.getElementById(
+  "startRaceBtn"
+).onclick=()=>{
+  startGame();
+};
+
+document.getElementById(
+  "startBackBtn"
+).onclick=()=>{
+
+  startScreen.classList.add(
+    "hidden"
+  );
+
+  menuScreen.classList.remove(
+    "hidden"
+  );
+
+};
+
+document.getElementById(
+  "garageBtn"
+).onclick=()=>{
+
+  menuScreen.classList.add(
+    "hidden"
+  );
+
+  garageScreen.classList.remove(
+    "hidden"
+  );
+
+  renderGarage();
+
+};
+
+document.getElementById(
+  "backGarage"
+).onclick=()=>{
+
+  garageScreen.classList.add(
+    "hidden"
+  );
+
+  menuScreen.classList.remove(
+    "hidden"
+  );
+
+  saveData();
+
+};
+
+document.getElementById(
+  "pauseBtn"
+).onclick=()=>{
+  togglePause();
+};
+
+document.getElementById(
+  "continueBtn"
+).onclick=()=>{
+  togglePause();
+};
+
+document.getElementById(
+  "pauseMenuBtn"
+).onclick=()=>{
+
+  running=false;
+  paused=false;
+
+  pauseScreen.classList.add(
+    "hidden"
+  );
+
+  menuScreen.classList.remove(
+    "hidden"
+  );
+
+};
+
+document.getElementById(
+  "restartBtn"
+).onclick=()=>{
+  startGame();
+};
+
+document.getElementById(
+  "gameMenuBtn"
+).onclick=()=>{
+
+  gameOver.classList.add(
+    "hidden"
+  );
+
+  menuScreen.classList.remove(
+    "hidden"
+  );
+
+  saveData();
+
+};
+
+/* ==========================================
+   RESIZE
+========================================== */
+
+window.addEventListener(
+  "resize",
+  ()=>{
+
+    if(!running){
+
+      playerX=
+        innerWidth/2;
+
+    }
+
+    updatePlayer();
+
+  }
+);
+
+/* ==========================================
+   INIT
+========================================== */
+
+createCity();
+createRoadLines();
+saveData();
+updateSoundButton();
+
+requestAnimationFrame(
+  loop
+);
 
 </script>
-
-</div>
 
 </body>
 </html>
