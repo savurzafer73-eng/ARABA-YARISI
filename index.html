@@ -17,16 +17,15 @@
             border-right: 8px solid #f1c40f;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0,0,0,0.9);
+            outline: none;
         }
 
-        /* Tam Ekran Stili */
         #oyun-kapsayici:fullscreen {
             width: 100vw;
             height: 100vh;
             border: none;
         }
 
-        /* Yol Çizgileri */
         .yol-cizgisi {
             position: absolute;
             left: 50%;
@@ -36,7 +35,6 @@
             background: #fff;
         }
 
-        /* Araç Stilleri */
         .arac {
             position: absolute;
             width: 45px;
@@ -65,7 +63,6 @@
         .far-sol { left: 4px; }
         .far-sag { right: 4px; }
 
-        /* Arayüz Panelleri */
         .panel {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -141,22 +138,19 @@
 </head>
 <body>
 
-<div id="oyun-kapsayici">
-    <!-- HUD Panel -->
+<div id="oyun-kapsayici" tabindex="0">
     <div id="hud">
         <div>Hız: <span id="hiz-gosterge">0</span> km/h</div>
         <div>Para: <span id="para-gosterge">0</span>$</div>
         <div>Skor: <span id="skor-gosterge">0</span></div>
     </div>
 
-    <!-- Oyuncu ve Oyun Alanı -->
     <div id="oyuncu" class="arac">
         <div class="far far-sol"></div>
         <div class="far far-sag"></div>
         <div class="arac-cam"></div>
     </div>
 
-    <!-- Ana Menü -->
     <div id="ana-menu" class="panel">
         <h1 style="color: #f1c40f; margin-bottom: 20px;">ARABA YARIŞI PRO</h1>
         <button onclick="oyunuBaslat()">OYUNA BAŞLA</button>
@@ -164,7 +158,6 @@
         <button onclick="tamEkranYap()">TAM EKRAN</button>
     </div>
 
-    <!-- Garaj Menüsü -->
     <div id="garaj-menu" class="panel gizli">
         <h2>GARAJI GÖZDEN GEÇİR</h2>
         <p style="margin-top:5px;">Toplam Bakiye: <span id="garaj-para">0</span>$</p>
@@ -172,7 +165,6 @@
         <button onclick="menuyeDon()">ANA MENÜYE DÖN</button>
     </div>
 
-    <!-- Oyun Bitti Menüsü -->
     <div id="game-over-menu" class="panel gizli">
         <h1 style="color: #e74c3c;">KAZA YAPTIN!</h1>
         <p style="margin: 10px 0;">Kazanılan Skor: <span id="son-skor">0</span></p>
@@ -183,7 +175,6 @@
 </div>
 
 <script>
-    // Ses Efektleri Sistem (Web Audio API)
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -219,7 +210,6 @@
         noise.start();
     }
 
-    // Araç Veritabanı
     const ARACLAR = [
         { id: 0, ad: "Kırmızı Klasik", renk: "#e74c3c", maxHiz: 12, ivme: 0.2, fiyat: 0, sahip: true },
         { id: 1, ad: "Mavi Fırtına", renk: "#3498db", maxHiz: 15, ivme: 0.3, fiyat: 200, sahip: false },
@@ -227,12 +217,10 @@
         { id: 3, ad: "Sarı Şimşek", renk: "#f1c40f", maxHiz: 22, ivme: 0.5, fiyat: 1000, sahip: false }
     ];
 
-    // Oyun Durum Değişkenleri
     let para = parseInt(localStorage.getItem('yarıs_para')) || 0;
     let seciliAracId = parseInt(localStorage.getItem('yarıs_secili_arac')) || 0;
     let sahipOlunanlar = JSON.parse(localStorage.getItem('yarıs_sahip_araclar')) || [0];
     
-    // Verileri Senkronize Et
     ARACLAR.forEach(a => { if(sahipOlunanlar.includes(a.id)) a.sahip = true; });
 
     let oyunda = false;
@@ -243,20 +231,24 @@
     let engeller = [];
     let cizgiler = [];
 
-    // Tuş Kontrolleri
     const tuslar = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
     window.addEventListener('keydown', e => {
-        if(tuslar.hasOwnProperty(e.key)) tuslar[e.key] = true;
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+            e.preventDefault();
+            tuslar[e.code] = true;
+        }
     });
     window.addEventListener('keyup', e => {
-        if(tuslar.hasOwnProperty(e.key)) tuslar[e.key] = false;
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+            e.preventDefault();
+            tuslar[e.code] = false;
+        }
     });
 
     const kapsayici = document.getElementById('oyun-kapsayici');
     const oyuncuEl = document.getElementById('oyuncu');
 
-    // Yol Çizgilerini Oluştur
     for (let i = 0; i < 6; i++) {
         let cizgi = document.createElement('div');
         cizgi.className = 'yol-cizgisi';
@@ -275,12 +267,12 @@
 
     function oyunuBaslat() {
         if(!audioCtx) audioCtx = new AudioContext();
+        kapsayici.focus();
         
         document.getElementById('ana-menu').classList.add('gizli');
         document.getElementById('game-over-menu').classList.add('gizli');
         document.getElementById('garaj-menu').classList.add('gizli');
         
-        // Temizle ve Sıfırla
         engeller.forEach(e => e.el.remove());
         engeller = [];
         skor = 0;
@@ -301,17 +293,15 @@
 
         const aktifArac = ARACLAR[seciliAracId];
 
-        // İvmelenme & Hızlanma / Yavaşlama Fizikleri
         if (tuslar.ArrowUp) {
             if (mevcutHiz < aktifArac.maxHiz) mevcutHiz += aktifArac.ivme;
         } else if (tuslar.ArrowDown) {
             if (mevcutHiz > 0) mevcutHiz -= aktifArac.ivme * 1.5;
         } else {
-            if (mevcutHiz > 0) mevcutHiz -= 0.05; // Sürtünme
+            if (mevcutHiz > 0) mevcutHiz -= 0.05;
         }
         if (mevcutHiz < 0) mevcutHiz = 0;
 
-        // Direksiyon Kontrolü
         if (tuslar.ArrowLeft && oyuncuX > 10) {
             oyuncuX -= 4 + (mevcutHiz * 0.2);
             oyuncuEl.style.transform = 'rotate(-5deg)';
@@ -325,7 +315,6 @@
         oyuncuEl.style.left = oyuncuX + 'px';
         oyuncuEl.style.top = oyuncuY + 'px';
 
-        // Çizgileri Hareket Ettir
         cizgiler.forEach(c => {
             let y = parseFloat(c.style.top);
             y += mevcutHiz;
@@ -333,12 +322,10 @@
             c.style.top = y + 'px';
         });
 
-        // Engelleri Oluştur (Hıza Bağlı)
         if (Math.random() < 0.02 && engeller.length < 4 && mevcutHiz > 1) {
             let engelEl = document.createElement('div');
             engelEl.className = 'arac';
             
-            // Rastgele Renk ve Şerit
             const renklers = ['#9b59b6', '#e67e22', '#1abc9c', '#34495e'];
             const rastgeleRenk = renklers[Math.floor(Math.random() * renklers.length)];
             engelEl.style.background = rastgeleRenk;
@@ -355,30 +342,26 @@
             engeller.push({ el: engelEl, x: posX, y: -80, hiz: Math.random() * 3 + 2 });
         }
 
-        // Engelleri Güncelle ve Çarpışma Testi
         for (let i = engeller.length - 1; i >= 0; i--) {
             let e = engeller[i];
             e.y += mevcutHiz - e.hiz;
             e.el.style.top = e.y + 'px';
 
-            // Çarpışma Tespiti (Hitbox)
             if (Math.abs(oyuncuX - e.x) < 38 && Math.abs(oyuncuY - e.y) < 65) {
                 oyunuBitir();
                 return;
             }
 
-            // Ekrandan Çıkan Engeller
             if (e.y > kapsayici.clientHeight + 100 || e.y < -150) {
                 e.el.remove();
                 engeller.splice(i, 1);
                 if (e.y > kapsayici.clientHeight) {
                     skor += 10;
-                    sesOlustur(600, 'sine', 0.05, 0.05); // Skorda hafif ses
+                    sesOlustur(600, 'sine', 0.05, 0.05);
                 }
             }
         }
 
-        // Skor ve Hız Göstergesi Güncelle
         if (mevcutHiz > 0) skor += Math.floor(mevcutHiz * 0.1);
         guncelleHUD();
 
@@ -413,7 +396,6 @@
         engeller = [];
     }
 
-    // Garaj ve Mağaza Mantığı
     function garajiAc() {
         document.getElementById('ana-menu').classList.add('gizli');
         document.getElementById('garaj-menu').classList.remove('gizli');
