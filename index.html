@@ -66,6 +66,7 @@ canvas{
   color:white;
   text-align:center;
   border:1px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(5px);
 }
 
 .hudSmall{
@@ -131,6 +132,7 @@ button{
   color:white;
   background:#24242a;
   border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
 }
 
 button:active{
@@ -226,6 +228,7 @@ button:active{
   background:#151519;
   color:white;
   text-align:center;
+  border:1px solid rgba(255,255,255,.12);
 }
 
 .overPanel h2{
@@ -235,6 +238,7 @@ button:active{
 .result{
   color:#bbb;
   margin:12px 0 18px;
+  line-height:1.8;
 }
 
 /* ================= MOBILE ================= */
@@ -254,6 +258,10 @@ button:active{
   .logo{
     font-size:29px;
   }
+
+  .menuPanel{
+    padding:24px;
+  }
 }
 </style>
 </head>
@@ -264,6 +272,7 @@ button:active{
 
 <canvas id="canvas"></canvas>
 
+<!-- HUD -->
 <div id="hud">
 
   <div class="hudBox">
@@ -287,17 +296,17 @@ button:active{
 
 </div>
 
-<!-- SADECE BUNLAR DİREKSİYON İÇİN KULLANILIYOR -->
+<!-- DİREKSİYON -->
 <div id="leftZone" class="touchZone"></div>
 <div id="rightZone" class="touchZone"></div>
 
 <div id="leftHint" class="touchHint">‹</div>
 <div id="rightHint" class="touchHint">›</div>
 
+<!-- SES -->
 <button id="soundBtn">🔊</button>
 
-<!-- MENU -->
-
+<!-- MENÜ -->
 <div id="menu">
 
   <div class="menuPanel">
@@ -330,7 +339,6 @@ button:active{
 </div>
 
 <!-- GAME OVER -->
-
 <div id="gameOver">
 
   <div class="overPanel">
@@ -360,23 +368,29 @@ button:active{
 "use strict";
 
 /* =========================================================
-   CANVAS
+   ELEMENTLER
 ========================================================= */
 
-const canvas =
-  document.getElementById("canvas");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-const ctx =
-  canvas.getContext("2d");
+const menu=document.getElementById("menu");
+const gameOver=document.getElementById("gameOver");
+
+const leftZone=document.getElementById("leftZone");
+const rightZone=document.getElementById("rightZone");
+
+/* =========================================================
+   CANVAS
+========================================================= */
 
 let W=0;
 let H=0;
 
-let DPR=
-  Math.min(
-    window.devicePixelRatio || 1,
-    2
-  );
+let DPR=Math.min(
+  window.devicePixelRatio || 1,
+  2
+);
 
 function resize(){
 
@@ -393,11 +407,11 @@ function resize(){
     DPR,0,0,DPR,0,0
   );
 
-  if(!running){
+  if(typeof player!=="undefined" && !running){
 
     player.x=W/2;
     player.targetX=W/2;
-    player.y=H*.78;
+    player.y=getPlayerY();
   }
 }
 
@@ -406,10 +420,8 @@ window.addEventListener(
   resize
 );
 
-resize();
-
 /* =========================================================
-   OYUN
+   OYUN DEĞİŞKENLERİ
 ========================================================= */
 
 let running=false;
@@ -424,15 +436,71 @@ let targetSpeed=0;
 let roadOffset=0;
 
 /* =========================================================
-   DİREKSİYON
+   YOL PERSPEKTİFİ
 ========================================================= */
 
 /*
-   steering:
-   -1 = SOL
-    0 = DÜZ
-    1 = SAĞ
+   ÖNEMLİ:
+   Yol artık gökyüzünden başlamıyor.
+
+   Ufuk daha aşağıda tutuluyor.
+   Böylece araçlar yola girmeden
+   gökyüzünde görünmüyor.
 */
+
+function getHorizon(){
+
+  return H*.31;
+}
+
+function roadProgress(y){
+
+  const horizon=getHorizon();
+
+  return Math.max(
+    0,
+    Math.min(
+      1,
+      (y-horizon)/
+      (H-horizon)
+    )
+  );
+}
+
+function roadWidthAt(y){
+
+  const p=roadProgress(y);
+
+  return W*(
+    .16+
+    .86*Math.pow(p,.82)
+  );
+}
+
+function roadCenterAt(y){
+
+  const p=roadProgress(y);
+
+  return W/2+
+    Math.sin(
+      roadOffset*.00055
+    )*
+    W*.045*
+    Math.pow(p,1.6);
+}
+
+/*
+   Oyuncu kesinlikle yolun alt bölümünde.
+*/
+
+function getPlayerY(){
+
+  return H*.80;
+}
+
+/* =========================================================
+   DİREKSİYON
+========================================================= */
 
 let steering=0;
 
@@ -442,28 +510,28 @@ let touchRight=false;
 let keyboardLeft=false;
 let keyboardRight=false;
 
-/*
-   Dokunmatik ve klavye aynı anda çalışabilir.
-*/
-
 function calculateSteering(){
 
   if(keyboardLeft && !keyboardRight){
+
     steering=-1;
     return;
   }
 
   if(keyboardRight && !keyboardLeft){
+
     steering=1;
     return;
   }
 
   if(touchLeft && !touchRight){
+
     steering=-1;
     return;
   }
 
   if(touchRight && !touchLeft){
+
     steering=1;
     return;
   }
@@ -480,12 +548,12 @@ const player={
   x:0,
   y:0,
 
-  width:54,
-  height:105,
+  width:52,
+  height:100,
 
   targetX:0,
 
-  color:"#e51f28",
+  color:"#d71920",
 
   tilt:0
 };
@@ -495,7 +563,6 @@ const player={
 ========================================================= */
 
 let traffic=[];
-
 let spawnTimer=0;
 
 const trafficColors=[
@@ -513,7 +580,6 @@ const trafficColors=[
 ========================================================= */
 
 let coinObjects=[];
-
 let coinTimer=0;
 
 /* =========================================================
@@ -535,11 +601,10 @@ function initAudio(){
 
   try{
 
-    audioCtx=
-      new(
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
+    audioCtx=new(
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
 
     engineOsc=
       audioCtx.createOscillator();
@@ -558,20 +623,16 @@ function initAudio(){
 
     engineGain.gain.value=0;
 
-    engineOsc
-      .connect(engineFilter);
-
-    engineFilter
-      .connect(engineGain);
-
-    engineGain
-      .connect(audioCtx.destination);
+    engineOsc.connect(engineFilter);
+    engineFilter.connect(engineGain);
+    engineGain.connect(audioCtx.destination);
 
     engineOsc.start();
 
     audioStarted=true;
 
   }catch(e){
+
     console.log(e);
   }
 }
@@ -585,8 +646,7 @@ function updateEngineSound(){
   )
     return;
 
-  const now=
-    audioCtx.currentTime;
+  const now=audioCtx.currentTime;
 
   const normalized=
     Math.max(
@@ -597,28 +657,19 @@ function updateEngineSound(){
       )
     );
 
-  /*
-     Motor devri hızla birlikte yükseliyor.
-  */
-
-  const frequency=
+  engineOsc.frequency.setTargetAtTime(
     55+
-    normalized*210;
+    normalized*210,
+    now,
+    .05
+  );
 
-  engineOsc.frequency
-    .setTargetAtTime(
-      frequency,
-      now,
-      .05
-    );
-
-  engineFilter.frequency
-    .setTargetAtTime(
-      450+
-      normalized*1900,
-      now,
-      .06
-    );
+  engineFilter.frequency.setTargetAtTime(
+    450+
+    normalized*1900,
+    now,
+    .06
+  );
 
   const volume=
     running
@@ -628,12 +679,11 @@ function updateEngineSound(){
       :
       0;
 
-  engineGain.gain
-    .setTargetAtTime(
-      volume,
-      now,
-      .08
-    );
+  engineGain.gain.setTargetAtTime(
+    volume,
+    now,
+    .08
+  );
 }
 
 function collisionSound(){
@@ -733,69 +783,29 @@ function coinSound(){
 }
 
 /* =========================================================
-   YOL
-========================================================= */
-
-function roadWidthAt(y){
-
-  const horizon=H*.20;
-
-  const p=
-    Math.max(
-      0,
-      Math.min(
-        1,
-        (y-horizon)/
-        (H-horizon)
-      )
-    );
-
-  return W*
-    (.25+
-     .70*p);
-}
-
-function roadCenterAt(y){
-
-  const horizon=H*.20;
-
-  const p=
-    Math.max(
-      0,
-      Math.min(
-        1,
-        (y-horizon)/
-        (H-horizon)
-      )
-    );
-
-  return W/2+
-    Math.sin(
-      roadOffset*.00035
-    )*
-    W*.035*
-    p*p;
-}
-
-/* =========================================================
    ARKA PLAN
 ========================================================= */
 
 function drawBackground(){
 
+  const horizon=getHorizon();
+
   const sky=
     ctx.createLinearGradient(
-      0,0,0,H*.55
+      0,
+      0,
+      0,
+      horizon+100
     );
 
   sky.addColorStop(
     0,
-    "#6eb6e8"
+    "#62addf"
   );
 
   sky.addColorStop(
     .55,
-    "#b9def2"
+    "#a9d7ed"
   );
 
   sky.addColorStop(
@@ -806,7 +816,10 @@ function drawBackground(){
   ctx.fillStyle=sky;
 
   ctx.fillRect(
-    0,0,W,H
+    0,
+    0,
+    W,
+    H
   );
 
   /* Güneş */
@@ -814,9 +827,9 @@ function drawBackground(){
   ctx.beginPath();
 
   ctx.arc(
-    W*.78,
-    H*.13,
-    34,
+    W*.80,
+    H*.12,
+    Math.max(25,W*.055),
     0,
     Math.PI*2
   );
@@ -826,73 +839,90 @@ function drawBackground(){
 
   ctx.fill();
 
-  /* Dağlar */
+  /* Uzak dağlar */
 
-  ctx.fillStyle="#76938d";
+  ctx.fillStyle="#708d88";
 
   ctx.beginPath();
 
-  ctx.moveTo(0,H*.36);
+  ctx.moveTo(
+    0,
+    horizon+.08*H
+  );
 
   ctx.lineTo(
-    W*.12,
-    H*.22
+    W*.10,
+    H*.20
   );
 
   ctx.lineTo(
     W*.22,
-    H*.34
+    H*.29
   );
 
   ctx.lineTo(
     W*.36,
+    H*.17
+  );
+
+  ctx.lineTo(
+    W*.51,
+    H*.29
+  );
+
+  ctx.lineTo(
+    W*.66,
     H*.18
   );
 
   ctx.lineTo(
-    W*.52,
-    H*.34
-  );
-
-  ctx.lineTo(
-    W*.68,
-    H*.21
-  );
-
-  ctx.lineTo(
-    W*.84,
-    H*.34
+    W*.82,
+    H*.29
   );
 
   ctx.lineTo(
     W,
-    H*.22
+    H*.19
   );
 
   ctx.lineTo(
     W,
-    H*.48
-  );
-
-  ctx.lineTo(
-    0,
-    H*.48
+    horizon+.10*H
   );
 
   ctx.closePath();
 
   ctx.fill();
 
-  /* Çimen */
+  /* Daha uzak zemin */
 
-  ctx.fillStyle="#3c613c";
+  ctx.fillStyle="#557b4d";
 
   ctx.fillRect(
     0,
-    H*.35,
+    horizon,
     W,
-    H*.65
+    H-horizon
   );
+
+  /* Yol dışı şerit dokusu */
+
+  ctx.fillStyle=
+    "rgba(255,255,255,.025)";
+
+  for(
+    let y=horizon;
+    y<H;
+    y+=32
+  ){
+
+    ctx.fillRect(
+      0,
+      y,
+      W,
+      2
+    );
+  }
 }
 
 /* =========================================================
@@ -901,7 +931,7 @@ function drawBackground(){
 
 function drawRoad(){
 
-  const horizon=H*.20;
+  const horizon=getHorizon();
 
   const topCenter=
     roadCenterAt(horizon);
@@ -941,15 +971,33 @@ function drawRoad(){
 
   ctx.closePath();
 
-  ctx.fillStyle="#33343a";
+  const roadGradient=
+    ctx.createLinearGradient(
+      0,
+      horizon,
+      0,
+      H
+    );
+
+  roadGradient.addColorStop(
+    0,
+    "#42434a"
+  );
+
+  roadGradient.addColorStop(
+    1,
+    "#28292e"
+  );
+
+  ctx.fillStyle=roadGradient;
 
   ctx.fill();
 
-  /* Kenarlar */
+  /* Yol kenar çizgileri */
 
-  ctx.strokeStyle="#eeeeee";
+  ctx.strokeStyle="#f4f4f4";
 
-  ctx.lineWidth=5;
+  ctx.lineWidth=4;
 
   ctx.beginPath();
 
@@ -979,10 +1027,88 @@ function drawRoad(){
 
   ctx.stroke();
 
-  /* Şeritler */
+  /* Kırmızı-beyaz yol kenarları */
 
-  const gap=85;
-  const length=42;
+  const segment=70;
+
+  for(
+    let i=0;
+    i<16;
+    i++
+  ){
+
+    const p1=
+      (i/16+
+      ((roadOffset*.001)%1)/16);
+
+    const p2=
+      p1+.025;
+
+    const y1=
+      horizon+
+      Math.min(1,p1)*(
+        H-horizon
+      );
+
+    const y2=
+      horizon+
+      Math.min(1,p2)*(
+        H-horizon
+      );
+
+    if(y1>=H)
+      continue;
+
+    const c1=roadCenterAt(y1);
+    const c2=roadCenterAt(y2);
+
+    const w1=roadWidthAt(y1);
+    const w2=roadWidthAt(y2);
+
+    ctx.strokeStyle=
+      i%2===0
+        ? "#ffffff"
+        : "#d52a2a";
+
+    ctx.lineWidth=
+      Math.max(
+        2,
+        7*roadProgress(y1)
+      );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      c1-w1/2,
+      y1
+    );
+
+    ctx.lineTo(
+      c2-w2/2,
+      y2
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      c1+w1/2,
+      y1
+    );
+
+    ctx.lineTo(
+      c2+w2/2,
+      y2
+    );
+
+    ctx.stroke();
+  }
+
+  /* 3 şerit çizgisi */
+
+  const gap=72;
+  const length=34;
 
   for(
     let lane=1;
@@ -993,7 +1119,7 @@ function drawRoad(){
     for(
       let y=
         horizon+
-        ((roadOffset*1.2)%gap)-
+        ((roadOffset*1.35)%gap)-
         gap;
 
       y<H;
@@ -1001,9 +1127,13 @@ function drawRoad(){
       y+=gap
     ){
 
-      const y2=y+length;
+      const y2=
+        Math.min(
+          H,
+          y+length
+        );
 
-      if(y2<horizon)
+      if(y2<=horizon)
         continue;
 
       const c1=
@@ -1027,17 +1157,10 @@ function drawRoad(){
         w2*(lane/3);
 
       const p=
-        Math.max(
-          0,
-          Math.min(
-            1,
-            (y-horizon)/
-            (H-horizon)
-          )
-        );
+        roadProgress(y);
 
       ctx.strokeStyle=
-        "rgba(255,255,255,.72)";
+        "rgba(255,255,255,.78)";
 
       ctx.lineWidth=
         Math.max(
@@ -1063,7 +1186,7 @@ function drawRoad(){
 }
 
 /* =========================================================
-   YUVARLAK DİKDÖRTGEN
+   ROUND RECT
 ========================================================= */
 
 function roundRect(
@@ -1136,50 +1259,44 @@ function shadeColor(
   let c=
     hex.replace("#","");
 
-  let r=
-    parseInt(
-      c.substring(0,2),
-      16
-    );
+  let r=parseInt(
+    c.substring(0,2),
+    16
+  );
 
-  let g=
-    parseInt(
-      c.substring(2,4),
-      16
-    );
+  let g=parseInt(
+    c.substring(2,4),
+    16
+  );
 
-  let b=
-    parseInt(
-      c.substring(4,6),
-      16
-    );
+  let b=parseInt(
+    c.substring(4,6),
+    16
+  );
 
-  r=
-    Math.max(
-      0,
-      Math.min(
-        255,
-        r+amount
-      )
-    );
+  r=Math.max(
+    0,
+    Math.min(
+      255,
+      r+amount
+    )
+  );
 
-  g=
-    Math.max(
-      0,
-      Math.min(
-        255,
-        g+amount
-      )
-    );
+  g=Math.max(
+    0,
+    Math.min(
+      255,
+      g+amount
+    )
+  );
 
-  b=
-    Math.max(
-      0,
-      Math.min(
-        255,
-        b+amount
-      )
-    );
+  b=Math.max(
+    0,
+    Math.min(
+      255,
+      b+amount
+    )
+  );
 
   return "#"+
     r.toString(16).padStart(2,"0")+
@@ -1188,7 +1305,7 @@ function shadeColor(
 }
 
 /* =========================================================
-   ARABA
+   ARABA ÇİZİMİ
 ========================================================= */
 
 function drawCar(
@@ -1213,15 +1330,15 @@ function drawCar(
   /* Gölge */
 
   ctx.fillStyle=
-    "rgba(0,0,0,.35)";
+    "rgba(0,0,0,.38)";
 
   ctx.beginPath();
 
   ctx.ellipse(
     0,
-    h*.48,
+    h*.47,
     w*.62,
-    h*.13,
+    h*.12,
     0,
     0,
     Math.PI*2
@@ -1231,40 +1348,56 @@ function drawCar(
 
   /* Tekerlekler */
 
-  ctx.fillStyle="#101010";
+  ctx.fillStyle="#0c0c0d";
 
-  const tw=w*.19;
-  const th=h*.27;
+  const tw=w*.18;
+  const th=h*.25;
 
-  ctx.fillRect(
+  roundRect(
+    ctx,
     -w*.57,
-    -h*.30,
+    -h*.31,
     tw,
-    th
+    th,
+    3
   );
 
-  ctx.fillRect(
-    w*.38,
-    -h*.30,
+  ctx.fill();
+
+  roundRect(
+    ctx,
+    w*.39,
+    -h*.31,
     tw,
-    th
+    th,
+    3
   );
 
-  ctx.fillRect(
+  ctx.fill();
+
+  roundRect(
+    ctx,
     -w*.57,
     h*.12,
     tw,
-    th
+    th,
+    3
   );
 
-  ctx.fillRect(
-    w*.38,
+  ctx.fill();
+
+  roundRect(
+    ctx,
+    w*.39,
     h*.12,
     tw,
-    th
+    th,
+    3
   );
 
-  /* Gövde */
+  ctx.fill();
+
+  /* Ana gövde */
 
   const grad=
     ctx.createLinearGradient(
@@ -1276,7 +1409,12 @@ function drawCar(
 
   grad.addColorStop(
     0,
-    shadeColor(color,-25)
+    shadeColor(color,-35)
+  );
+
+  grad.addColorStop(
+    .22,
+    shadeColor(color,-8)
   );
 
   grad.addColorStop(
@@ -1285,8 +1423,13 @@ function drawCar(
   );
 
   grad.addColorStop(
+    .82,
+    shadeColor(color,15)
+  );
+
+  grad.addColorStop(
     1,
-    shadeColor(color,20)
+    shadeColor(color,-12)
   );
 
   ctx.fillStyle=grad;
@@ -1297,7 +1440,7 @@ function drawCar(
     -h/2,
     w,
     h,
-    w*.18
+    w*.17
   );
 
   ctx.fill();
@@ -1305,1247 +1448,78 @@ function drawCar(
   /* Kaput */
 
   ctx.fillStyle=
-    shadeColor(color,12);
+    shadeColor(color,10);
 
   roundRect(
     ctx,
-    -w*.39,
-    -h*.40,
-    w*.78,
-    h*.24,
-    w*.08
+    -w*.38,
+    -h*.42,
+    w*.76,
+    h*.22,
+    w*.07
   );
 
   ctx.fill();
 
   /* Ön cam */
 
-  ctx.fillStyle="#1c3039";
+  const glass=
+    ctx.createLinearGradient(
+      0,
+      -h*.25,
+      0,
+      0
+    );
+
+  glass.addColorStop(
+    0,
+    "#314b57"
+  );
+
+  glass.addColorStop(
+    1,
+    "#101b21"
+  );
+
+  ctx.fillStyle=glass;
 
   roundRect(
     ctx,
     -w*.31,
-    -h*.23,
+    -h*.24,
     w*.62,
     h*.25,
-    w*.08
+    w*.07
   );
+
+  ctx.fill();
+
+  /* Cam parlama */
+
+  ctx.fillStyle=
+    "rgba(255,255,255,.16)";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    -w*.23,
+    -h*.20
+  );
+
+  ctx.lineTo(
+    -w*.08,
+    -h*.20
+  );
+
+  ctx.lineTo(
+    -w*.20,
+    -h*.04
+  );
+
+  ctx.closePath();
 
   ctx.fill();
 
   /* Arka cam */
 
-  ctx.fillStyle="#16242b";
-
-  roundRect(
-    ctx,
-    -w*.30,
-    h*.07,
-    w*.60,
-    h*.20,
-    w*.06
-  );
-
-  ctx.fill();
-
-  /* Farlar */
-
-  ctx.fillStyle="#fff3b0";
-
-  roundRect(
-    ctx,
-    -w*.35,
-    -h*.45,
-    w*.22,
-    h*.07,
-    w*.025
-  );
-
-  ctx.fill();
-
-  roundRect(
-    ctx,
-    w*.13,
-    -h*.45,
-    w*.22,
-    h*.07,
-    w*.025
-  );
-
-  ctx.fill();
-
-  /* Stoplar */
-
-  ctx.fillStyle="#ff3030";
-
-  ctx.fillRect(
-    -w*.33,
-    h*.39,
-    w*.20,
-    h*.055
-  );
-
-  ctx.fillRect(
-    w*.13,
-    h*.39,
-    w*.20,
-    h*.055
-  );
-
-  /* Mustang yazısı */
-
-  if(isPlayer){
-
-    ctx.fillStyle="#111";
-
-    roundRect(
-      ctx,
-      -w*.28,
-      -h*.48,
-      w*.56,
-      h*.07,
-      w*.02
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle=
-      "rgba(255,255,255,.75)";
-
-    ctx.font=
-      `bold ${Math.max(
-        7,
-        w*.13
-      )}px Arial`;
-
-    ctx.textAlign="center";
-
-    ctx.fillText(
-      "MUSTANG",
-      0,
-      h*.02
-    );
-  }
-
-  ctx.restore();
-}
-
-/* =========================================================
-   TRAFİK OLUŞTUR
-========================================================= */
-
-function spawnTraffic(){
-
-  /*
-     Trafik doğrudan ufuktan başlıyor.
-     Gökten düşme efekti yok.
-  */
-
-  const lane=
-    Math.floor(
-      Math.random()*3
-    );
-
-  traffic.push({
-
-    lane,
-
-    progress:0,
-
-    speed:
-      .20+
-      Math.random()*.13,
-
-    width:42,
-    height:80,
-
-    color:
-      trafficColors[
-        Math.floor(
-          Math.random()*
-          trafficColors.length
-        )
-      ]
-  });
-}
-
-/* =========================================================
-   TRAFİK GÜNCELLE
-========================================================= */
-
-function updateTraffic(dt){
-
-  for(
-    let i=traffic.length-1;
-    i>=0;
-    i--
-  ){
-
-    const car=traffic[i];
-
-    car.progress+=
-      dt*
-      car.speed*
-      (.65+
-       speed/180);
-
-    if(car.progress>1.15){
-
-      traffic.splice(i,1);
-
-      score+=10;
-
-      continue;
-    }
-
-    const p=
-      Math.max(
-        0,
-        Math.min(
-          1,
-          car.progress
-        )
-      );
-
-    car.y=
-      H*.20+
-      p*(H*.87);
-
-    const roadW=
-      roadWidthAt(car.y);
-
-    const center=
-      roadCenterAt(car.y);
-
-    const laneW=
-      roadW/3;
-
-    car.x=
-      center-
-      roadW/2+
-      laneW*
-      (car.lane+.5);
-
-    const scale=
-      .35+
-      p*.75;
-
-    car.drawW=
-      car.width*
-      scale;
-
-    car.drawH=
-      car.height*
-      scale;
-  }
-}
-
-/* =========================================================
-   ALTIN OLUŞTUR
-========================================================= */
-
-function spawnCoin(){
-
-  const lane=
-    Math.floor(
-      Math.random()*3
-    );
-
-  coinObjects.push({
-
-    lane,
-
-    progress:0,
-
-    spin:
-      Math.random()*
-      Math.PI*2
-  });
-}
-
-/* =========================================================
-   ALTIN GÜNCELLE
-========================================================= */
-
-function updateCoins(dt){
-
-  for(
-    let i=coinObjects.length-1;
-    i>=0;
-    i--
-  ){
-
-    const c=
-      coinObjects[i];
-
-    c.progress+=
-      dt*
-      (.22+
-       speed/700);
-
-    c.spin+=dt*6;
-
-    if(c.progress>1.1){
-
-      coinObjects.splice(
-        i,
-        1
-      );
-
-      continue;
-    }
-
-    const p=
-      Math.max(
-        0,
-        Math.min(
-          1,
-          c.progress
-        )
-      );
-
-    c.y=
-      H*.20+
-      p*(H*.80);
-
-    const roadW=
-      roadWidthAt(c.y);
-
-    const center=
-      roadCenterAt(c.y);
-
-    const laneW=
-      roadW/3;
-
-    c.x=
-      center-
-      roadW/2+
-      laneW*
-      (c.lane+.5);
-
-    c.size=
-      8+
-      p*16;
-  }
-}
-
-/* =========================================================
-   ALTIN ÇİZ
-========================================================= */
-
-function drawCoins(){
-
-  for(
-    const c of coinObjects
-  ){
-
-    ctx.save();
-
-    ctx.translate(
-      c.x,
-      c.y
-    );
-
-    const sx=
-      Math.abs(
-        Math.cos(c.spin)
-      );
-
-    ctx.scale(
-      Math.max(.15,sx),
-      1
-    );
-
-    ctx.beginPath();
-
-    ctx.arc(
-      0,
-      0,
-      c.size,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fillStyle="#ffd83d";
-
-    ctx.fill();
-
-    ctx.strokeStyle="#b87900";
-
-    ctx.lineWidth=2;
-
-    ctx.stroke();
-
-    ctx.fillStyle="#fff3a1";
-
-    ctx.font=
-      `bold ${c.size}px Arial`;
-
-    ctx.textAlign="center";
-
-    ctx.textBaseline="middle";
-
-    ctx.fillText(
-      "₺",
-      0,
-      1
-    );
-
-    ctx.restore();
-  }
-}
-
-/* =========================================================
-   ÇARPIŞMA
-========================================================= */
-
-function hitTest(a,b){
-
-  const aw=
-    a.width*.72;
-
-  const ah=
-    a.height*.72;
-
-  const bw=
-    b.drawW*.72;
-
-  const bh=
-    b.drawH*.72;
-
-  return(
-    Math.abs(a.x-b.x)<
-    (aw+bw)/2
-    &&
-    Math.abs(a.y-b.y)<
-    (ah+bh)/2
-  );
-}
-
-function coinHit(c){
-
-  return(
-    Math.abs(
-      player.x-c.x
-    )<
-    player.width*.65
-    &&
-    Math.abs(
-      player.y-c.y
-    )<
-    player.height*.65
-  );
-}
-
-/* =========================================================
-   OYUNCU GÜNCELLE
-========================================================= */
-
-function updatePlayer(dt){
-
-  /*
-     ÇOK ÖNEMLİ:
-     Burada steering artık
-     tekrar sıfırlanmıyor.
-
-     Direksiyon değerini yalnızca
-     gerçek kontrol sistemi belirliyor.
-  */
-
-  const steeringPower=
-    245+
-    speed*1.55;
-
-  player.targetX+=
-    steering*
-    steeringPower*
-    dt;
-
-  /*
-     Yol sınırları.
-  */
-
-  const roadW=
-    roadWidthAt(
-      player.y
-    );
-
-  const center=
-    roadCenterAt(
-      player.y
-    );
-
-  const padding=
-    player.width*.60;
-
-  const minX=
-    center-
-    roadW/2+
-    padding;
-
-  const maxX=
-    center+
-    roadW/2-
-    padding;
-
-  player.targetX=
-    Math.max(
-      minX,
-      Math.min(
-        maxX,
-        player.targetX
-      )
-    );
-
-  /*
-     Aracı hedef konuma
-     yumuşak ama hızlı götür.
-  */
-
-  const follow=
-    12+
-    speed/35;
-
-  player.x+=
-    (
-      player.targetX-
-      player.x
-    )*
-    Math.min(
-      1,
-      dt*follow
-    );
-
-  /*
-     Direksiyon animasyonu.
-  */
-
-  const wantedTilt=
-    steering*.075;
-
-  player.tilt+=
-    (
-      wantedTilt-
-      player.tilt
-    )*
-    Math.min(
-      1,
-      dt*12
-    );
-}
-
-/* =========================================================
-   OYUN BAŞLAT
-========================================================= */
-
-function startGame(){
-
-  initAudio();
-
-  if(
-    audioCtx &&
-    audioCtx.state==="suspended"
-  ){
-    audioCtx.resume();
-  }
-
-  running=true;
-
-  menu.style.display="none";
-
-  gameOver.style.display="none";
-
-  score=0;
-  coins=0;
-
-  speed=0;
-  targetSpeed=0;
-
-  roadOffset=0;
-
-  traffic=[];
-  coinObjects=[];
-
-  spawnTimer=.4;
-  coinTimer=.7;
-
-  touchLeft=false;
-  touchRight=false;
-
-  keyboardLeft=false;
-  keyboardRight=false;
-
-  steering=0;
-
-  player.x=W/2;
-  player.targetX=W/2;
-  player.y=H*.78;
-  player.tilt=0;
-
-  lastTime=
-    performance.now();
-}
-
-/* =========================================================
-   OYUN BİTİR
-========================================================= */
-
-function endGame(){
-
-  if(!running)
-    return;
-
-  running=false;
-
-  speed=0;
-
-  steering=0;
-
-  touchLeft=false;
-  touchRight=false;
-
-  updateEngineSound();
-
-  collisionSound();
-
-  document.getElementById(
-    "finalScore"
-  ).textContent=
-    Math.floor(score);
-
-  document.getElementById(
-    "finalCoins"
-  ).textContent=
-    coins;
-
-  gameOver.style.display="flex";
-}
-
-/* =========================================================
-   UPDATE
-========================================================= */
-
-function update(dt){
-
-  if(!running)
-    return;
-
-  /*
-     Maksimum hız.
-  */
-
-  targetSpeed=
-    Math.min(
-      220,
-      95+
-      score*.025
-    );
-
-  speed+=
-    (
-      targetSpeed-
-      speed
-    )*
-    Math.min(
-      1,
-      dt*1.6
-    );
-
-  roadOffset+=
-    speed*
-    dt*
-    2.8;
-
-  score+=
-    speed*
-    dt*
-    .035;
-
-  updatePlayer(dt);
-
-  spawnTimer-=dt;
-
-  coinTimer-=dt;
-
-  if(spawnTimer<=0){
-
-    spawnTraffic();
-
-    spawnTimer=
-      Math.max(
-        .58,
-        1.18-
-        speed/500
-      );
-  }
-
-  if(coinTimer<=0){
-
-    spawnCoin();
-
-    coinTimer=
-      1.15+
-      Math.random()*.9;
-  }
-
-  updateTraffic(dt);
-
-  updateCoins(dt);
-
-  /* Çarpışma */
-
-  for(
-    const car of traffic
-  ){
-
-    if(
-      hitTest(
-        player,
-        car
-      )
-    ){
-
-      endGame();
-
-      return;
-    }
-  }
-
-  /* Altın */
-
-  for(
-    let i=
-      coinObjects.length-1;
-    i>=0;
-    i--
-  ){
-
-    if(
-      coinHit(
-        coinObjects[i]
-      )
-    ){
-
-      coinObjects.splice(
-        i,
-        1
-      );
-
-      coins++;
-
-      score+=25;
-
-      coinSound();
-    }
-  }
-
-  document.getElementById(
-    "speedText"
-  ).textContent=
-    Math.floor(speed);
-
-  document.getElementById(
-    "scoreText"
-  ).textContent=
-    Math.floor(score);
-
-  document.getElementById(
-    "coinText"
-  ).textContent=
-    coins;
-
-  updateEngineSound();
-}
-
-/* =========================================================
-   DRAW
-========================================================= */
-
-function draw(){
-
-  ctx.clearRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-  drawBackground();
-
-  drawRoad();
-
-  /*
-     Trafik
-  */
-
-  for(
-    const car of traffic
-  ){
-
-    drawCar(
-      car.x,
-      car.y,
-      car.drawW,
-      car.drawH,
-      car.color,
-      false,
-      0
-    );
-  }
-
-  drawCoins();
-
-  /*
-     Oyuncu
-  */
-
-  drawCar(
-    player.x,
-    player.y,
-    player.width,
-    player.height,
-    player.color,
-    true,
-    player.tilt
-  );
-}
-
-/* =========================================================
-   GAME LOOP
-========================================================= */
-
-function loop(now){
-
-  const dt=
-    Math.min(
-      .035,
-      (now-lastTime)/1000||0
-    );
-
-  lastTime=now;
-
-  update(dt);
-
-  draw();
-
-  requestAnimationFrame(loop);
-}
-
-requestAnimationFrame(loop);
-
-/* =========================================================
-   DOKUNMATİK DİREKSİYON
-========================================================= */
-
-const leftZone=
-  document.getElementById(
-    "leftZone"
-  );
-
-const rightZone=
-  document.getElementById(
-    "rightZone"
-  );
-
-/*
-   touchstart
-*/
-
-leftZone.addEventListener(
-  "touchstart",
-  function(e){
-
-    e.preventDefault();
-
-    touchLeft=true;
-
-    calculateSteering();
-
-    initAudio();
-
-  },
-  {passive:false}
-);
-
-rightZone.addEventListener(
-  "touchstart",
-  function(e){
-
-    e.preventDefault();
-
-    touchRight=true;
-
-    calculateSteering();
-
-    initAudio();
-
-  },
-  {passive:false}
-);
-
-/*
-   touchend
-*/
-
-leftZone.addEventListener(
-  "touchend",
-  function(e){
-
-    e.preventDefault();
-
-    touchLeft=false;
-
-    calculateSteering();
-
-  },
-  {passive:false}
-);
-
-rightZone.addEventListener(
-  "touchend",
-  function(e){
-
-    e.preventDefault();
-
-    touchRight=false;
-
-    calculateSteering();
-
-  },
-  {passive:false}
-);
-
-/*
-   Parmağı ekrandan kaldırınca
-   mutlaka direksiyon sıfırlanır.
-*/
-
-leftZone.addEventListener(
-  "touchcancel",
-  function(){
-
-    touchLeft=false;
-
-    calculateSteering();
-
-  },
-  {passive:false}
-);
-
-rightZone.addEventListener(
-  "touchcancel",
-  function(){
-
-    touchRight=false;
-
-    calculateSteering();
-
-  },
-  {passive:false}
-);
-
-/* =========================================================
-   POINTER DİREKSİYON
-========================================================= */
-
-leftZone.addEventListener(
-  "pointerdown",
-  function(e){
-
-    if(e.pointerType==="mouse")
-      return;
-
-    e.preventDefault();
-
-    touchLeft=true;
-
-    calculateSteering();
-
-    try{
-      leftZone.setPointerCapture(
-        e.pointerId
-      );
-    }catch(err){}
-
-  }
-);
-
-rightZone.addEventListener(
-  "pointerdown",
-  function(e){
-
-    if(e.pointerType==="mouse")
-      return;
-
-    e.preventDefault();
-
-    touchRight=true;
-
-    calculateSteering();
-
-    try{
-      rightZone.setPointerCapture(
-        e.pointerId
-      );
-    }catch(err){}
-
-  }
-);
-
-leftZone.addEventListener(
-  "pointerup",
-  function(e){
-
-    if(e.pointerType==="mouse")
-      return;
-
-    touchLeft=false;
-
-    calculateSteering();
-  }
-);
-
-rightZone.addEventListener(
-  "pointerup",
-  function(e){
-
-    if(e.pointerType==="mouse")
-      return;
-
-    touchRight=false;
-
-    calculateSteering();
-  }
-);
-
-leftZone.addEventListener(
-  "pointercancel",
-  function(){
-
-    touchLeft=false;
-
-    calculateSteering();
-
-  }
-);
-
-rightZone.addEventListener(
-  "pointercancel",
-  function(){
-
-    touchRight=false;
-
-    calculateSteering();
-
-  }
-);
-
-/*
-   Sayfa/focus kaybolursa
-   direksiyon takılı kalmasın.
-*/
-
-window.addEventListener(
-  "blur",
-  function(){
-
-    touchLeft=false;
-    touchRight=false;
-
-    keyboardLeft=false;
-    keyboardRight=false;
-
-    steering=0;
-  }
-);
-
-/* =========================================================
-   KLAVYE
-========================================================= */
-
-window.addEventListener(
-  "keydown",
-  function(e){
-
-    if(
-      e.key==="ArrowLeft"
-    ){
-
-      keyboardLeft=true;
-
-      calculateSteering();
-
-      e.preventDefault();
-    }
-
-    if(
-      e.key==="ArrowRight"
-    ){
-
-      keyboardRight=true;
-
-      calculateSteering();
-
-      e.preventDefault();
-    }
-
-    if(
-      e.key===" " &&
-      !running
-    ){
-
-      startGame();
-
-      e.preventDefault();
-    }
-  }
-);
-
-window.addEventListener(
-  "keyup",
-  function(e){
-
-    if(
-      e.key==="ArrowLeft"
-    ){
-
-      keyboardLeft=false;
-
-      calculateSteering();
-    }
-
-    if(
-      e.key==="ArrowRight"
-    ){
-
-      keyboardRight=false;
-
-      calculateSteering();
-    }
-  }
-);
-
-/* =========================================================
-   BUTONLAR
-========================================================= */
-
-const menu=
-  document.getElementById(
-    "menu"
-  );
-
-const gameOver=
-  document.getElementById(
-    "gameOver"
-  );
-
-document.getElementById(
-  "startBtn"
-).addEventListener(
-  "click",
-  startGame
-);
-
-document.getElementById(
-  "restartBtn"
-).addEventListener(
-  "click",
-  startGame
-);
-
-document.getElementById(
-  "menuBtn"
-).addEventListener(
-  "click",
-  function(){
-
-    gameOver.style.display="none";
-
-    menu.style.display="flex";
-
-    touchLeft=false;
-    touchRight=false;
-
-    steering=0;
-  }
-);
-
-document.getElementById(
-  "helpBtn"
-).addEventListener(
-  "click",
-  function(){
-
-    alert(
-      "TURBO ROAD\n\n"+
-      "📱 SOLA: ekranın soluna basılı tut\n"+
-      "📱 SAĞA: ekranın sağına basılı tut\n"+
-      "☝️ Parmağını kaldırınca araç düz gider\n\n"+
-      "💻 Bilgisayar: ← →\n\n"+
-      "🪙 Altınları topla\n"+
-      "🚗 Trafiğe çarpma\n"+
-      "🏎️ Hız arttıkça motor sesi yükselir."
-    );
-  }
-);
-
-/* =========================================================
-   SES BUTONU
-========================================================= */
-
-document.getElementById(
-  "soundBtn"
-).addEventListener(
-  "click",
-  function(){
-
-    soundEnabled=
-      !soundEnabled;
-
-    this.textContent=
-      soundEnabled
-        ? "🔊"
-        : "🔇";
-
-    if(!soundEnabled){
-
-      if(
-        engineGain &&
-        audioCtx
-      ){
-
-        engineGain.gain.setTargetAtTime(
-          0,
-          audioCtx.currentTime,
-          .05
-        );
-      }
-
-    }else{
-
-      initAudio();
-
-      if(
-        audioCtx &&
-        audioCtx.state==="suspended"
-      ){
-        audioCtx.resume();
-      }
-
-      updateEngineSound();
-    }
-  }
-);
-
-/* =========================================================
-   İLK POZİSYON
-========================================================= */
-
-player.x=W/2;
-player.targetX=W/2;
-player.y=H*.78;
-
-</script>
-
-</body>
-</html>
+  ctx.fillStyl
