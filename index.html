@@ -248,7 +248,7 @@ button:active{
 
 @media(max-width:600px){
 
-  .hud{
+  #hud{
     width:96vw;
   }
 
@@ -373,59 +373,60 @@ button:active{
    ELEMENTLER
 ========================================================= */
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-const menu=document.getElementById("menu");
-const gameOver=document.getElementById("gameOver");
+const menu = document.getElementById("menu");
+const gameOver = document.getElementById("gameOver");
 
-const leftZone=document.getElementById("leftZone");
-const rightZone=document.getElementById("rightZone");
+const leftZone = document.getElementById("leftZone");
+const rightZone = document.getElementById("rightZone");
 
-const speedText=document.getElementById("speedText");
-const scoreText=document.getElementById("scoreText");
-const coinText=document.getElementById("coinText");
+const speedText = document.getElementById("speedText");
+const scoreText = document.getElementById("scoreText");
+const coinText = document.getElementById("coinText");
 
 /* =========================================================
    CANVAS
 ========================================================= */
 
-let W=0;
-let H=0;
+let W = 0;
+let H = 0;
 
-let DPR=Math.min(
-  window.devicePixelRatio||1,
+let DPR = Math.min(
+  window.devicePixelRatio || 1,
   2
 );
 
 function resize(){
 
-  W=window.innerWidth;
-  H=window.innerHeight;
+  W = window.innerWidth;
+  H = window.innerHeight;
 
-  DPR=Math.min(
-    window.devicePixelRatio||1,
+  DPR = Math.min(
+    window.devicePixelRatio || 1,
     2
   );
 
-  canvas.width=W*DPR;
-  canvas.height=H*DPR;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
 
-  canvas.style.width=W+"px";
-  canvas.style.height=H+"px";
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
 
   ctx.setTransform(
     DPR,0,0,DPR,0,0
   );
 
-  if(typeof player!=="undefined"){
+  if(typeof player !== "undefined"){
 
-    player.y=getPlayerY();
+    player.y = getPlayerY();
 
     if(!running){
 
-      player.x=W/2;
-      player.targetX=W/2;
+      player.x = W / 2;
+      player.targetX = W / 2;
+
     }
   }
 }
@@ -439,24 +440,24 @@ window.addEventListener(
    OYUN DEĞİŞKENLERİ
 ========================================================= */
 
-let running=false;
-let lastTime=0;
+let running = false;
+let lastTime = 0;
 
-let score=0;
-let coins=0;
+let score = 0;
+let coins = 0;
 
-let speed=0;
-let targetSpeed=0;
+let speed = 0;
+let targetSpeed = 0;
 
-let roadOffset=0;
+let roadOffset = 0;
 
-let steering=0;
+let steering = 0;
 
-let touchLeft=false;
-let touchRight=false;
+let touchLeft = false;
+let touchRight = false;
 
-let keyboardLeft=false;
-let keyboardRight=false;
+let keyboardLeft = false;
+let keyboardRight = false;
 
 /* =========================================================
    PERSPEKTİF
@@ -464,30 +465,32 @@ let keyboardRight=false;
 
 function getHorizon(){
 
-  return H*.34;
+  return H * .34;
+
 }
 
 function roadProgress(y){
 
-  const horizon=getHorizon();
+  const horizon = getHorizon();
 
   return Math.max(
     0,
     Math.min(
       1,
-      (y-horizon)/
-      (H-horizon)
+      (y - horizon) /
+      (H - horizon)
     )
   );
 }
 
 function roadWidthAt(y){
 
-  const p=roadProgress(y);
+  const p = roadProgress(y);
 
-  return W*(
-    .13+
-    .91*Math.pow(
+  return W * (
+    .13 +
+    .91 *
+    Math.pow(
       p,
       .79
     )
@@ -496,13 +499,13 @@ function roadWidthAt(y){
 
 function roadCenterAt(y){
 
-  const p=roadProgress(y);
+  const p = roadProgress(y);
 
-  return W/2+
+  return W / 2 +
     Math.sin(
-      roadOffset*.00055
-    )*
-    W*.032*
+      roadOffset * .00055
+    ) *
+    W * .032 *
     Math.pow(
       p,
       1.7
@@ -511,14 +514,15 @@ function roadCenterAt(y){
 
 function getPlayerY(){
 
-  return H*.81;
+  return H * .81;
+
 }
 
 /* =========================================================
    PLAYER
 ========================================================= */
 
-const player={
+const player = {
 
   x:0,
   y:0,
@@ -531,16 +535,17 @@ const player={
   color:"#c8141c",
 
   tilt:0
+
 };
 
 /* =========================================================
    TRAFİK
 ========================================================= */
 
-let traffic=[];
-let spawnTimer=0;
+let traffic = [];
+let spawnTimer = 0;
 
-const trafficColors=[
+const trafficColors = [
   "#e8e8e8",
   "#1c6da8",
   "#e69b17",
@@ -553,49 +558,41 @@ const trafficColors=[
 
 function spawnTraffic(){
 
-  /*
-    Aracın ortaya çıkacağı lane seçiliyor.
-    Çok yakın iki araç aynı anda doğmasın.
-  */
-
-  let lane=
+  let lane =
     Math.floor(
-      Math.random()*3
+      Math.random() * 3
     );
 
-  const last=
+  const last =
     traffic[
-      traffic.length-1
+      traffic.length - 1
     ];
 
   if(
     last &&
-    last.progress<.20 &&
-    last.lane===lane
+    last.progress < .20 &&
+    last.lane === lane
   ){
 
-    lane=
-      (lane+1+
-      Math.floor(
-        Math.random()*2
-      ))%3;
+    lane =
+      (
+        lane +
+        1 +
+        Math.floor(
+          Math.random() * 2
+        )
+      ) % 3;
   }
 
   traffic.push({
 
     lane:lane,
 
-    /*
-      Araç ufuk çizgisinden değil,
-      yolun görünür bölümünün biraz
-      ilerisinden geliyor.
-    */
-
     progress:.075,
 
     speed:
-      .19+
-      Math.random()*.075,
+      .19 +
+      Math.random() * .075,
 
     width:40,
     height:78,
@@ -603,30 +600,33 @@ function spawnTraffic(){
     color:
       trafficColors[
         Math.floor(
-          Math.random()*
+          Math.random() *
           trafficColors.length
         )
       ],
 
     y:0,
     x:0,
+
     drawW:0,
     drawH:0
+
   });
+
 }
 
 /* =========================================================
    ALTIN
 ========================================================= */
 
-let coinObjects=[];
-let coinTimer=0;
+let coinObjects = [];
+let coinTimer = 0;
 
 function spawnCoin(){
 
-  const lane=
+  const lane =
     Math.floor(
-      Math.random()*3
+      Math.random() * 3
     );
 
   coinObjects.push({
@@ -636,31 +636,39 @@ function spawnCoin(){
     progress:.10,
 
     spin:
-      Math.random()*
-      Math.PI*2,
+      Math.random() *
+      Math.PI * 2,
 
     x:0,
     y:0,
     size:8
+
   });
+
 }
 
 /* =========================================================
    SES
 ========================================================= */
 
-let audioCtx=null;
-let engineOsc=null;
-let engineGain=null;
-let engineFilter=null;
+let audioCtx = null;
 
-let audioStarted=false;
-let soundEnabled=true;
+let engineOsc = null;
+let engineGain = null;
+let engineFilter = null;
+
+let audioStarted = false;
+let soundEnabled = true;
+
+/*
+  Motor sesi daha tok.
+  Yüksek tizli sawtooth yerine triangle.
+*/
 
 function initAudio(){
 
   if(
-    audioStarted||
+    audioStarted ||
     !soundEnabled
   ){
     return;
@@ -668,28 +676,32 @@ function initAudio(){
 
   try{
 
-    audioCtx=
+    audioCtx =
       new(
-        window.AudioContext||
+        window.AudioContext ||
         window.webkitAudioContext
       )();
 
-    engineOsc=
+    engineOsc =
       audioCtx.createOscillator();
 
-    engineGain=
+    engineGain =
       audioCtx.createGain();
 
-    engineFilter=
+    engineFilter =
       audioCtx.createBiquadFilter();
 
-    engineOsc.type="sawtooth";
+    /* TOK MOTOR */
 
-    engineFilter.type="lowpass";
+    engineOsc.type = "triangle";
 
-    engineFilter.frequency.value=600;
+    engineFilter.type = "lowpass";
 
-    engineGain.gain.value=0;
+    engineFilter.frequency.value = 700;
+
+    engineFilter.Q.value = .7;
+
+    engineGain.gain.value = 0;
 
     engineOsc.connect(
       engineFilter
@@ -705,58 +717,83 @@ function initAudio(){
 
     engineOsc.start();
 
-    audioStarted=true;
+    audioStarted = true;
 
   }catch(e){}
+
 }
+
+/* =========================================================
+   MOTOR SESİ
+========================================================= */
 
 function updateEngineSound(){
 
   if(
-    !audioStarted||
-    !audioCtx||
+    !audioStarted ||
+    !audioCtx ||
     !soundEnabled
   ){
     return;
   }
 
-  const now=
+  const now =
     audioCtx.currentTime;
 
-  const normalized=
+  const normalized =
     Math.max(
       0,
       Math.min(
         1,
-        speed/220
+        speed / 220
       )
     );
 
+  /*
+    Daha düşük motor frekansı.
+  */
+
+  const engineFrequency =
+    48 +
+    normalized * 115;
+
   engineOsc.frequency.setTargetAtTime(
-    55+
-    normalized*205,
+    engineFrequency,
     now,
-    .05
+    .08
   );
 
+  /*
+    Tiz sesleri azalt.
+  */
+
   engineFilter.frequency.setTargetAtTime(
-    450+
-    normalized*1900,
+    520 +
+    normalized * 700,
     now,
-    .06
+    .10
   );
+
+  /*
+    Motor sesi daha yumuşak.
+  */
 
   engineGain.gain.setTargetAtTime(
     running
       ?
-      .008+
-      normalized*.045
+      .012 +
+      normalized * .025
       :
       0,
     now,
-    .08
+    .10
   );
+
 }
+
+/* =========================================================
+   ÇARPIŞMA SESİ
+========================================================= */
 
 function collisionSound(){
 
@@ -766,35 +803,36 @@ function collisionSound(){
 
   if(!audioCtx)return;
 
-  const osc=
+  const osc =
     audioCtx.createOscillator();
 
-  const gain=
+  const gain =
     audioCtx.createGain();
 
-  osc.type="square";
+  osc.type = "sine";
 
   osc.frequency.setValueAtTime(
-    130,
+    105,
     audioCtx.currentTime
   );
 
   osc.frequency.exponentialRampToValueAtTime(
-    42,
-    audioCtx.currentTime+.25
+    38,
+    audioCtx.currentTime + .30
   );
 
   gain.gain.setValueAtTime(
-    .15,
+    .14,
     audioCtx.currentTime
   );
 
   gain.gain.exponentialRampToValueAtTime(
     .001,
-    audioCtx.currentTime+.28
+    audioCtx.currentTime + .30
   );
 
   osc.connect(gain);
+
   gain.connect(
     audioCtx.destination
   );
@@ -802,9 +840,14 @@ function collisionSound(){
   osc.start();
 
   osc.stop(
-    audioCtx.currentTime+.3
+    audioCtx.currentTime + .32
   );
+
 }
+
+/* =========================================================
+   ALTIN SESİ
+========================================================= */
 
 function coinSound(){
 
@@ -814,35 +857,36 @@ function coinSound(){
 
   if(!audioCtx)return;
 
-  const osc=
+  const osc =
     audioCtx.createOscillator();
 
-  const gain=
+  const gain =
     audioCtx.createGain();
 
-  osc.type="sine";
+  osc.type = "sine";
 
   osc.frequency.setValueAtTime(
-    600,
+    560,
     audioCtx.currentTime
   );
 
   osc.frequency.exponentialRampToValueAtTime(
-    1050,
-    audioCtx.currentTime+.1
+    880,
+    audioCtx.currentTime + .10
   );
 
   gain.gain.setValueAtTime(
-    .08,
+    .065,
     audioCtx.currentTime
   );
 
   gain.gain.exponentialRampToValueAtTime(
     .001,
-    audioCtx.currentTime+.18
+    audioCtx.currentTime + .18
   );
 
   osc.connect(gain);
+
   gain.connect(
     audioCtx.destination
   );
@@ -850,8 +894,9 @@ function coinSound(){
   osc.start();
 
   osc.stop(
-    audioCtx.currentTime+.2
+    audioCtx.currentTime + .20
   );
+
 }
 
 /* =========================================================
@@ -860,12 +905,15 @@ function coinSound(){
 
 function drawBackground(){
 
-  const horizon=getHorizon();
+  const horizon =
+    getHorizon();
 
-  const sky=
+  const sky =
     ctx.createLinearGradient(
-      0,0,0,
-      horizon+100
+      0,
+      0,
+      0,
+      horizon + 100
     );
 
   sky.addColorStop(
@@ -883,10 +931,13 @@ function drawBackground(){
     "#dce9e8"
   );
 
-  ctx.fillStyle=sky;
+  ctx.fillStyle = sky;
 
   ctx.fillRect(
-    0,0,W,H
+    0,
+    0,
+    W,
+    H
   );
 
   /* Güneş */
@@ -894,70 +945,71 @@ function drawBackground(){
   ctx.beginPath();
 
   ctx.arc(
-    W*.80,
-    H*.12,
+    W * .80,
+    H * .12,
     Math.max(
       24,
-      W*.055
+      W * .055
     ),
     0,
-    Math.PI*2
+    Math.PI * 2
   );
 
-  ctx.fillStyle=
+  ctx.fillStyle =
     "rgba(255,239,175,.9)";
 
   ctx.fill();
 
-  /* Uzak dağ */
+  /* Dağ */
 
-  ctx.fillStyle="#708d87";
+  ctx.fillStyle =
+    "#708d87";
 
   ctx.beginPath();
 
   ctx.moveTo(
     0,
-    horizon+.08*H
+    horizon + .08 * H
   );
 
   ctx.lineTo(
-    W*.10,
-    H*.20
+    W * .10,
+    H * .20
   );
 
   ctx.lineTo(
-    W*.22,
-    H*.29
+    W * .22,
+    H * .29
   );
 
   ctx.lineTo(
-    W*.36,
-    H*.17
+    W * .36,
+    H * .17
   );
 
   ctx.lineTo(
-    W*.51,
-    H*.29
+    W * .51,
+    H * .29
   );
 
   ctx.lineTo(
-    W*.66,
-    H*.18
+    W * .66,
+    H * .18
   );
 
   ctx.lineTo(
-    W*.82,
-    H*.29
-  );
-
-  ctx.lineTo(
-    W,
-    H*.19
+    W * .82,
+    H * .29
   );
 
   ctx.lineTo(
     W,
-    horizon+.10*H
+    H * .19
+  );
+
+  ctx.lineTo(
+    W,
+    horizon + .10 * H
   );
 
   ctx.closePath();
@@ -966,58 +1018,65 @@ function drawBackground(){
 
   /* Zemin */
 
-  ctx.fillStyle="#52794c";
+  ctx.fillStyle =
+    "#52794c";
 
   ctx.fillRect(
     0,
     horizon,
     W,
-    H-horizon
+    H - horizon
   );
 
-  /* Yol kenarı çimen detayları */
+  /* Çimen detayları */
 
-  ctx.fillStyle=
+  ctx.fillStyle =
     "rgba(30,70,32,.18)";
 
   for(
-    let i=0;
-    i<20;
+    let i = 0;
+    i < 20;
     i++
   ){
 
-    const y=
-      horizon+
-      ((i*97+
-      roadOffset*.7)%
-      (H-horizon));
+    const y =
+      horizon +
+      (
+        (i * 97 +
+        roadOffset * .7) %
+        (H - horizon)
+      );
 
-    const p=
+    const p =
       roadProgress(y);
 
-    const rw=
+    const rw =
       roadWidthAt(y);
 
-    const rc=
+    const rc =
       roadCenterAt(y);
 
-    const side=
-      i%2===0?-1:1;
+    const side =
+      i % 2 === 0 ? -1 : 1;
 
-    const x=
-      rc+
-      side*
-      (rw/2+
-      12+
-      p*45);
+    const x =
+      rc +
+      side *
+      (
+        rw / 2 +
+        12 +
+        p * 45
+      );
 
     ctx.fillRect(
       x,
       y,
-      3+p*3,
-      8+p*7
+      3 + p * 3,
+      8 + p * 7
     );
+
   }
+
 }
 
 /* =========================================================
@@ -1026,47 +1085,46 @@ function drawBackground(){
 
 function drawRoad(){
 
-  const horizon=getHorizon();
+  const horizon =
+    getHorizon();
 
-  const topCenter=
+  const topCenter =
     roadCenterAt(horizon);
 
-  const bottomCenter=
+  const bottomCenter =
     roadCenterAt(H);
 
-  const topWidth=
+  const topWidth =
     roadWidthAt(horizon);
 
-  const bottomWidth=
+  const bottomWidth =
     roadWidthAt(H);
-
-  /* yol gövdesi */
 
   ctx.beginPath();
 
   ctx.moveTo(
-    topCenter-topWidth/2,
+    topCenter - topWidth / 2,
     horizon
   );
 
   ctx.lineTo(
-    topCenter+topWidth/2,
+    topCenter + topWidth / 2,
     horizon
   );
 
   ctx.lineTo(
-    bottomCenter+bottomWidth/2,
+    bottomCenter + bottomWidth / 2,
     H
   );
 
   ctx.lineTo(
-    bottomCenter-bottomWidth/2,
+    bottomCenter - bottomWidth / 2,
     H
   );
 
   ctx.closePath();
 
-  const roadGradient=
+  const roadGradient =
     ctx.createLinearGradient(
       0,
       horizon,
@@ -1089,26 +1147,27 @@ function drawRoad(){
     "#24252a"
   );
 
-  ctx.fillStyle=
+  ctx.fillStyle =
     roadGradient;
 
   ctx.fill();
 
-  /* dış beyaz çizgiler */
+  /* Yol kenarları */
 
-  ctx.strokeStyle="#f4f4f4";
+  ctx.strokeStyle =
+    "#f4f4f4";
 
-  ctx.lineWidth=4;
+  ctx.lineWidth = 4;
 
   ctx.beginPath();
 
   ctx.moveTo(
-    topCenter-topWidth/2,
+    topCenter - topWidth / 2,
     horizon
   );
 
   ctx.lineTo(
-    bottomCenter-bottomWidth/2,
+    bottomCenter - bottomWidth / 2,
     H
   );
 
@@ -1117,82 +1176,86 @@ function drawRoad(){
   ctx.beginPath();
 
   ctx.moveTo(
-    topCenter+topWidth/2,
+    topCenter + topWidth / 2,
     horizon
   );
 
   ctx.lineTo(
-    bottomCenter+bottomWidth/2,
+    bottomCenter + bottomWidth / 2,
     H
   );
 
   ctx.stroke();
 
-  /* Kırmızı-beyaz kenar taşları */
+  /* Kırmızı beyaz kenar taşları */
 
-  const dashCount=22;
+  const dashCount = 22;
 
-  const moving=
-    (roadOffset*.0016)%1;
+  const moving =
+    (roadOffset * .0016) % 1;
 
   for(
-    let i=0;
-    i<dashCount;
+    let i = 0;
+    i < dashCount;
     i++
   ){
 
-    let p1=
-      i/dashCount+
-      moving/dashCount;
+    let p1 =
+      i / dashCount +
+      moving / dashCount;
 
-    p1%=1;
+    p1 %= 1;
 
-    let p2=p1+.026;
+    let p2 =
+      p1 + .026;
 
-    if(p2>1)p2=1;
+    if(p2 > 1)p2 = 1;
 
-    const y1=
-      horizon+
-      p1*(H-horizon);
+    const y1 =
+      horizon +
+      p1 *
+      (H - horizon);
 
-    const y2=
-      horizon+
-      p2*(H-horizon);
+    const y2 =
+      horizon +
+      p2 *
+      (H - horizon);
 
-    const c1=
+    const c1 =
       roadCenterAt(y1);
 
-    const c2=
+    const c2 =
       roadCenterAt(y2);
 
-    const w1=
+    const w1 =
       roadWidthAt(y1);
 
-    const w2=
+    const w2 =
       roadWidthAt(y2);
 
-    ctx.strokeStyle=
-      i%2===0
+    ctx.strokeStyle =
+      i % 2 === 0
         ?
         "#ffffff"
         :
         "#d32929";
 
-    ctx.lineWidth=
+    ctx.lineWidth =
       Math.max(
         2,
-        7*roadProgress(y1)
+        7 *
+        roadProgress(y1)
       );
 
     ctx.beginPath();
 
     ctx.moveTo(
-      c1-w1/2,
+      c1 - w1 / 2,
       y1
     );
 
     ctx.lineTo(
-      c2-w2/2,
+      c2 - w2 / 2,
       y2
     );
 
@@ -1201,97 +1264,103 @@ function drawRoad(){
     ctx.beginPath();
 
     ctx.moveTo(
-      c1+w1/2,
+      c1 + w1 / 2,
       y1
     );
 
     ctx.lineTo(
-      c2+w2/2,
+      c2 + w2 / 2,
       y2
     );
 
     ctx.stroke();
+
   }
 
   /* Şerit çizgileri */
 
-  const gap=66;
-  const dashLength=31;
+  const gap = 66;
+  const dashLength = 31;
 
   for(
-    let lane=1;
-    lane<3;
+    let lane = 1;
+    lane < 3;
     lane++
   ){
 
     for(
-      let y=
-        horizon-
-        gap+
-        (roadOffset*1.45)%gap;
+      let y =
+        horizon -
+        gap +
+        (roadOffset * 1.45) % gap;
 
-      y<H;
+      y < H;
 
-      y+=gap
+      y += gap
     ){
 
-      const y1=
+      const y1 =
         Math.max(
           horizon,
           y
         );
 
-      const y2=
+      const y2 =
         Math.min(
           H,
-          y+dashLength
+          y + dashLength
         );
 
-      if(y2<=horizon)continue;
+      if(y2 <= horizon)continue;
 
-      const c1=
+      const c1 =
         roadCenterAt(y1);
 
-      const c2=
+      const c2 =
         roadCenterAt(y2);
 
-      const w1=
+      const w1 =
         roadWidthAt(y1);
 
-      const w2=
+      const w2 =
         roadWidthAt(y2);
 
-      const x1=
-        c1-w1/2+
-        w1*(lane/3);
+      const x1 =
+        c1 -
+        w1 / 2 +
+        w1 * (lane / 3);
 
-      const x2=
-        c2-w2/2+
-        w2*(lane/3);
+      const x2 =
+        c2 -
+        w2 / 2 +
+        w2 * (lane / 3);
 
-      const p=
+      const p =
         roadProgress(y1);
 
-      ctx.strokeStyle=
+      ctx.strokeStyle =
         "rgba(255,255,255,.72)";
 
-      ctx.lineWidth=
+      ctx.lineWidth =
         Math.max(
           1,
-          3.5*p
+          3.5 * p
         );
 
       ctx.beginPath();
 
       ctx.moveTo(
-        x1,y1
+        x1,
+        y1
       );
 
       ctx.lineTo(
-        x2,y2
+        x2,
+        y2
       );
 
       ctx.stroke();
+
     }
   }
 }
@@ -1301,43 +1370,57 @@ function drawRoad(){
 ========================================================= */
 
 function roundRect(
-  ctx,x,y,w,h,r
+  ctx,
+  x,
+  y,
+  w,
+  h,
+  r
 ){
 
-  const rr=
+  const rr =
     Math.min(
       r,
-      Math.abs(w)/2,
-      Math.abs(h)/2
+      Math.abs(w) / 2,
+      Math.abs(h) / 2
     );
 
   ctx.beginPath();
 
   ctx.moveTo(
-    x+rr,y
+    x + rr,
+    y
   );
 
   ctx.arcTo(
-    x+w,y,
-    x+w,y+h,
+    x + w,
+    y,
+    x + w,
+    y + h,
     rr
   );
 
   ctx.arcTo(
-    x+w,y+h,
-    x,y+h,
+    x + w,
+    y + h,
+    x,
+    y + h,
     rr
   );
 
   ctx.arcTo(
-    x,y+h,
-    x,y,
+    x,
+    y + h,
+    x,
+    y,
     rr
   );
 
   ctx.arcTo(
-    x,y,
-    x+w,y,
+    x,
+    y,
+    x + w,
+    y,
     rr
   );
 
@@ -1353,155 +1436,175 @@ function shadeColor(
   amount
 ){
 
-  let c=
+  let c =
     hex.replace("#","");
 
-  let r=parseInt(
-    c.substring(0,2),
-    16
-  );
+  let r =
+    parseInt(
+      c.substring(0,2),
+      16
+    );
 
-  let g=parseInt(
-    c.substring(2,4),
-    16
-  );
+  let g =
+    parseInt(
+      c.substring(2,4),
+      16
+    );
 
-  let b=parseInt(
-    c.substring(4,6),
-    16
-  );
+  let b =
+    parseInt(
+      c.substring(4,6),
+      16
+    );
 
-  r=Math.max(
+  r = Math.max(
     0,
     Math.min(
       255,
-      r+amount
+      r + amount
     )
   );
 
-  g=Math.max(
+  g = Math.max(
     0,
     Math.min(
       255,
-      g+amount
+      g + amount
     )
   );
 
-  b=Math.max(
+  b = Math.max(
     0,
     Math.min(
       255,
-      b+amount
+      b + amount
     )
   );
 
-  return "#"+
-    r.toString(16).padStart(2,"0")+
-    g.toString(16).padStart(2,"0")+
+  return "#" +
+    r.toString(16).padStart(2,"0") +
+    g.toString(16).padStart(2,"0") +
     b.toString(16).padStart(2,"0");
 }
 
 /* =========================================================
-   PROFESYONEL ARABA ÇİZİMİ
+   ARABA ÇİZİMİ
 ========================================================= */
 
 function drawCar(
-  x,y,w,h,color,
-  isPlayer=false,
-  tilt=0
+  x,
+  y,
+  w,
+  h,
+  color,
+  isPlayer = false,
+  tilt = 0
 ){
 
-  if(w<=0||h<=0)return;
+  if(w <= 0 || h <= 0)return;
 
   ctx.save();
 
-  ctx.translate(x,y);
-  ctx.rotate(tilt);
+  ctx.translate(
+    x,
+    y
+  );
 
-  /* gölge */
+  ctx.rotate(
+    tilt
+  );
 
-  ctx.fillStyle=
+  /* Gölge */
+
+  ctx.fillStyle =
     "rgba(0,0,0,.38)";
 
   ctx.beginPath();
 
   ctx.ellipse(
     0,
-    h*.47,
-    w*.60,
-    h*.105,
-    0,0,
-    Math.PI*2
+    h * .47,
+    w * .60,
+    h * .105,
+    0,
+    0,
+    Math.PI * 2
   );
 
   ctx.fill();
 
-  /* lastikler */
+  /* Lastikler */
 
-  ctx.fillStyle="#090a0c";
+  ctx.fillStyle =
+    "#090a0c";
 
-  const tw=
+  const tw =
     Math.max(
       3,
-      w*.18
+      w * .18
     );
 
-  const th=
+  const th =
     Math.max(
       7,
-      h*.245
+      h * .245
     );
 
   roundRect(
     ctx,
-    -w*.55,
-    -h*.31,
+    -w * .55,
+    -h * .31,
     tw,
     th,
     3
   );
+
   ctx.fill();
 
   roundRect(
     ctx,
-    w*.37,
-    -h*.31,
+    w * .37,
+    -h * .31,
     tw,
     th,
     3
   );
+
   ctx.fill();
 
   roundRect(
     ctx,
-    -w*.55,
-    h*.11,
+    -w * .55,
+    h * .11,
     tw,
     th,
     3
   );
+
   ctx.fill();
 
   roundRect(
     ctx,
-    w*.37,
-    h*.11,
+    w * .37,
+    h * .11,
     tw,
     th,
     3
   );
+
   ctx.fill();
 
-  /* jantlar */
+  /* Jant */
 
-  if(w>18){
+  if(w > 18){
 
-    ctx.fillStyle="#8e949a";
+    ctx.fillStyle =
+      "#8e949a";
 
     for(
       const wx of [
-        -w*.47,
-        w*.45
+        -w * .47,
+        w * .45
       ]
     ){
 
@@ -1509,13 +1612,13 @@ function drawCar(
 
       ctx.arc(
         wx,
-        -h*.18,
+        -h * .18,
         Math.max(
           2,
-          w*.045
+          w * .045
         ),
         0,
-        Math.PI*2
+        Math.PI * 2
       );
 
       ctx.fill();
@@ -1524,37 +1627,44 @@ function drawCar(
 
       ctx.arc(
         wx,
-        h*.24,
+        h * .24,
         Math.max(
           2,
-          w*.045
+          w * .045
         ),
         0,
-        Math.PI*2
+        Math.PI * 2
       );
 
       ctx.fill();
+
     }
   }
 
-  /* ana gövde */
+  /* Ana gövde */
 
-  const bodyGrad=
+  const bodyGrad =
     ctx.createLinearGradient(
-      -w/2,
+      -w / 2,
       0,
-      w/2,
+      w / 2,
       0
     );
 
   bodyGrad.addColorStop(
     0,
-    shadeColor(color,-42)
+    shadeColor(
+      color,
+      -42
+    )
   );
 
   bodyGrad.addColorStop(
     .20,
-    shadeColor(color,-13)
+    shadeColor(
+      color,
+      -13
+    )
   );
 
   bodyGrad.addColorStop(
@@ -1564,49 +1674,59 @@ function drawCar(
 
   bodyGrad.addColorStop(
     .72,
-    shadeColor(color,16)
+    shadeColor(
+      color,
+      16
+    )
   );
 
   bodyGrad.addColorStop(
     1,
-    shadeColor(color,-25)
+    shadeColor(
+      color,
+      -25
+    )
   );
 
-  ctx.fillStyle=bodyGrad;
+  ctx.fillStyle =
+    bodyGrad;
 
   roundRect(
     ctx,
-    -w/2,
-    -h/2,
+    -w / 2,
+    -h / 2,
     w,
     h,
-    w*.16
+    w * .16
   );
 
   ctx.fill();
 
-  /* tavan */
+  /* Tavan */
 
-  ctx.fillStyle=
-    shadeColor(color,-7);
+  ctx.fillStyle =
+    shadeColor(
+      color,
+      -7
+    );
 
   roundRect(
     ctx,
-    -w*.35,
-    -h*.25,
-    w*.70,
-    h*.47,
-    w*.12
+    -w * .35,
+    -h * .25,
+    w * .70,
+    h * .47,
+    w * .12
   );
 
   ctx.fill();
 
-  /* ön cam */
+  /* Ön cam */
 
-  const glass=
+  const glass =
     ctx.createLinearGradient(
       0,
-      -h*.27,
+      -h * .27,
       0,
       0
     );
@@ -1626,104 +1746,111 @@ function drawCar(
     "#10191e"
   );
 
-  ctx.fillStyle=glass;
+  ctx.fillStyle =
+    glass;
 
   roundRect(
     ctx,
-    -w*.285,
-    -h*.235,
-    w*.57,
-    h*.22,
-    w*.055
+    -w * .285,
+    -h * .235,
+    w * .57,
+    h * .22,
+    w * .055
   );
 
   ctx.fill();
 
-  /* cam bölmesi */
+  /* Cam yansıması */
 
-  ctx.fillStyle=
+  ctx.fillStyle =
     "rgba(255,255,255,.15)";
 
   ctx.beginPath();
 
   ctx.moveTo(
-    -w*.22,
-    -h*.20
+    -w * .22,
+    -h * .20
   );
 
   ctx.lineTo(
-    -w*.07,
-    -h*.20
+    -w * .07,
+    -h * .20
   );
 
   ctx.lineTo(
-    -w*.18,
-    -h*.055
+    -w * .18,
+    -h * .055
   );
 
   ctx.closePath();
 
   ctx.fill();
 
-  /* arka cam */
+  /* Arka cam */
 
-  ctx.fillStyle="#14242b";
+  ctx.fillStyle =
+    "#14242b";
 
   roundRect(
     ctx,
-    -w*.285,
-    h*.045,
-    w*.57,
-    h*.19,
-    w*.055
+    -w * .285,
+    h * .045,
+    w * .57,
+    h * .19,
+    w * .055
   );
 
   ctx.fill();
 
-  /* ön tampon */
+  /* Ön tampon */
 
-  ctx.fillStyle=
-    shadeColor(color,-38);
+  ctx.fillStyle =
+    shadeColor(
+      color,
+      -38
+    );
 
   roundRect(
     ctx,
-    -w*.38,
-    -h*.475,
-    w*.76,
-    h*.07,
-    w*.025
+    -w * .38,
+    -h * .475,
+    w * .76,
+    h * .07,
+    w * .025
   );
 
   ctx.fill();
 
-  /* ön ızgara */
+  /* Izgara */
 
-  if(w>15){
+  if(w > 15){
 
-    ctx.fillStyle="#111";
+    ctx.fillStyle =
+      "#111";
 
     roundRect(
       ctx,
-      -w*.27,
-      -h*.455,
-      w*.54,
-      h*.035,
+      -w * .27,
+      -h * .455,
+      w * .54,
+      h * .035,
       2
     );
 
     ctx.fill();
   }
 
-  /* farlar */
+  /* Farlar */
 
-  ctx.fillStyle="#fff3bd";
+  ctx.fillStyle =
+    "#fff3bd";
 
   roundRect(
     ctx,
-    -w*.35,
-    -h*.455,
-    w*.20,
-    h*.065,
+    -w * .35,
+    -h * .455,
+    w * .20,
+    h * .065,
     2
   );
 
@@ -1731,25 +1858,26 @@ function drawCar(
 
   roundRect(
     ctx,
-    w*.15,
-    -h*.455,
-    w*.20,
-    h*.065,
+    w * .15,
+    -h * .455,
+    w * .20,
+    h * .065,
     2
   );
 
   ctx.fill();
 
-  /* stoplar */
+  /* Stoplar */
 
-  ctx.fillStyle="#ff2929";
+  ctx.fillStyle =
+    "#ff2929";
 
   roundRect(
     ctx,
-    -w*.34,
-    h*.39,
-    w*.21,
-    h*.06,
+    -w * .34,
+    h * .39,
+    w * .21,
+    h * .06,
     2
   );
 
@@ -1757,10 +1885,10 @@ function drawCar(
 
   roundRect(
     ctx,
-    w*.13,
-    h*.39,
-    w*.21,
-    h*.06,
+    w * .13,
+    h * .39,
+    w * .21,
+    h * .06,
     2
   );
 
@@ -1770,94 +1898,104 @@ function drawCar(
 
   if(isPlayer){
 
-    /* siyah yarış şeridi */
+    /* Siyah orta şerit */
 
-    ctx.fillStyle="#151515";
+    ctx.fillStyle =
+      "#151515";
 
     roundRect(
       ctx,
-      -w*.072,
-      -h*.47,
-      w*.144,
-      h*.94,
-      w*.02
+      -w * .072,
+      -h * .47,
+      w * .144,
+      h * .94,
+      w * .02
     );
 
     ctx.fill();
 
-    /* yan şeritler */
+    /* Yan şeritler */
 
-    ctx.fillStyle=
+    ctx.fillStyle =
       "rgba(255,255,255,.16)";
 
     ctx.fillRect(
-      -w*.265,
-      -h*.43,
-      w*.023,
-      h*.86
+      -w * .265,
+      -h * .43,
+      w * .023,
+      h * .86
     );
 
     ctx.fillRect(
-      w*.242,
-      -h*.43,
-      w*.023,
-      h*.86
+      w * .242,
+      -h * .43,
+      w * .023,
+      h * .86
     );
 
     /* Mustang yazısı */
 
-    if(w>25){
+    if(w > 25){
 
-      ctx.fillStyle=
+      ctx.fillStyle =
         "rgba(255,255,255,.92)";
 
-      ctx.font=
+      ctx.font =
         `900 ${Math.max(
           6,
-          w*.11
+          w * .11
         )}px Arial`;
 
-      ctx.textAlign="center";
-      ctx.textBaseline="middle";
+      ctx.textAlign =
+        "center";
+
+      ctx.textBaseline =
+        "middle";
 
       ctx.fillText(
         "MUSTANG",
         0,
-        h*.045
+        h * .045
       );
+
     }
 
-    /* küçük amblem */
+    /* Amblem */
 
-    ctx.fillStyle="#d9d9d9";
+    ctx.fillStyle =
+      "#d9d9d9";
 
     ctx.beginPath();
 
     ctx.arc(
       0,
-      -h*.425,
+      -h * .425,
       Math.max(
         2,
-        w*.043
+        w * .043
       ),
       0,
-      Math.PI*2
+      Math.PI * 2
     );
 
     ctx.fill();
 
-    /* egzoz */
+    /* Egzoz */
 
-    ctx.fillStyle="#080808";
+    ctx.fillStyle =
+      "#080808";
 
     ctx.beginPath();
 
     ctx.arc(
-      -w*.25,
-      h*.47,
-      Math.max(1.5,w*.025),
+      -w * .25,
+      h * .47,
+      Math.max(
+        1.5,
+        w * .025
+      ),
       0,
-      Math.PI*2
+      Math.PI * 2
     );
 
     ctx.fill();
@@ -1865,17 +2003,22 @@ function drawCar(
     ctx.beginPath();
 
     ctx.arc(
-      w*.25,
-      h*.47,
-      Math.max(1.5,w*.025),
+      w * .25,
+      h * .47,
+      Math.max(
+        1.5,
+        w * .025
+      ),
       0,
-      Math.PI*2
+      Math.PI * 2
     );
 
     ctx.fill();
+
   }
 
   ctx.restore();
+
 }
 
 /* =========================================================
@@ -1889,7 +2032,7 @@ function calculateSteering(){
     !keyboardRight
   ){
 
-    steering=-1;
+    steering = -1;
     return;
   }
 
@@ -1898,7 +2041,7 @@ function calculateSteering(){
     !keyboardLeft
   ){
 
-    steering=1;
+    steering = 1;
     return;
   }
 
@@ -1907,7 +2050,7 @@ function calculateSteering(){
     !touchRight
   ){
 
-    steering=-1;
+    steering = -1;
     return;
   }
 
@@ -1916,48 +2059,49 @@ function calculateSteering(){
     !touchLeft
   ){
 
-    steering=1;
+    steering = 1;
     return;
   }
 
-  steering=0;
+  steering = 0;
+
 }
 
 function updatePlayer(dt){
 
-  const power=
-    245+
-    speed*1.45;
+  const power =
+    245 +
+    speed * 1.45;
 
-  player.targetX+=
-    steering*
-    power*
+  player.targetX +=
+    steering *
+    power *
     dt;
 
-  const roadW=
+  const roadW =
     roadWidthAt(
       player.y
     );
 
-  const center=
+  const center =
     roadCenterAt(
       player.y
     );
 
-  const padding=
-    player.width*.60;
+  const padding =
+    player.width * .60;
 
-  const minX=
-    center-
-    roadW/2+
+  const minX =
+    center -
+    roadW / 2 +
     padding;
 
-  const maxX=
-    center+
-    roadW/2-
+  const maxX =
+    center +
+    roadW / 2 -
     padding;
 
-  player.targetX=
+  player.targetX =
     Math.max(
       minX,
       Math.min(
@@ -1966,32 +2110,33 @@ function updatePlayer(dt){
       )
     );
 
-  const follow=
-    12+
-    speed/35;
+  const follow =
+    12 +
+    speed / 35;
 
-  player.x+=
+  player.x +=
     (
-      player.targetX-
+      player.targetX -
       player.x
-    )*
+    ) *
     Math.min(
       1,
-      dt*follow
+      dt * follow
     );
 
-  const wantedTilt=
-    steering*.065;
+  const wantedTilt =
+    steering * .065;
 
-  player.tilt+=
+  player.tilt +=
     (
-      wantedTilt-
+      wantedTilt -
       player.tilt
-    )*
+    ) *
     Math.min(
       1,
-      dt*11
+      dt * 11
     );
+
 }
 
 /* =========================================================
@@ -2001,33 +2146,37 @@ function updatePlayer(dt){
 function updateTraffic(dt){
 
   for(
-    let i=traffic.length-1;
-    i>=0;
+    let i = traffic.length - 1;
+    i >= 0;
     i--
   ){
 
-    const car=traffic[i];
+    const car =
+      traffic[i];
 
-    car.progress+=
-      dt*
-      car.speed*
+    car.progress +=
+      dt *
+      car.speed *
       (
-        .72+
-        speed/185
+        .72 +
+        speed / 185
       );
 
     if(
-      car.progress>1.08
+      car.progress > 1.08
     ){
 
-      traffic.splice(i,1);
+      traffic.splice(
+        i,
+        1
+      );
 
-      score+=10;
+      score += 10;
 
       continue;
     }
 
-    const p=
+    const p =
       Math.max(
         .075,
         Math.min(
@@ -2036,64 +2185,61 @@ function updateTraffic(dt){
         )
       );
 
-    /*
-      Perspektif eğrisi:
-      araçlar yolun üzerinde kalıyor.
-    */
-
-    const visualP=
+    const visualP =
       Math.pow(
         p,
         1.10
       );
 
-    car.y=
-      getHorizon()+
-      visualP*
+    car.y =
+      getHorizon() +
+      visualP *
       (
-        H-
+        H -
         getHorizon()
       );
 
-    const roadW=
-      roadWidthAt(car.y);
+    const roadW =
+      roadWidthAt(
+        car.y
+      );
 
-    const center=
-      roadCenterAt(car.y);
+    const center =
+      roadCenterAt(
+        car.y
+      );
 
-    const laneW=
-      roadW/3;
+    const laneW =
+      roadW / 3;
 
-    car.x=
-      center-
-      roadW/2+
-      laneW*
-      (car.lane+.5);
+    car.x =
+      center -
+      roadW / 2 +
+      laneW *
+      (car.lane + .5);
 
-    /*
-      Trafik araçları uzakta küçük,
-      yakında doğal şekilde büyüyor.
-    */
-
-    const scale=
-      .11+
+    const scale =
+      .11 +
       Math.pow(
         p,
         .73
-      )*.82;
+      ) *
+      .82;
 
-    car.drawW=
+    car.drawW =
       Math.max(
         5,
-        car.width*scale
+        car.width * scale
       );
 
-    car.drawH=
+    car.drawH =
       Math.max(
         10,
-        car.height*scale
+        car.height * scale
       );
+
   }
+
 }
 
 /* =========================================================
@@ -2103,33 +2249,37 @@ function updateTraffic(dt){
 function updateCoins(dt){
 
   for(
-    let i=coinObjects.length-1;
-    i>=0;
+    let i = coinObjects.length - 1;
+    i >= 0;
     i--
   ){
 
-    const c=coinObjects[i];
+    const c =
+      coinObjects[i];
 
-    c.progress+=
-      dt*
+    c.progress +=
+      dt *
       (
-        .22+
-        speed/700
+        .22 +
+        speed / 700
       );
 
-    c.spin+=
-      dt*6;
+    c.spin +=
+      dt * 6;
 
     if(
-      c.progress>1.08
+      c.progress > 1.08
     ){
 
-      coinObjects.splice(i,1);
+      coinObjects.splice(
+        i,
+        1
+      );
 
       continue;
     }
 
-    const p=
+    const p =
       Math.max(
         .10,
         Math.min(
@@ -2138,39 +2288,46 @@ function updateCoins(dt){
         )
       );
 
-    c.y=
-      getHorizon()+
+    c.y =
+      getHorizon() +
       Math.pow(
         p,
         1.03
-      )*
+      ) *
       (
-        H-
+        H -
         getHorizon()
       );
 
-    const roadW=
-      roadWidthAt(c.y);
+    const roadW =
+      roadWidthAt(
+        c.y
+      );
 
-    const center=
-      roadCenterAt(c.y);
+    const center =
+      roadCenterAt(
+        c.y
+      );
 
-    const laneW=
-      roadW/3;
+    const laneW =
+      roadW / 3;
 
-    c.x=
-      center-
-      roadW/2+
-      laneW*
-      (c.lane+.5);
+    c.x =
+      center -
+      roadW / 2 +
+      laneW *
+      (c.lane + .5);
 
-    c.size=
-      4+
+    c.size =
+      4 +
       Math.pow(
         p,
         .65
-      )*17;
+      ) *
+      17;
+
   }
+
 }
 
 /* =========================================================
@@ -2190,13 +2347,18 @@ function drawCoins(){
       c.y
     );
 
-    const sx=
+    const sx =
       Math.abs(
-        Math.cos(c.spin)
+        Math.cos(
+          c.spin
+        )
       );
 
     ctx.scale(
-      Math.max(.18,sx),
+      Math.max(
+        .18,
+        sx
+      ),
       1
     );
 
@@ -2207,13 +2369,13 @@ function drawCoins(){
       0,
       c.size,
       0,
-      Math.PI*2
+      Math.PI * 2
     );
 
-    const grad=
+    const grad =
       ctx.createRadialGradient(
-        -c.size*.25,
-        -c.size*.25,
+        -c.size * .25,
+        -c.size * .25,
         1,
         0,
         0,
@@ -2235,23 +2397,32 @@ function drawCoins(){
       "#d28c00"
     );
 
-    ctx.fillStyle=grad;
+    ctx.fillStyle =
+      grad;
+
     ctx.fill();
 
-    ctx.strokeStyle="#a36c00";
-    ctx.lineWidth=2;
+    ctx.strokeStyle =
+      "#a36c00";
+
+    ctx.lineWidth = 2;
+
     ctx.stroke();
 
-    ctx.fillStyle="#8b5b00";
+    ctx.fillStyle =
+      "#8b5b00";
 
-    ctx.font=
+    ctx.font =
       `bold ${Math.max(
         6,
-        c.size*.9
+        c.size * .9
       )}px Arial`;
 
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
+    ctx.textAlign =
+      "center";
+
+    ctx.textBaseline =
+      "middle";
 
     ctx.fillText(
       "₺",
@@ -2260,7 +2431,9 @@ function drawCoins(){
     );
 
     ctx.restore();
+
   }
+
 }
 
 /* =========================================================
@@ -2270,50 +2443,60 @@ function drawCoins(){
 function hitTest(a,b){
 
   if(
-    b.drawW<15||
-    b.drawH<25
+    b.drawW < 15 ||
+    b.drawH < 25
   ){
+
     return false;
+
   }
 
-  const aw=
-    a.width*.68;
+  /*
+    Daha gerçekçi çarpışma alanı.
+    Aracın dış gölgeleri veya tamponları
+    yüzünden erken çarpışmayı azaltır.
+  */
 
-  const ah=
-    a.height*.65;
+  const aw =
+    a.width * .48;
 
-  const bw=
-    b.drawW*.67;
+  const ah =
+    a.height * .52;
 
-  const bh=
-    b.drawH*.65;
+  const bw =
+    b.drawW * .48;
+
+  const bh =
+    b.drawH * .52;
 
   return(
     Math.abs(
-      a.x-b.x
-    )<
-    (aw+bw)/2
+      a.x - b.x
+    ) <
+    (aw + bw) / 2
     &&
     Math.abs(
-      a.y-b.y
-    )<
-    (ah+bh)/2
+      a.y - b.y
+    ) <
+    (ah + bh) / 2
   );
+
 }
 
 function coinHit(c){
 
   return(
     Math.abs(
-      player.x-c.x
-    )<
-    player.width*.62
+      player.x - c.x
+    ) <
+    player.width * .62
     &&
     Math.abs(
-      player.y-c.y
-    )<
-    player.height*.60
+      player.y - c.y
+    ) <
+    player.height * .60
   );
+
 }
 
 /* =========================================================
@@ -2326,49 +2509,66 @@ function startGame(){
 
   if(
     audioCtx &&
-    audioCtx.state==="suspended"
+    audioCtx.state === "suspended"
   ){
+
     audioCtx.resume();
+
   }
 
-  running=true;
+  running = true;
 
-  menu.style.display="none";
-  gameOver.style.display="none";
+  menu.style.display =
+    "none";
 
-  score=0;
-  coins=0;
+  gameOver.style.display =
+    "none";
 
-  speed=0;
-  targetSpeed=0;
+  score = 0;
+  coins = 0;
 
-  roadOffset=0;
+  speed = 0;
+  targetSpeed = 0;
 
-  traffic=[];
-  coinObjects=[];
+  roadOffset = 0;
 
-  spawnTimer=.95;
-  coinTimer=1.25;
+  traffic = [];
+  coinObjects = [];
 
-  touchLeft=false;
-  touchRight=false;
+  spawnTimer = .95;
+  coinTimer = 1.25;
 
-  keyboardLeft=false;
-  keyboardRight=false;
+  touchLeft = false;
+  touchRight = false;
 
-  steering=0;
+  keyboardLeft = false;
+  keyboardRight = false;
 
-  player.x=W/2;
-  player.targetX=W/2;
-  player.y=getPlayerY();
-  player.tilt=0;
+  steering = 0;
 
-  speedText.textContent="0";
-  scoreText.textContent="0";
-  coinText.textContent="0";
+  player.x =
+    W / 2;
 
-  lastTime=
+  player.targetX =
+    W / 2;
+
+  player.y =
+    getPlayerY();
+
+  player.tilt = 0;
+
+  speedText.textContent =
+    "0";
+
+  scoreText.textContent =
+    "0";
+
+  coinText.textContent =
+    "0";
+
+  lastTime =
     performance.now();
+
 }
 
 /* =========================================================
@@ -2379,17 +2579,16 @@ function endGame(){
 
   if(!running)return;
 
-  running=false;
+  running = false;
 
-  speed=0;
+  speed = 0;
+  steering = 0;
 
-  steering=0;
+  touchLeft = false;
+  touchRight = false;
 
-  touchLeft=false;
-  touchRight=false;
-
-  keyboardLeft=false;
-  keyboardRight=false;
+  keyboardLeft = false;
+  keyboardRight = false;
 
   updateEngineSound();
 
@@ -2397,15 +2596,17 @@ function endGame(){
 
   document.getElementById(
     "finalScore"
-  ).textContent=
+  ).textContent =
     Math.floor(score);
 
   document.getElementById(
     "finalCoins"
-  ).textContent=
+  ).textContent =
     coins;
 
-  gameOver.style.display="flex";
+  gameOver.style.display =
+    "flex";
+
 }
 
 /* =========================================================
@@ -2416,67 +2617,69 @@ function update(dt){
 
   if(!running)return;
 
-  targetSpeed=
+  targetSpeed =
     Math.min(
       220,
-      95+
-      score*.025
+      95 +
+      score * .025
     );
 
-  speed+=
+  speed +=
     (
-      targetSpeed-
+      targetSpeed -
       speed
-    )*
+    ) *
     Math.min(
       1,
-      dt*1.6
+      dt * 1.6
     );
 
-  roadOffset+=
-    speed*
-    dt*
+  roadOffset +=
+    speed *
+    dt *
     2.8;
 
-  score+=
-    speed*
-    dt*
+  score +=
+    speed *
+    dt *
     .035;
 
   updatePlayer(dt);
 
-  spawnTimer-=dt;
-  coinTimer-=dt;
+  spawnTimer -= dt;
+  coinTimer -= dt;
 
   if(
-    spawnTimer<=0
+    spawnTimer <= 0
   ){
 
     spawnTraffic();
 
-    spawnTimer=
+    spawnTimer =
       Math.max(
         .72,
-        1.30-
-        speed/570
+        1.30 -
+        speed / 570
       );
+
   }
 
   if(
-    coinTimer<=0
+    coinTimer <= 0
   ){
 
     spawnCoin();
 
-    coinTimer=
-      1.05+
-      Math.random()*.85;
+    coinTimer =
+      1.05 +
+      Math.random() * .85;
+
   }
 
   updateTraffic(dt);
   updateCoins(dt);
 
-  /* trafik çarpışması */
+  /* Trafik çarpışması */
 
   for(
     const car of traffic
@@ -2492,15 +2695,17 @@ function update(dt){
       endGame();
 
       return;
+
     }
+
   }
 
-  /* altın toplama */
+  /* Altın */
 
   for(
-    let i=
-      coinObjects.length-1;
-    i>=0;
+    let i =
+      coinObjects.length - 1;
+    i >= 0;
     i--
   ){
 
@@ -2517,22 +2722,25 @@ function update(dt){
 
       coins++;
 
-      score+=25;
+      score += 25;
 
       coinSound();
+
     }
+
   }
 
-  speedText.textContent=
+  speedText.textContent =
     Math.floor(speed);
 
-  scoreText.textContent=
+  scoreText.textContent =
     Math.floor(score);
 
-  coinText.textContent=
+  coinText.textContent =
     coins;
 
   updateEngineSound();
+
 }
 
 /* =========================================================
@@ -2553,44 +2761,110 @@ function draw(){
   drawRoad();
 
   /*
-    Uzak araçlar önce çizilir.
-    Yakındaki araçlar sonradan çizilir.
+    ÖNEMLİ DÜZELTME:
+
+    Artık oyuncu arabasını zorla en üstte
+    çizmiyoruz.
+
+    Oyuncu ve trafik araçları aynı
+    perspektif sırasına sokuluyor.
+
+    Uzak araç önce,
+    yakın araç sonra çiziliyor.
+
+    Böylece yan yana geçişlerde oyuncu
+    aracının diğer arabanın üstünden
+    geçiyormuş gibi görünmesi engelleniyor.
   */
 
-  const sortedTraffic=
-    traffic.slice().sort(
-      (a,b)=>
-        a.y-b.y
-    );
+  const objects = [];
+
+  /* Trafik */
 
   for(
-    const car of sortedTraffic
+    const car of traffic
   ){
 
-    drawCar(
-      car.x,
-      car.y,
-      car.drawW,
-      car.drawH,
-      car.color,
-      false,
-      0
-    );
+    objects.push({
+
+      type:"traffic",
+
+      y:car.y,
+
+      car:car
+
+    });
+
   }
+
+  /* Oyuncu */
+
+  objects.push({
+
+    type:"player",
+
+    y:player.y,
+
+    car:player
+
+  });
+
+  /*
+    Uzak -> yakın
+  */
+
+  objects.sort(
+    (a,b) =>
+      a.y - b.y
+  );
+
+  for(
+    const obj of objects
+  ){
+
+    if(
+      obj.type === "traffic"
+    ){
+
+      const car =
+        obj.car;
+
+      drawCar(
+
+        car.x,
+        car.y,
+        car.drawW,
+        car.drawH,
+        car.color,
+        false,
+        0
+
+      );
+
+    }else{
+
+      drawCar(
+
+        player.x,
+        player.y,
+        player.width,
+        player.height,
+        player.color,
+        true,
+        player.tilt
+
+      );
+
+    }
+
+  }
+
+  /*
+    Altınları araçların üzerinde göster.
+  */
 
   drawCoins();
 
-  /* oyuncu her zaman üstte */
-
-  drawCar(
-    player.x,
-    player.y,
-    player.width,
-    player.height,
-    player.color,
-    true,
-    player.tilt
-  );
 }
 
 /* =========================================================
@@ -2599,31 +2873,42 @@ function draw(){
 
 function loop(now){
 
-  const dt=
+  const dt =
     Math.min(
       .035,
-      (now-lastTime)/1000||0
+      (now - lastTime) /
+      1000 || 0
     );
 
-  lastTime=now;
+  lastTime = now;
 
   update(dt);
 
   draw();
 
-  requestAnimationFrame(loop);
+  requestAnimationFrame(
+    loop
+  );
+
 }
 
 resize();
 
-player.x=W/2;
-player.targetX=W/2;
-player.y=getPlayerY();
+player.x =
+  W / 2;
 
-lastTime=
+player.targetX =
+  W / 2;
+
+player.y =
+  getPlayerY();
+
+lastTime =
   performance.now();
 
-requestAnimationFrame(loop);
+requestAnimationFrame(
+  loop
+);
 
 /* =========================================================
    TOUCH EVENTS
@@ -2635,14 +2920,16 @@ leftZone.addEventListener(
 
     e.preventDefault();
 
-    touchLeft=true;
+    touchLeft = true;
 
     calculateSteering();
 
     initAudio();
 
   },
-  {passive:false}
+  {
+    passive:false
+  }
 );
 
 rightZone.addEventListener(
@@ -2651,14 +2938,16 @@ rightZone.addEventListener(
 
     e.preventDefault();
 
-    touchRight=true;
+    touchRight = true;
 
     calculateSteering();
 
     initAudio();
 
   },
-  {passive:false}
+  {
+    passive:false
+  }
 );
 
 leftZone.addEventListener(
@@ -2667,12 +2956,14 @@ leftZone.addEventListener(
 
     e.preventDefault();
 
-    touchLeft=false;
+    touchLeft = false;
 
     calculateSteering();
 
   },
-  {passive:false}
+  {
+    passive:false
+  }
 );
 
 rightZone.addEventListener(
@@ -2681,36 +2972,42 @@ rightZone.addEventListener(
 
     e.preventDefault();
 
-    touchRight=false;
+    touchRight = false;
 
     calculateSteering();
 
   },
-  {passive:false}
+  {
+    passive:false
+  }
 );
 
 leftZone.addEventListener(
   "touchcancel",
   function(){
 
-    touchLeft=false;
+    touchLeft = false;
 
     calculateSteering();
 
   },
-  {passive:false}
+  {
+    passive:false
+  }
 );
 
 rightZone.addEventListener(
   "touchcancel",
   function(){
 
-    touchRight=false;
+    touchRight = false;
 
     calculateSteering();
 
   },
-  {passive:false}
+  {
+    passive:false
+  }
 );
 
 /* =========================================================
@@ -2721,20 +3018,28 @@ leftZone.addEventListener(
   "pointerdown",
   function(e){
 
-    if(e.pointerType==="mouse")
+    if(
+      e.pointerType === "mouse"
+    ){
       return;
+    }
 
     e.preventDefault();
 
-    touchLeft=true;
+    touchLeft = true;
 
     calculateSteering();
 
+    initAudio();
+
     try{
+
       leftZone.setPointerCapture(
         e.pointerId
       );
+
     }catch(err){}
+
   }
 );
 
@@ -2742,20 +3047,28 @@ rightZone.addEventListener(
   "pointerdown",
   function(e){
 
-    if(e.pointerType==="mouse")
+    if(
+      e.pointerType === "mouse"
+    ){
       return;
+    }
 
     e.preventDefault();
 
-    touchRight=true;
+    touchRight = true;
 
     calculateSteering();
 
+    initAudio();
+
     try{
+
       rightZone.setPointerCapture(
         e.pointerId
       );
+
     }catch(err){}
+
   }
 );
 
@@ -2763,12 +3076,16 @@ leftZone.addEventListener(
   "pointerup",
   function(e){
 
-    if(e.pointerType==="mouse")
+    if(
+      e.pointerType === "mouse"
+    ){
       return;
+    }
 
-    touchLeft=false;
+    touchLeft = false;
 
     calculateSteering();
+
   }
 );
 
@@ -2776,12 +3093,16 @@ rightZone.addEventListener(
   "pointerup",
   function(e){
 
-    if(e.pointerType==="mouse")
+    if(
+      e.pointerType === "mouse"
+    ){
       return;
+    }
 
-    touchRight=false;
+    touchRight = false;
 
     calculateSteering();
+
   }
 );
 
@@ -2789,9 +3110,10 @@ leftZone.addEventListener(
   "pointercancel",
   function(){
 
-    touchLeft=false;
+    touchLeft = false;
 
     calculateSteering();
+
   }
 );
 
@@ -2799,9 +3121,10 @@ rightZone.addEventListener(
   "pointercancel",
   function(){
 
-    touchRight=false;
+    touchRight = false;
 
     calculateSteering();
+
   }
 );
 
@@ -2813,13 +3136,14 @@ window.addEventListener(
   "blur",
   function(){
 
-    touchLeft=false;
-    touchRight=false;
+    touchLeft = false;
+    touchRight = false;
 
-    keyboardLeft=false;
-    keyboardRight=false;
+    keyboardLeft = false;
+    keyboardRight = false;
 
-    steering=0;
+    steering = 0;
+
   }
 );
 
@@ -2832,36 +3156,40 @@ window.addEventListener(
   function(e){
 
     if(
-      e.key==="ArrowLeft"
+      e.key === "ArrowLeft"
     ){
 
-      keyboardLeft=true;
+      keyboardLeft = true;
 
       calculateSteering();
 
       e.preventDefault();
+
     }
 
     if(
-      e.key==="ArrowRight"
+      e.key === "ArrowRight"
     ){
 
-      keyboardRight=true;
+      keyboardRight = true;
 
       calculateSteering();
 
       e.preventDefault();
+
     }
 
     if(
-      e.key===" " &&
+      e.key === " " &&
       !running
     ){
 
       startGame();
 
       e.preventDefault();
+
     }
+
   }
 );
 
@@ -2870,22 +3198,25 @@ window.addEventListener(
   function(e){
 
     if(
-      e.key==="ArrowLeft"
+      e.key === "ArrowLeft"
     ){
 
-      keyboardLeft=false;
+      keyboardLeft = false;
 
       calculateSteering();
+
     }
 
     if(
-      e.key==="ArrowRight"
+      e.key === "ArrowRight"
     ){
 
-      keyboardRight=false;
+      keyboardRight = false;
 
       calculateSteering();
+
     }
+
   }
 );
 
@@ -2913,22 +3244,32 @@ document.getElementById(
   "click",
   function(){
 
-    running=false;
+    running = false;
 
-    speed=0;
+    speed = 0;
 
-    gameOver.style.display="none";
-    menu.style.display="flex";
+    gameOver.style.display =
+      "none";
 
-    touchLeft=false;
-    touchRight=false;
+    menu.style.display =
+      "flex";
 
-    keyboardLeft=false;
-    keyboardRight=false;
+    touchLeft = false;
+    touchRight = false;
 
-    steering=0;
+    keyboardLeft = false;
+    keyboardRight = false;
+
+    steering = 0;
+
+    updateEngineSound();
+
   }
 );
+
+/* =========================================================
+   YARDIM
+========================================================= */
 
 document.getElementById(
   "helpBtn"
@@ -2937,15 +3278,23 @@ document.getElementById(
   function(){
 
     alert(
-      "TURBO ROAD\n\n"+
-      "📱 SOLA: ekranın soluna basılı tut\n"+
-      "📱 SAĞA: ekranın sağına basılı tut\n"+
-      "☝️ Parmağını kaldırınca araç düz gider\n\n"+
-      "💻 Bilgisayar: ← →\n\n"+
-      "🪙 Altınları topla\n"+
-      "🚗 Trafiğe çarpma\n"+
+      "TURBO ROAD\n\n" +
+
+      "📱 SOLA: ekranın soluna basılı tut\n" +
+
+      "📱 SAĞA: ekranın sağına basılı tut\n" +
+
+      "☝️ Parmağını kaldırınca araç düz gider\n\n" +
+
+      "💻 Bilgisayar: ← →\n\n" +
+
+      "🪙 Altınları topla\n" +
+
+      "🚗 Trafiğe çarpma\n" +
+
       "🏎️ Hız arttıkça motor sesi yükselir."
     );
+
   }
 );
 
@@ -2959,17 +3308,19 @@ document.getElementById(
   "click",
   function(){
 
-    soundEnabled=
+    soundEnabled =
       !soundEnabled;
 
-    this.textContent=
+    this.textContent =
       soundEnabled
         ?
         "🔊"
         :
         "🔇";
 
-    if(!soundEnabled){
+    if(
+      !soundEnabled
+    ){
 
       if(
         engineGain &&
@@ -2981,6 +3332,7 @@ document.getElementById(
           audioCtx.currentTime,
           .05
         );
+
       }
 
     }else{
@@ -2989,14 +3341,17 @@ document.getElementById(
 
       if(
         audioCtx &&
-        audioCtx.state==="suspended"
+        audioCtx.state === "suspended"
       ){
 
         audioCtx.resume();
+
       }
 
       updateEngineSound();
+
     }
+
   }
 );
 
