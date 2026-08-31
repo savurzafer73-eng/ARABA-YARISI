@@ -3,238 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Araba Yarışı Oyunu</title>
+    <title>Gelişmiş Araba Yarışı</title>
     <style>
-        body {
-            margin: 0;
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background: #111; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        
+        #oyun-kapsayici {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background: #333;
+            border-left: 8px solid #f1c40f;
+            border-right: 8px solid #f1c40f;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+        }
+
+        /* Tam Ekran Stili */
+        #oyun-kapsayici:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+        }
+
+        /* Yol Çizgileri */
+        .yol-cizgisi {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 50px;
+            background: #fff;
+        }
+
+        /* Araç Stilleri */
+        .arac {
+            position: absolute;
+            width: 45px;
+            height: 75px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        .arac-cam {
+            position: absolute;
+            top: 18px;
+            left: 5px;
+            width: 35px;
+            height: 22px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 3px;
+        }
+        .far {
+            position: absolute;
+            top: 0;
+            width: 8px;
+            height: 6px;
+            background: #fff;
+            box-shadow: 0 0 10px #fff;
+        }
+        .far-sol { left: 4px; }
+        .far-sag { right: 4px; }
+
+        /* Arayüz Panelleri */
+        .panel {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 15, 15, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .gizli { display: none !important; }
+
+        #hud {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+            font-weight: bold;
+            font-size: 18px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:hover { transform: scale(1.05); background: #2ecc71; }
+        button.buy-btn { background: #e67e22; }
+        button.buy-btn:hover { background: #f39c12; }
+        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+
+        .arac-kart-liste {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            overflow-x: auto;
+            max-width: 100%;
+            padding: 10px;
+        }
+
+        .arac-kart {
             background: #222;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            color: white;
-            user-select: none;
         }
-        #puan-tabelasi {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        #oyun-alani {
-            position: relative;
-            width: 300px;
-            height: 500px;
-            background: #444;
-            border-left: 8px dashed #fff;
-            border-right: 8px dashed #fff;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
-        .yol-cizgisi {
-            position: absolute;
-            left: 145px;
-            width: 10px;
-            height: 40px;
-            background: #fff;
-        }
-        #oyuncu-arabasi {
-            position: absolute;
-            bottom: 20px;
-            left: 130px;
-            width: 40px;
-            height: 70px;
-            background: #e74c3c;
-            border-radius: 8px;
-            box-shadow: 0 0 5px #000;
-        }
-        #oyuncu-arabasi::after {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 5px;
-            width: 30px;
-            height: 20px;
-            background: #333;
-            border-radius: 3px;
-        }
-        .engel {
-            position: absolute;
-            top: -80px;
-            width: 40px;
-            height: 70px;
-            background: #3498db;
-            border-radius: 8px;
-            box-shadow: 0 0 5px #000;
-        }
-        .engel::after {
-            content: '';
-            position: absolute;
-            bottom: 15px;
-            left: 5px;
-            width: 30px;
-            height: 20px;
-            background: #333;
-            border-radius: 3px;
-        }
-        #oyun-bitti {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.85);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 10;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #2ecc71;
-            color: white;
-            border: none;
+        .arac-kart.secili { border-color: #2ecc71; }
+        .arac-onizleme {
+            width: 35px;
+            height: 60px;
             border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            background: #27ae60;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div id="puan-tabelasi">Skor: <span id="skor">0</span></div>
-    
-    <div id="oyun-alani">
-        <div id="oyuncu-arabasi"></div>
-        <div id="oyun-bitti">
-            <h2>Kaza Yaptın!</h2>
-            <p>Toplam Skor: <span id="son-skor">0</span></p>
-            <button onclick="oyunuYenidenBaslat()">Tekrar Oyna</button>
-        </div>
+<div id="oyun-kapsayici">
+    <!-- HUD Panel -->
+    <div id="hud">
+        <div>Hız: <span id="hiz-gosterge">0</span> km/h</div>
+        <div>Para: <span id="para-gosterge">0</span>$</div>
+        <div>Skor: <span id="skor-gosterge">0</span></div>
     </div>
 
-    <script>
-        const oyunAlani = document.getElementById('oyun-alani');
-        const oyuncu = document.getElementById('oyuncu-arabasi');
-        const skorEkrani = document.getElementById('skor');
-        const oyunBittiEkrani = document.getElementById('oyun-bitti');
-        const sonSkorEkrani = document.getElementById('son-skor');
+    <!-- Oyuncu ve Oyun Alanı -->
+    <div id="oyuncu" class="arac">
+        <div class="far far-sol"></div>
+        <div class="far far-sag"></div>
+        <div class="arac-cam"></div>
+    </div>
 
-        let oyuncuX = 130;
-        let skor = 0;
-        let oyunDevamEdiyor = true;
-        let hiz = 4;
-        let engeller = [];
-        let cizgiler = [];
+    <!-- Ana Menü -->
+    <div id="ana-menu" class="panel">
+        <h1 style="color: #f1c40f; margin-bottom: 20px;">ARABA YARIŞI PRO</h1>
+        <button onclick="oyunuBaslat()">OYUNA BAŞLA</button>
+        <button onclick="garajiAc()">GARAJ / MAĞAZA</button>
+        <button onclick="tamEkranYap()">TAM EKRAN</button>
+    </div>
 
-        // Yol çizgilerini oluştur
-        for (let i = 0; i < 5; i++) {
-            let cizgi = document.createElement('div');
-            cizgi.className = 'yol-cizgisi';
-            cizgi.style.top = (i * 120) + 'px';
-            oyunAlani.appendChild(cizgi);
-            cizgiler.push(cizgi);
+    <!-- Garaj Menüsü -->
+    <div id="garaj-menu" class="panel gizli">
+        <h2>GARAJI GÖZDEN GEÇİR</h2>
+        <p style="margin-top:5px;">Toplam Bakiye: <span id="garaj-para">0</span>$</p>
+        <div class="arac-kart-liste" id="garaj-listesi"></div>
+        <button onclick="menuyeDon()">ANA MENÜYE DÖN</button>
+    </div>
+
+    <!-- Oyun Bitti Menüsü -->
+    <div id="game-over-menu" class="panel gizli">
+        <h1 style="color: #e74c3c;">KAZA YAPTIN!</h1>
+        <p style="margin: 10px 0;">Kazanılan Skor: <span id="son-skor">0</span></p>
+        <p style="margin-bottom: 15px;">Kazanılan Para: +<span id="kazanilan-para">0</span>$</p>
+        <button onclick="oyunuBaslat()">TEKRAR DENE</button>
+        <button onclick="menuyeDon()">ANA MENÜ</button>
+    </div>
+</div>
+
+<script>
+    // Ses Efektleri Sistem (Web Audio API)
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function sesOlustur(frekans, tip, sure, sesSeviyesi = 0.1) {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = tip;
+            osc.frequency.setValueAtTime(frekans, audioCtx.currentTime);
+            gain.gain.setValueAtTime(sesSeviyesi, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + sure);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + sure);
+        } catch (e) {}
+    }
+
+    function kazaSesi() {
+        if (!audioCtx) return;
+        const bufferSize = audioCtx.sampleRate * 0.5;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        noise.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start();
+    }
+
+    // Araç Veritabanı
+    const ARACLAR = [
+        { id: 0, ad: "Kırmızı Klasik", renk: "#e74c3c", maxHiz: 12, ivme: 0.2, fiyat: 0, sahip: true },
+        { id: 1, ad: "Mavi Fırtına", renk: "#3498db", maxHiz: 15, ivme: 0.3, fiyat: 200, sahip: false },
+        { id: 2, ad: "Yeşil Canavar", renk: "#2ecc71", maxHiz: 18, ivme: 0.4, fiyat: 500, sahip: false },
+        { id: 3, ad: "Sarı Şimşek", renk: "#f1c40f", maxHiz: 22, ivme: 0.5, fiyat: 1000, sahip: false }
+    ];
+
+    // Oyun Durum Değişkenleri
+    let para = parseInt(localStorage.getItem('yarıs_para')) || 0;
+    let seciliAracId = parseInt(localStorage.getItem('yarıs_secili_arac')) || 0;
+    let sahipOlunanlar = JSON.parse(localStorage.getItem('yarıs_sahip_araclar')) || [0];
+    
+    // Verileri Senkronize Et
+    ARACLAR.forEach(a => { if(sahipOlunanlar.includes(a.id)) a.sahip = true; });
+
+    let oyunda = false;
+    let oyuncuX = 175;
+    let oyuncuY = 480;
+    let mevcutHiz = 0;
+    let skor = 0;
+    let engeller = [];
+    let cizgiler = [];
+
+    // Tuş Kontrolleri
+    const tuslar = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+    window.addEventListener('keydown', e => {
+        if(tuslar.hasOwnProperty(e.key)) tuslar[e.key] = true;
+    });
+    window.addEventListener('keyup', e => {
+        if(tuslar.hasOwnProperty(e.key)) tuslar[e.key] = false;
+    });
+
+    const kapsayici = document.getElementById('oyun-kapsayici');
+    const oyuncuEl = document.getElementById('oyuncu');
+
+    // Yol Çizgilerini Oluştur
+    for (let i = 0; i < 6; i++) {
+        let cizgi = document.createElement('div');
+        cizgi.className = 'yol-cizgisi';
+        cizgi.style.top = (i * 120) + 'px';
+        kapsayici.appendChild(cizgi);
+        cizgiler.push(cizgi);
+    }
+
+    function tamEkranYap() {
+        if (!document.fullscreenElement) {
+            kapsayici.requestFullscreen().catch(err => alert("Tam ekran yapılamadı."));
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function oyunuBaslat() {
+        if(!audioCtx) audioCtx = new AudioContext();
+        
+        document.getElementById('ana-menu').classList.add('gizli');
+        document.getElementById('game-over-menu').classList.add('gizli');
+        document.getElementById('garaj-menu').classList.add('gizli');
+        
+        // Temizle ve Sıfırla
+        engeller.forEach(e => e.el.remove());
+        engeller = [];
+        skor = 0;
+        mevcutHiz = 0;
+        oyuncuX = (kapsayici.clientWidth / 2) - 22;
+        oyuncuY = kapsayici.clientHeight - 100;
+
+        const aktifArac = ARACLAR[seciliAracId];
+        oyuncuEl.style.background = aktifArac.renk;
+        
+        oyunda = true;
+        guncelleHUD();
+        requestAnimationFrame(oyunDongusu);
+    }
+
+    function oyunDongusu() {
+        if (!oyunda) return;
+
+        const aktifArac = ARACLAR[seciliAracId];
+
+        // İvmelenme & Hızlanma / Yavaşlama Fizikleri
+        if (tuslar.ArrowUp) {
+            if (mevcutHiz < aktifArac.maxHiz) mevcutHiz += aktifArac.ivme;
+        } else if (tuslar.ArrowDown) {
+            if (mevcutHiz > 0) mevcutHiz -= aktifArac.ivme * 1.5;
+        } else {
+            if (mevcutHiz > 0) mevcutHiz -= 0.05; // Sürtünme
+        }
+        if (mevcutHiz < 0) mevcutHiz = 0;
+
+        // Direksiyon Kontrolü
+        if (tuslar.ArrowLeft && oyuncuX > 10) {
+            oyuncuX -= 4 + (mevcutHiz * 0.2);
+            oyuncuEl.style.transform = 'rotate(-5deg)';
+        } else if (tuslar.ArrowRight && oyuncuX < kapsayici.clientWidth - 55) {
+            oyuncuX += 4 + (mevcutHiz * 0.2);
+            oyuncuEl.style.transform = 'rotate(5deg)';
+        } else {
+            oyuncuEl.style.transform = 'rotate(0deg)';
         }
 
-        // Klavye Kontrolleri
-        document.addEventListener('keydown', (e) => {
-            if (!oyunDevamEdiyor) return;
-            if (e.key === 'ArrowLeft' && oyuncuX > 10) {
-                oyuncuX -= 20;
-            } else if (e.key === 'ArrowRight' && oyuncuX < 250) {
-                oyuncuX += 20;
-            }
-            oyuncu.style.left = oyuncuX + 'px';
+        oyuncuEl.style.left = oyuncuX + 'px';
+        oyuncuEl.style.top = oyuncuY + 'px';
+
+        // Çizgileri Hareket Ettir
+        cizgiler.forEach(c => {
+            let y = parseFloat(c.style.top);
+            y += mevcutHiz;
+            if (y > kapsayici.clientHeight) y = -60;
+            c.style.top = y + 'px';
         });
 
-        // Yeni Engel Ekle
-        function engelOlustur() {
-            let engel = document.createElement('div');
-            engel.className = 'engel';
-            // Rastgele şerit pozisyonu (sol, orta, sağ)
-            const pozisyonlar = [30, 130, 230];
-            let rastgeleX = pozisyonlar[Math.floor(Math.random() * pozisyonlar.length)];
-            engel.style.left = rastgeleX + 'px';
-            engel.style.top = '-80px';
-            oyunAlani.appendChild(engel);
-            engeller.push(engel);
+        // Engelleri Oluştur (Hıza Bağlı)
+        if (Math.random() < 0.02 && engeller.length < 4 && mevcutHiz > 1) {
+            let engelEl = document.createElement('div');
+            engelEl.className = 'arac';
+            
+            // Rastgele Renk ve Şerit
+            const renklers = ['#9b59b6', '#e67e22', '#1abc9c', '#34495e'];
+            const rastgeleRenk = renklers[Math.floor(Math.random() * renklers.length)];
+            engelEl.style.background = rastgeleRenk;
+            
+            let cam = document.createElement('div');
+            cam.className = 'arac-cam';
+            engelEl.appendChild(cam);
+
+            let posX = Math.random() * (kapsayici.clientWidth - 60) + 10;
+            engelEl.style.left = posX + 'px';
+            engelEl.style.top = '-80px';
+            
+            kapsayici.appendChild(engelEl);
+            engeller.push({ el: engelEl, x: posX, y: -80, hiz: Math.random() * 3 + 2 });
         }
 
-        // Ana Oyun Döngüsü
-        function oyunDongusu() {
-            if (!oyunDevamEdiyor) return;
+        // Engelleri Güncelle ve Çarpışma Testi
+        for (let i = engeller.length - 1; i >= 0; i--) {
+            let e = engeller[i];
+            e.y += mevcutHiz - e.hiz;
+            e.el.style.top = e.y + 'px';
 
-            // Çizgileri hareket ettir
-            cizgiler.forEach(cizgi => {
-                let y = parseInt(cizgi.style.top);
-                y += hiz;
-                if (y > 500) y = -40;
-                cizgi.style.top = y + 'px';
-            });
-
-            // Engelleri hareket ettir ve Çarpışma Kontrolü
-            for (let i = 0; i < engeller.length; i++) {
-                let engel = engeller[i];
-                let y = parseInt(engel.style.top);
-                y += hiz;
-                engel.style.top = y + 'px';
-
-                // Çarpışma Algılama (Hitbox)
-                let oyuncuRect = oyuncu.getBoundingClientRect();
-                let engelRect = engel.getBoundingClientRect();
-
-                if (!(oyuncuRect.right < engelRect.left || 
-                      oyuncuRect.left > engelRect.right || 
-                      oyuncuRect.bottom < engelRect.top || 
-                      oyuncuRect.top > engelRect.bottom)) {
-                    oyunuBitir();
-                    return;
-                }
-
-                // Ekrandan çıkan engeli sil ve puan ekle
-                if (y > 500) {
-                    engel.remove();
-                    engeller.splice(i, 1);
-                    skor += 10;
-                    skorEkrani.innerText = skor;
-                    if (skor % 50 === 0) hiz += 0.5; // Gittikçe hızlandır
-                    i--;
-                }
+            // Çarpışma Tespiti (Hitbox)
+            if (Math.abs(oyuncuX - e.x) < 38 && Math.abs(oyuncuY - e.y) < 65) {
+                oyunuBitir();
+                return;
             }
 
-            requestAnimationFrame(oyunDongusu);
+            // Ekrandan Çıkan Engeller
+            if (e.y > kapsayici.clientHeight + 100 || e.y < -150) {
+                e.el.remove();
+                engeller.splice(i, 1);
+                if (e.y > kapsayici.clientHeight) {
+                    skor += 10;
+                    sesOlustur(600, 'sine', 0.05, 0.05); // Skorda hafif ses
+                }
+            }
         }
 
-        // Periyodik olarak engel çıkar
-        let engelZamanlayici = setInterval(() => {
-            if (oyunDevamEdiyor) engelOlustur();
-        }, 1500);
+        // Skor ve Hız Göstergesi Güncelle
+        if (mevcutHiz > 0) skor += Math.floor(mevcutHiz * 0.1);
+        guncelleHUD();
 
-        function oyunuBitir() {
-            oyunDevamEdiyor = false;
-            sonSkorEkrani.innerText = skor;
-            oyunBittiEkrani.style.display = 'block';
+        requestAnimationFrame(oyunDongusu);
+    }
+
+    function guncelleHUD() {
+        document.getElementById('hiz-gosterge').innerText = Math.floor(mevcutHiz * 15);
+        document.getElementById('para-gosterge').innerText = para;
+        document.getElementById('skor-gosterge').innerText = skor;
+    }
+
+    function oyunuBitir() {
+        oyunda = false;
+        kazaSesi();
+        
+        let kazanilan = Math.floor(skor / 5);
+        para += kazanilan;
+        localStorage.setItem('yarıs_para', para);
+
+        document.getElementById('son-skor').innerText = skor;
+        document.getElementById('kazanilan-para').innerText = kazanilan;
+        document.getElementById('game-over-menu').classList.remove('gizli');
+    }
+
+    function menuyeDon() {
+        oyunda = false;
+        document.getElementById('ana-menu').classList.remove('gizli');
+        document.getElementById('garaj-menu').classList.add('gizli');
+        document.getElementById('game-over-menu').classList.add('gizli');
+        engeller.forEach(e => e.el.remove());
+        engeller = [];
+    }
+
+    // Garaj ve Mağaza Mantığı
+    function garajiAc() {
+        document.getElementById('ana-menu').classList.add('gizli');
+        document.getElementById('garaj-menu').classList.remove('gizli');
+        document.getElementById('garaj-para').innerText = para;
+
+        const liste = document.getElementById('garaj-listesi');
+        liste.innerHTML = '';
+
+        ARACLAR.forEach(a => {
+            let kart = document.createElement('div');
+            kart.className = `arac-kart ${seciliAracId === a.id ? 'secili' : ''}`;
+            
+            let butonHTML = '';
+            if (a.sahip) {
+                butonHTML = seciliAracId === a.id ? 
+                    '<button disabled>SEÇİLİ</button>' : 
+                    `<button onclick="aracSec(${a.id})">SEÇ</button>`;
+            } else {
+                butonHTML = `<button class="buy-btn" onclick="aracSatinAl(${a.id})">${a.fiyat}$ SATIN AL</button>`;
+            }
+
+            kart.innerHTML = `
+                <div class="arac-onizleme" style="background:${a.renk}"></div>
+                <strong>${a.ad}</strong>
+                <small>Max Hız: ${a.maxHiz * 15}</small>
+                <div style="margin-top:10px;">${butonHTML}</div>
+            `;
+            liste.appendChild(kart);
+        });
+    }
+
+    function aracSec(id) {
+        seciliAracId = id;
+        localStorage.setItem('yarıs_secili_arac', id);
+        sesOlustur(440, 'sine', 0.1);
+        garajiAc();
+    }
+
+    function aracSatinAl(id) {
+        const arac = ARACLAR[id];
+        if (para >= arac.fiyat) {
+            para -= arac.fiyat;
+            arac.sahip = true;
+            sahipOlunanlar.push(id);
+            localStorage.setItem('yarıs_para', para);
+            localStorage.setItem('yarıs_sahip_araclar', JSON.stringify(sahipOlunanlar));
+            sesOlustur(880, 'triangle', 0.2);
+            aracSec(id);
+        } else {
+            alert("Yeterli paranız yok!");
         }
-
-        function oyunuYenidenBaslat() {
-            engeller.forEach(e => e.remove());
-            engeller = [];
-            skor = 0;
-            hiz = 4;
-            oyuncuX = 130;
-            oyuncu.style.left = oyuncuX + 'px';
-            skorEkrani.innerText = skor;
-            oyunBittiEkrani.style.display = 'none';
-            oyunDevamEdiyor = true;
-            oyunDongusu();
-        }
-
-        // Oyunu Başlat
-        oyunDongusu();
-    </script>
+    }
+</script>
 </body>
 </html>
