@@ -318,11 +318,11 @@ function getLaneX(l,y){
 
 function getCarSize(){
 
-  var w=Math.min(W*.085,108);
+  var w=Math.min(W*.105,118);
 
   return {
     w:w,
-    h:w*1.58
+    h:w*.82
   };
 }
 
@@ -619,105 +619,322 @@ function drawCar(x,y,w,h,colorIndex,isPlayer){
   var color=colors[colorIndex%colors.length];
 
   ctx.save();
-
   ctx.translate(x,y);
 
-  /* gölge */
+  /* =========================
+     GÖLGE
+  ========================= */
 
-  ctx.fillStyle="rgba(0,0,0,.45)";
+  ctx.fillStyle="rgba(0,0,0,.42)";
 
   ctx.beginPath();
   ctx.ellipse(
     0,
-    h*.47,
-    w*.52,
-    h*.105,
+    h*.48,
+    w*.56,
+    h*.12,
     0,
     0,
     Math.PI*2
   );
   ctx.fill();
 
-  /* dış gövde */
+  /* =========================
+     ANA GÖVDE
+  ========================= */
 
-  var body=ctx.createLinearGradient(-w/2,0,w/2,0);
+  var body=ctx.createLinearGradient(
+    -w*.5,
+    0,
+    w*.5,
+    0
+  );
 
-  body.addColorStop(0,"#090b0e");
-  body.addColorStop(.14,color);
-  body.addColorStop(.5,color);
-  body.addColorStop(.86,color);
-  body.addColorStop(1,"#090b0e");
+  body.addColorStop(0,"#07090c");
+  body.addColorStop(.08,"#24282c");
+  body.addColorStop(.20,color);
+  body.addColorStop(.50,color);
+  body.addColorStop(.80,color);
+  body.addColorStop(.92,"#24282c");
+  body.addColorStop(1,"#07090c");
 
   roundRect(
     -w*.46,
-    -h*.5,
+    -h*.50,
     w*.92,
-    h*.98,
-    w*.12
+    h*.96,
+    w*.13
   );
 
   ctx.fillStyle=body;
   ctx.fill();
 
-  /* tavan */
+  /* =========================
+     KAPUT
+  ========================= */
 
-  var roofW=w*.60;
-  var roofH=h*.34;
-  var roofY=-h*.29;
+  var hood=ctx.createLinearGradient(
+    0,
+    h*.02,
+    0,
+    h*.30
+  );
+
+  hood.addColorStop(0,"rgba(255,255,255,.18)");
+  hood.addColorStop(.45,"rgba(255,255,255,.06)");
+  hood.addColorStop(1,"rgba(0,0,0,.12)");
 
   roundRect(
-    -roofW/2,
-    roofY,
-    roofW,
-    roofH,
-    w*.08
+    -w*.36,
+    h*.04,
+    w*.72,
+    h*.27,
+    w*.045
+  );
+
+  ctx.fillStyle=hood;
+  ctx.fill();
+
+  /* =========================
+     TAVAN / KABİN
+  ========================= */
+
+  var cabinW=w*.62;
+  var cabinH=h*.39;
+  var cabinY=-h*.31;
+
+  roundRect(
+    -cabinW/2,
+    cabinY,
+    cabinW,
+    cabinH,
+    w*.09
   );
 
   var glass=ctx.createLinearGradient(
-    0,roofY,
-    0,roofY+roofH
+    0,
+    cabinY,
+    0,
+    cabinY+cabinH
   );
 
-  glass.addColorStop(0,"#09141d");
-  glass.addColorStop(.5,"#355364");
-  glass.addColorStop(1,"#091118");
+  glass.addColorStop(0,"#071019");
+  glass.addColorStop(.35,"#294553");
+  glass.addColorStop(.72,"#172c38");
+  glass.addColorStop(1,"#050b10");
 
   ctx.fillStyle=glass;
   ctx.fill();
 
-  /* cam orta çizgisi */
+  /* ön cam */
 
-  ctx.fillStyle="rgba(255,255,255,.14)";
+  ctx.fillStyle="rgba(105,170,195,.24)";
+
+  ctx.beginPath();
+  ctx.moveTo(-cabinW*.40,cabinY+cabinH*.12);
+  ctx.lineTo(cabinW*.40,cabinY+cabinH*.12);
+  ctx.lineTo(cabinW*.32,cabinY+cabinH*.42);
+  ctx.lineTo(-cabinW*.32,cabinY+cabinH*.42);
+  ctx.closePath();
+  ctx.fill();
+
+  /* cam orta direği */
+
+  ctx.fillStyle="rgba(255,255,255,.13)";
 
   ctx.fillRect(
     -w*.014,
-    roofY,
+    cabinY,
     w*.028,
-    roofH
+    cabinH
   );
 
-  /* kaput parlaması */
+  /* =========================
+     YAN CAMLAR
+  ========================= */
 
-  ctx.fillStyle="rgba(255,255,255,.12)";
+  ctx.fillStyle="rgba(8,17,23,.78)";
 
   roundRect(
-    -w*.30,
-    h*.05,
-    w*.60,
-    h*.17,
+    -cabinW*.43,
+    cabinY+cabinH*.48,
+    cabinW*.32,
+    cabinH*.27,
+    w*.025
+  );
+  ctx.fill();
+
+  roundRect(
+    cabinW*.11,
+    cabinY+cabinH*.48,
+    cabinW*.32,
+    cabinH*.27,
+    w*.025
+  );
+  ctx.fill();
+
+  /* =========================
+     ÖN IZGARA
+  ========================= */
+
+  ctx.fillStyle="#090d11";
+
+  roundRect(
+    -w*.25,
+    h*.315,
+    w*.50,
+    h*.075,
     w*.025
   );
 
   ctx.fill();
 
-  /* farlar */
+  /* ızgara çizgileri */
 
-  ctx.fillStyle="#fff6cf";
+  ctx.strokeStyle="rgba(255,255,255,.18)";
+  ctx.lineWidth=Math.max(1,w*.012);
+
+  for(var gr=-2;gr<=2;gr++){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      gr*w*.075,
+      h*.325
+    );
+
+    ctx.lineTo(
+      gr*w*.075,
+      h*.38
+    );
+
+    ctx.stroke();
+  }
+
+  /* =========================
+     4 FAR
+  ========================= */
+
+  ctx.fillStyle="#fff7d0";
 
   roundRect(
-    -w*.35,
-    h*.18,
+    -w*.36,
+    h*.22,
     w*.18,
+    h*.065,
+    w*.018
+  );
+  ctx.fill();
+
+  roundRect(
+    w*.18,
+    h*.22,
+    w*.18,
+    h*.065,
+    w*.018
+  );
+  ctx.fill();
+
+  /* far parlaması */
+
+  ctx.fillStyle="rgba(255,255,220,.30)";
+
+  ctx.beginPath();
+  ctx.arc(
+    -w*.27,
+    h*.252,
+    w*.07,
+    0,
+    Math.PI*2
+  );
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(
+    w*.27,
+    h*.252,
+    w*.07,
+    0,
+    Math.PI*2
+  );
+  ctx.fill();
+
+  /* =========================
+     4 TEKERLEK
+  ========================= */
+
+  var wheelW=w*.135;
+  var wheelH=h*.25;
+
+  var wheelPositions=[
+    [-w*.405,-h*.28],
+    [ w*.405,-h*.28],
+    [-w*.405, h*.20],
+    [ w*.405, h*.20]
+  ];
+
+  for(var wi=0;wi<4;wi++){
+
+    var wx=wheelPositions[wi][0];
+    var wy=wheelPositions[wi][1];
+
+    /* lastik */
+
+    ctx.fillStyle="#050608";
+
+    roundRect(
+      wx-wheelW/2,
+      wy-wheelH/2,
+      wheelW,
+      wheelH,
+      wheelW*.28
+    );
+
+    ctx.fill();
+
+    /* jant */
+
+    ctx.fillStyle="#899197";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      wx,
+      wy,
+      wheelW*.27,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* jant merkezi */
+
+    ctx.fillStyle="#252a2e";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      wx,
+      wy,
+      wheelW*.11,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+  }
+
+  /* =========================
+     ARKA STOPLAR
+  ========================= */
+
+  ctx.fillStyle="#ff2929";
+
+  roundRect(
+    -w*.36,
+    -h*.43,
+    w*.19,
     h*.06,
     w*.015
   );
@@ -725,113 +942,44 @@ function drawCar(x,y,w,h,colorIndex,isPlayer){
 
   roundRect(
     w*.17,
-    h*.18,
-    w*.18,
+    -h*.43,
+    w*.19,
     h*.06,
     w*.015
   );
   ctx.fill();
 
-  /* ön ızgara */
+  /* =========================
+     PLAKA
+  ========================= */
 
-  ctx.fillStyle="#111519";
+  ctx.fillStyle="#e7e7df";
 
   roundRect(
-    -w*.23,
-    h*.29,
-    w*.46,
-    h*.08,
-    w*.02
+    -w*.15,
+    h*.39,
+    w*.30,
+    h*.045,
+    w*.008
   );
 
   ctx.fill();
 
-  /* tekerlekler */
-
-  var sides=[-1,1];
-
-  for(var s=0;s<sides.length;s++){
-
-    var side=sides[s];
-
-    ctx.fillStyle="#050608";
-
-    roundRect(
-      side*w*.40-w*.065,
-      -h*.31,
-      w*.13,
-      h*.25,
-      w*.025
-    );
-    ctx.fill();
-
-    roundRect(
-      side*w*.40-w*.065,
-      h*.13,
-      w*.13,
-      h*.25,
-      w*.025
-    );
-    ctx.fill();
-
-    ctx.fillStyle="#9ca2a6";
-
-    ctx.beginPath();
-    ctx.arc(
-      side*w*.40,
-      -h*.18,
-      w*.033,
-      0,
-      Math.PI*2
-    );
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(
-      side*w*.40,
-      h*.25,
-      w*.033,
-      0,
-      Math.PI*2
-    );
-    ctx.fill();
-  }
-
-  /* arka stoplar */
-
-  ctx.fillStyle="#ff2929";
-
-  roundRect(
-    -w*.36,
-    -h*.40,
-    w*.18,
-    h*.055,
-    w*.01
-  );
-  ctx.fill();
-
-  roundRect(
-    w*.18,
-    -h*.40,
-    w*.18,
-    h*.055,
-    w*.01
-  );
-  ctx.fill();
-
-  /* oyuncu dış çizgisi */
+  /* =========================
+     OYUNCU DIŞ ÇİZGİSİ
+  ========================= */
 
   if(isPlayer){
 
-    ctx.strokeStyle="rgba(255,105,25,.8)";
-    ctx.lineWidth=2;
+    ctx.strokeStyle="rgba(255,105,25,.90)";
+    ctx.lineWidth=Math.max(2,w*.018);
 
     roundRect(
       -w*.46,
-      -h*.5,
+      -h*.50,
       w*.92,
-      h*.98,
-      w*.12
+      h*.96,
+      w*.13
     );
 
     ctx.stroke();
