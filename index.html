@@ -2,10 +2,17 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport"
-content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#071018">
-<title>Turbo Road 5.1 Professional</title>
+content="width=device-width,
+initial-scale=1,
+maximum-scale=1,
+user-scalable=no,
+viewport-fit=cover">
+
+<meta name="theme-color" content="#050b10">
+
+<title>Turbo Road 7.0 Professional</title>
 
 <style>
 *{
@@ -17,18 +24,20 @@ content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,vie
   -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
+html,
+body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#071018;
-  font-family:Arial,sans-serif;
+  background:#050b10;
   touch-action:none;
+  overscroll-behavior:none;
 }
 
 body{
   position:fixed;
   inset:0;
+  font-family:Arial,Helvetica,sans-serif;
 }
 
 canvas{
@@ -37,109 +46,371 @@ canvas{
   width:100%;
   height:100%;
   display:block;
-  touch-action:none;
 }
+
+button{
+  font-family:Arial,Helvetica,sans-serif;
+  border:0;
+  touch-action:manipulation;
+}
+
+/* =========================================================
+   LANDSCAPE UYARI
+========================================================= */
+
+#rotateScreen{
+  position:fixed;
+  inset:0;
+  z-index:999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+  background:
+    radial-gradient(circle at 50% 20%,#254b5e,#09131b 48%,#020508);
+}
+
+.rotateBox{
+  width:min(360px,88vw);
+  padding:30px 20px;
+  border-radius:24px;
+  background:rgba(5,10,15,.94);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 25px 70px rgba(0,0,0,.65);
+}
+
+.rotateIcon{
+  font-size:55px;
+  margin-bottom:15px;
+}
+
+.rotateTitle{
+  font-size:22px;
+  font-weight:900;
+}
+
+.rotateText{
+  margin-top:9px;
+  color:#94a1aa;
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* =========================================================
+   MENU
+========================================================= */
 
 #menu{
   position:fixed;
   inset:0;
-  z-index:10;
+  z-index:20;
   display:flex;
   align-items:center;
   justify-content:center;
+
   background:
-    radial-gradient(circle at 50% 20%,#183447 0,#071018 48%,#020507 100%);
+    radial-gradient(circle at 50% 10%,
+      #294e60 0,
+      #10222d 38%,
+      #020609 100%);
 }
 
-.box{
-  width:min(430px,90vw);
-  padding:28px 23px;
-  border-radius:24px;
-  background:rgba(10,17,24,.95);
+.menuBox{
+  width:min(430px,92vw);
+  max-height:94vh;
+  overflow:auto;
+  padding:25px 20px;
+
+  border-radius:26px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10,18,25,.97),
+      rgba(5,10,15,.98)
+    );
+
   border:1px solid rgba(255,255,255,.12);
-  text-align:center;
+
   color:#fff;
-  box-shadow:0 20px 70px rgba(0,0,0,.7);
+  text-align:center;
+
+  box-shadow:
+    0 25px 90px rgba(0,0,0,.78);
 }
 
 .logo{
-  font-size:clamp(34px,9vw,45px);
+  font-size:clamp(36px,9vw,48px);
   font-weight:900;
   font-style:italic;
   letter-spacing:2px;
 }
 
 .logo span{
-  color:#ff641c;
+  color:#ff6420;
 }
 
 .sub{
-  margin-top:5px;
-  color:#7f8c97;
+  margin-top:4px;
+  color:#84929c;
   font-size:10px;
   letter-spacing:4px;
 }
 
-.best{
-  margin:23px 0;
-  padding:14px;
+.money{
+  width:fit-content;
+  min-width:150px;
+  margin:17px auto;
+  padding:10px 18px;
+
   border-radius:14px;
-  background:rgba(255,255,255,.05);
-  color:#8d99a3;
-  font-size:11px;
+
+  background:rgba(255,184,45,.10);
+  border:1px solid rgba(255,190,50,.20);
+
+  color:#ffd35d;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.best{
+  padding:11px;
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+
+  color:#87939c;
+  font-size:10px;
 }
 
 .best b{
   display:block;
-  margin-top:5px;
+  margin-top:3px;
   color:#fff;
-  font-size:25px;
+  font-size:22px;
 }
 
-#start{
-  width:100%;
-  padding:17px;
-  border:0;
+.menuButtons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+
+.menuBtn{
+  min-height:52px;
+  padding:13px 8px;
+
   border-radius:14px;
-  background:linear-gradient(135deg,#ff8a2a,#e64212);
-  color:white;
-  font-size:17px;
+
+  color:#fff;
+  background:#1a2731;
+
+  border:1px solid rgba(255,255,255,.08);
+
+  font-size:14px;
   font-weight:bold;
+
+  transition:.12s;
 }
 
-#start:active{
-  transform:scale(.97);
+.menuBtn:active{
+  transform:scale(.96);
+}
+
+.menuBtn.primary{
+  grid-column:1/-1;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff922e,
+      #e63e10
+    );
+
+  font-size:17px;
+
+  box-shadow:
+    0 8px 25px rgba(230,70,15,.20);
 }
 
 .info{
-  margin-top:15px;
-  color:#73808b;
-  font-size:11px;
-  line-height:1.7;
+  margin-top:14px;
+  color:#71808a;
+  font-size:10px;
+  line-height:1.65;
 }
+
+/* =========================================================
+   GARAGE
+========================================================= */
+
+#garage{
+  position:fixed;
+  inset:0;
+  z-index:30;
+  display:none;
+
+  background:
+    linear-gradient(
+      180deg,
+      #071018,
+      #101a23
+    );
+
+  color:#fff;
+}
+
+.garageHeader{
+  height:70px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:
+    10px
+    max(16px,env(safe-area-inset-right))
+    10px
+    max(16px,env(safe-area-inset-left));
+
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.garageTitle{
+  font-size:23px;
+  font-weight:900;
+}
+
+.back{
+  padding:10px 15px;
+  border-radius:11px;
+  background:#202d37;
+  color:#fff;
+  font-weight:bold;
+}
+
+.garageMoney{
+  color:#ffd35d;
+  font-weight:bold;
+}
+
+#carsList{
+  height:calc(100% - 70px);
+
+  overflow:auto;
+
+  padding:15px;
+
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+
+  align-content:start;
+}
+
+.carCard{
+  padding:13px 10px;
+
+  border-radius:17px;
+
+  background:rgba(255,255,255,.055);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  text-align:center;
+}
+
+.carName{
+  margin-bottom:7px;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.carPrice{
+  margin:5px 0 9px;
+  color:#ffd35d;
+  font-size:12px;
+}
+
+.carBtn{
+  width:100%;
+  padding:10px 5px;
+
+  border-radius:10px;
+
+  color:#fff;
+  background:#273641;
+
+  font-size:11px;
+  font-weight:bold;
+}
+
+.carBtn.selected{
+  background:#208451;
+}
+
+.carBtn.buy{
+  background:
+    linear-gradient(
+      135deg,
+      #ff922e,
+      #e64212
+    );
+}
+
+/* =========================================================
+   PAUSE
+========================================================= */
 
 #pause{
   display:none;
+
   position:fixed;
-  z-index:6;
+  z-index:50;
+
   top:max(12px,env(safe-area-inset-top));
   right:max(12px,env(safe-area-inset-right));
-  width:44px;
-  height:44px;
-  border:1px solid rgba(255,255,255,.18);
+
+  width:46px;
+  height:46px;
+
   border-radius:13px;
+
   background:rgba(0,0,0,.48);
-  color:white;
+  border:1px solid rgba(255,255,255,.20);
+
+  color:#fff;
   font-size:17px;
 }
 
+/* =========================================================
+   MOBILE
+========================================================= */
+
 @media(max-width:500px){
-  .box{
-    padding:23px 19px;
+  .menuBox{
+    padding:21px 16px;
   }
 
-  .best{
-    margin:18px 0;
+  #carsList{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+/* =========================================================
+   DİKEY EKRAN
+========================================================= */
+
+@media(max-aspect-ratio:1/1){
+  #rotateScreen{
+    display:flex;
+  }
+
+  #menu,
+  #garage,
+  #pause{
+    display:none !important;
   }
 }
 </style>
@@ -149,35 +420,132 @@ canvas{
 
 <canvas id="canvas"></canvas>
 
+<!-- =========================================================
+     YATAY EKRAN UYARISI
+========================================================= -->
+
+<div id="rotateScreen">
+
+  <div class="rotateBox">
+
+    <div class="rotateIcon">📱↔️</div>
+
+    <div class="rotateTitle">
+      TELEFONU YATAY ÇEVİR
+    </div>
+
+    <div class="rotateText">
+      Turbo Road en iyi deneyim için
+      yatay ekranda oynanır.
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =========================================================
+     ANA MENÜ
+========================================================= -->
+
 <div id="menu">
-  <div class="box">
+
+  <div class="menuBox">
 
     <div class="logo">
       TURBO <span>ROAD</span>
     </div>
 
     <div class="sub">
-      5.1 PROFESSIONAL
+      7.0 PROFESSIONAL
+    </div>
+
+    <div class="money">
+      💰 <span id="money">0</span>
     </div>
 
     <div class="best">
+
       EN YÜKSEK SKOR
+
       <b id="best">0</b>
+
     </div>
 
-    <button id="start">
-      YARIŞI BAŞLAT
-    </button>
+    <div class="menuButtons">
+
+      <button
+        id="start"
+        class="menuBtn primary">
+
+        🏁 YARIŞI BAŞLAT
+
+      </button>
+
+      <button
+        id="garageBtn"
+        class="menuBtn">
+
+        🚘 GARAJ
+
+      </button>
+
+      <button
+        id="soundBtn"
+        class="menuBtn">
+
+        🔊 SES: AÇIK
+
+      </button>
+
+    </div>
 
     <div class="info">
-      Ekranın soluna dokun → SOL<br>
-      Ekranın sağına dokun → SAĞ<br>
-      Kaydırarak da şerit değiştirebilirsin<br>
-      Telefon dikey veya yatay kullanılabilir
+
+      3 eşit şeritli profesyonel yol<br>
+      Ekranın soluna/sağına dokunarak şerit değiştir<br>
+      Kaydırarak da kontrol edebilirsin<br>
+      Hız arttıkça motor sesi değişir<br>
+      Yarışlardan para kazan ve yeni araçlar satın al
+
     </div>
 
   </div>
+
 </div>
+
+<!-- =========================================================
+     GARAJ
+========================================================= -->
+
+<div id="garage">
+
+  <div class="garageHeader">
+
+    <button
+      id="backBtn"
+      class="back">
+
+      ← MENÜ
+
+    </button>
+
+    <div class="garageTitle">
+      🚘 GARAJ
+    </div>
+
+    <div class="garageMoney">
+      💰 <span id="garageMoney">0</span>
+    </div>
+
+  </div>
+
+  <div id="carsList"></div>
+
+</div>
+
+<!-- =========================================================
+     PAUSE
+========================================================= -->
 
 <button id="pause">Ⅱ</button>
 
@@ -187,19 +555,60 @@ canvas{
 "use strict";
 
 /* =========================================================
-   TEMEL
+   DOM
 ========================================================= */
 
-var canvas=document.getElementById("canvas");
-var ctx=canvas.getContext("2d");
+var canvas =
+document.getElementById("canvas");
 
-var menu=document.getElementById("menu");
-var startButton=document.getElementById("start");
-var pauseButton=document.getElementById("pause");
-var bestElement=document.getElementById("best");
+var ctx =
+canvas.getContext("2d",{
+  alpha:false,
+  desynchronized:true
+});
 
-var W=window.innerWidth;
-var H=window.innerHeight;
+var menu =
+document.getElementById("menu");
+
+var garage =
+document.getElementById("garage");
+
+var startButton =
+document.getElementById("start");
+
+var garageButton =
+document.getElementById("garageBtn");
+
+var backButton =
+document.getElementById("backBtn");
+
+var pauseButton =
+document.getElementById("pause");
+
+var moneyElement =
+document.getElementById("money");
+
+var garageMoneyElement =
+document.getElementById("garageMoney");
+
+var bestElement =
+document.getElementById("best");
+
+var soundButton =
+document.getElementById("soundBtn");
+
+/* =========================================================
+   EKRAN
+========================================================= */
+
+var W=innerWidth;
+var H=innerHeight;
+
+var dpr=1;
+
+/* =========================================================
+   OYUN
+========================================================= */
 
 var running=false;
 var paused=false;
@@ -207,10 +616,11 @@ var over=false;
 
 var score=0;
 var distance=0;
+
 var speed=140;
 
-/* 2 ŞERİT */
-var lane=0;
+var lane=1;
+
 var playerX=0;
 
 var cars=[];
@@ -218,45 +628,326 @@ var trees=[];
 
 var spawnTimer=0;
 var treeTimer=0;
+
 var lastTime=0;
 
 /* =========================================================
-   SKOR
+   KAYIT
 ========================================================= */
 
+var money=0;
 var bestScore=0;
 
 try{
-  bestScore=parseInt(
-    localStorage.getItem("turboRoadBest") || "0",
+
+  money=parseInt(
+    localStorage.getItem("turboMoney")||"0",
     10
   );
+
+  bestScore=parseInt(
+    localStorage.getItem("turboRoadBest")||"0",
+    10
+  );
+
 }catch(e){
+
+  money=0;
   bestScore=0;
+
 }
 
+var soundEnabled=true;
+
+try{
+
+  soundEnabled=
+    localStorage.getItem("turboSound")!=="off";
+
+}catch(e){}
+
+moneyElement.textContent=
+money.toLocaleString("tr-TR");
+
 bestElement.textContent=
-  bestScore.toLocaleString("tr-TR");
+bestScore.toLocaleString("tr-TR");
 
 /* =========================================================
-   EKRAN
+   ARABA VERİLERİ
+========================================================= */
+
+var carData=[
+
+  {
+    name:"Street",
+    price:0,
+    color:"#2774c9"
+  },
+
+  {
+    name:"Red Fury",
+    price:500,
+    color:"#df302b"
+  },
+
+  {
+    name:"Golden GT",
+    price:1200,
+    color:"#e9a927"
+  },
+
+  {
+    name:"Green RS",
+    price:2500,
+    color:"#3c9b58"
+  },
+
+  {
+    name:"Purple X",
+    price:5000,
+    color:"#9a46c4"
+  },
+
+  {
+    name:"Black Beast",
+    price:10000,
+    color:"#22272c"
+  }
+
+];
+
+var owned=[0];
+var selectedCar=0;
+
+try{
+
+  var savedOwned=
+    JSON.parse(
+      localStorage.getItem("turboOwned")||"[0]"
+    );
+
+  if(
+    Array.isArray(savedOwned) &&
+    savedOwned.length
+  ){
+
+    owned=savedOwned;
+
+  }
+
+  selectedCar=
+    parseInt(
+      localStorage.getItem("turboSelected")||"0",
+      10
+    );
+
+}catch(e){}
+
+if(
+  selectedCar<0 ||
+  selectedCar>=carData.length ||
+  !owned.includes(selectedCar)
+){
+
+  selectedCar=0;
+
+}
+
+/* =========================================================
+   SES
+========================================================= */
+
+var audioCtx=null;
+var engineOsc=null;
+var engineGain=null;
+
+function initAudio(){
+
+  if(!soundEnabled)return;
+
+  try{
+
+    if(!audioCtx){
+
+      audioCtx=
+        new (
+          window.AudioContext||
+          window.webkitAudioContext
+        )();
+
+      engineOsc=
+        audioCtx.createOscillator();
+
+      engineGain=
+        audioCtx.createGain();
+
+      engineOsc.type="sawtooth";
+
+      engineOsc.frequency.value=80;
+
+      engineGain.gain.value=0;
+
+      engineOsc.connect(engineGain);
+
+      engineGain.connect(audioCtx.destination);
+
+      engineOsc.start();
+
+    }
+
+    if(
+      audioCtx.state==="suspended"
+    ){
+
+      audioCtx.resume();
+
+    }
+
+  }catch(e){}
+
+}
+
+function engineUpdate(){
+
+  if(
+    !soundEnabled ||
+    !audioCtx ||
+    !engineOsc ||
+    !engineGain
+  ){
+
+    return;
+
+  }
+
+  if(
+    !running ||
+    paused ||
+    over
+  ){
+
+    engineGain.gain.value=0;
+
+    return;
+
+  }
+
+  var ratio=
+    Math.max(
+      0,
+      Math.min(
+        1,
+        (speed-100)/220
+      )
+    );
+
+  var frequency=
+    65+
+    speed*1.18+
+    Math.sin(distance*.045)*3;
+
+  var volume=
+    .012+
+    ratio*.028;
+
+  engineOsc.frequency.setTargetAtTime(
+    frequency,
+    audioCtx.currentTime,
+    .025
+  );
+
+  engineGain.gain.setTargetAtTime(
+    volume,
+    audioCtx.currentTime,
+    .04
+  );
+
+}
+
+function beep(
+  freq,
+  duration,
+  type
+){
+
+  if(!soundEnabled)return;
+
+  try{
+
+    initAudio();
+
+    if(!audioCtx)return;
+
+    var osc=
+      audioCtx.createOscillator();
+
+    var gain=
+      audioCtx.createGain();
+
+    osc.type=
+      type||"sine";
+
+    osc.frequency.value=
+      freq;
+
+    gain.gain.setValueAtTime(
+      .0001,
+      audioCtx.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      .09,
+      audioCtx.currentTime+.01
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      .0001,
+      audioCtx.currentTime+duration
+    );
+
+    osc.connect(gain);
+
+    gain.connect(
+      audioCtx.destination
+    );
+
+    osc.start();
+
+    osc.stop(
+      audioCtx.currentTime+
+      duration+
+      .03
+    );
+
+  }catch(e){}
+
+}
+
+/* =========================================================
+   RESIZE
 ========================================================= */
 
 function resize(){
 
-  W=window.innerWidth;
-  H=window.innerHeight;
+  W=innerWidth;
+  H=innerHeight;
 
-  var dpr=Math.min(
-    window.devicePixelRatio || 1,
+  dpr=Math.min(
+    window.devicePixelRatio||1,
     1.5
   );
 
-  canvas.width=Math.floor(W*dpr);
-  canvas.height=Math.floor(H*dpr);
+  canvas.width=
+    Math.floor(W*dpr);
 
-  canvas.style.width=W+"px";
-  canvas.style.height=H+"px";
+  canvas.height=
+    Math.floor(H*dpr);
+
+  canvas.style.width=
+    W+"px";
+
+  canvas.style.height=
+    H+"px";
 
   ctx.setTransform(
     dpr,
@@ -268,135 +959,201 @@ function resize(){
   );
 
   if(!running){
-    playerX=getLaneX(0,H*.80);
+
+    playerX=
+      getLaneX(
+        lane,
+        H*.80
+      );
+
   }
+
 }
 
-window.addEventListener(
+addEventListener(
   "resize",
   resize
 );
 
-window.addEventListener(
+addEventListener(
   "orientationchange",
   function(){
-    setTimeout(resize,100);
+
+    setTimeout(
+      resize,
+      120
+    );
+
   }
 );
 
 resize();
 
 /* =========================================================
-   YOL
+   FULLSCREEN
+========================================================= */
+
+function enterFullscreen(){
+
+  try{
+
+    var element=
+      document.documentElement;
+
+    if(
+      element.requestFullscreen &&
+      !document.fullscreenElement
+    ){
+
+      element.requestFullscreen()
+      .catch(function(){});
+
+    }
+
+  }catch(e){}
+
+}
+
+/* =========================================================
+   YOL HESAPLARI
 ========================================================= */
 
 function horizon(){
 
-  if(H>W){
-    return H*.25;
-  }
+  return H>W
+    ? H*.24
+    : H*.28;
 
-  return H*.30;
 }
 
 function roadCenter(y){
 
   var hy=horizon();
 
-  var t=(y-hy)/(H-hy);
+  var t=
+    (y-hy)/
+    (H-hy);
 
-  if(t<0)t=0;
-  if(t>1)t=1;
+  t=
+    Math.max(
+      0,
+      Math.min(1,t)
+    );
 
-  return W*.5+
-    Math.sin(distance*.0011)*
-    W*.025*
+  var curve=
+    Math.sin(
+      distance*.00075
+    )*
+    W*.018*
     t;
+
+  return W*.5+curve;
+
 }
 
 function roadWidth(y){
 
   var hy=horizon();
 
-  var t=(y-hy)/(H-hy);
+  var t=
+    (y-hy)/
+    (H-hy);
 
-  if(t<0)t=0;
-  if(t>1)t=1;
-
-  if(H>W){
-
-    return W*(
-      .26+
-      .58*Math.pow(t,.82)
+  t=
+    Math.max(
+      0,
+      Math.min(1,t)
     );
 
-  }
-
-  return W*(
-    .18+
-    .70*Math.pow(t,.82)
-  );
-}
-
-/* =========================================================
-   2 ŞERİT KONUMU
-========================================================= */
-
-function getLaneX(l,y){
-
-  var yy=Math.max(
-    horizon(),
-    Math.min(H,y)
-  );
-
-  var center=roadCenter(yy);
-  var width=roadWidth(yy);
-
   /*
-    2 şerit:
-    lane 0 = sol
-    lane 1 = sağ
+    Yol tamamen ekranda görünür.
+    3 şerit birbirine eşittir.
   */
 
+  return W*
+    (
+      .30+
+      .62*Math.pow(t,.84)
+    );
+
+}
+
+function getLaneX(
+  l,
+  y
+){
+
+  var yy=
+    Math.max(
+      horizon(),
+      Math.min(H,y)
+    );
+
+  var center=
+    roadCenter(yy);
+
+  var width=
+    roadWidth(yy);
+
   return center+
-    (l-.5)*(width/2);
+    (l-1)*
+    (width/3);
+
 }
 
 /* =========================================================
-   ARABA ÖLÇÜSÜ — %50 KÜÇÜLTÜLDÜ
+   ARABA BOYUTU
 ========================================================= */
 
 function getCarSize(){
 
-  var base=Math.min(W,H);
+  var base=
+    Math.min(W,H);
 
-  var w=Math.min(
-    base*.12,
-    56
-  );
+  var w=
+    Math.min(
+      base*.105,
+      58
+    );
 
   return{
+
     w:w,
+
     h:w*1.72
+
   };
+
 }
 
 /* =========================================================
-   GÖKYÜZÜ
+   SKY
 ========================================================= */
 
 function drawSky(){
 
-  var g=ctx.createLinearGradient(
+  var g=
+    ctx.createLinearGradient(
+      0,
+      0,
+      0,
+      H*.60
+    );
+
+  g.addColorStop(
     0,
-    0,
-    0,
-    H*.58
+    "#06131e"
   );
 
-  g.addColorStop(0,"#06131e");
-  g.addColorStop(.45,"#315365");
-  g.addColorStop(1,"#d09a70");
+  g.addColorStop(
+    .42,
+    "#34586a"
+  );
+
+  g.addColorStop(
+    1,
+    "#d09a70"
+  );
 
   ctx.fillStyle=g;
 
@@ -407,22 +1164,82 @@ function drawSky(){
     H
   );
 
-  var sunX=W*.76;
-  var sunY=H*.17;
-  var sunR=Math.min(W,H)*.055;
+  /*
+    Uzak dağlar
+  */
 
-  var sg=ctx.createRadialGradient(
-    sunX,
-    sunY,
+  var hy=horizon();
+
+  ctx.fillStyle=
+    "rgba(24,48,53,.72)";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
     0,
-    sunX,
-    sunY,
-    sunR*3
+    hy+25
   );
+
+  for(
+    var x=0;
+    x<=W;
+    x+=W/7
+  ){
+
+    var yy=
+      hy+
+      12+
+      Math.sin(
+        x*.012
+      )*16;
+
+    ctx.lineTo(
+      x,
+      yy
+    );
+
+  }
+
+  ctx.lineTo(
+    W,
+    hy+100
+  );
+
+  ctx.lineTo(
+    0,
+    hy+100
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  /*
+    Güneş
+  */
+
+  var sunX=
+    W*.78;
+
+  var sunY=
+    H*.16;
+
+  var sunR=
+    Math.min(W,H)*.055;
+
+  var sg=
+    ctx.createRadialGradient(
+      sunX,
+      sunY,
+      0,
+      sunX,
+      sunY,
+      sunR*3
+    );
 
   sg.addColorStop(
     0,
-    "rgba(255,238,177,.9)"
+    "rgba(255,238,177,.95)"
   );
 
   sg.addColorStop(
@@ -441,10 +1258,11 @@ function drawSky(){
     0,
     0,
     W,
-    H*.6
+    H*.58
   );
 
-  ctx.fillStyle="#ffeab0";
+  ctx.fillStyle=
+    "#ffeab0";
 
   ctx.beginPath();
 
@@ -457,6 +1275,7 @@ function drawSky(){
   );
 
   ctx.fill();
+
 }
 
 /* =========================================================
@@ -467,15 +1286,28 @@ function drawGround(){
 
   var hy=horizon();
 
-  var g=ctx.createLinearGradient(
+  var g=
+    ctx.createLinearGradient(
+      0,
+      hy,
+      0,
+      H
+    );
+
+  g.addColorStop(
     0,
-    hy,
-    0,
-    H
+    "#4c6840"
   );
 
-  g.addColorStop(0,"#46613a");
-  g.addColorStop(1,"#142018");
+  g.addColorStop(
+    .5,
+    "#263b28"
+  );
+
+  g.addColorStop(
+    1,
+    "#111d15"
+  );
 
   ctx.fillStyle=g;
 
@@ -485,21 +1317,33 @@ function drawGround(){
     W,
     H-hy
   );
+
 }
 
 /* =========================================================
-   YOL — 2 ŞERİT
+   YOL
 ========================================================= */
 
 function drawRoad(){
 
-  var hy=horizon();
+  var hy=
+    horizon();
 
-  var tc=roadCenter(hy);
-  var bc=roadCenter(H);
+  var tc=
+    roadCenter(hy);
 
-  var tw=roadWidth(hy);
-  var bw=roadWidth(H);
+  var bc=
+    roadCenter(H);
+
+  var tw=
+    roadWidth(hy);
+
+  var bw=
+    roadWidth(H);
+
+  /*
+    Yol gövdesi
+  */
 
   ctx.beginPath();
 
@@ -525,29 +1369,45 @@ function drawRoad(){
 
   ctx.closePath();
 
-  var g=ctx.createLinearGradient(
+  var g=
+    ctx.createLinearGradient(
+      0,
+      hy,
+      0,
+      H
+    );
+
+  g.addColorStop(
     0,
-    hy,
-    0,
-    H
+    "#555b60"
   );
 
-  g.addColorStop(0,"#44494e");
-  g.addColorStop(.55,"#252a2f");
-  g.addColorStop(1,"#101419");
+  g.addColorStop(
+    .45,
+    "#30353a"
+  );
+
+  g.addColorStop(
+    1,
+    "#111519"
+  );
 
   ctx.fillStyle=g;
 
   ctx.fill();
 
-  /* Yol kenarları */
+  /*
+    Yol dış çizgileri
+  */
 
-  ctx.strokeStyle="#ded8c7";
+  ctx.strokeStyle=
+    "#ded9c9";
 
-  ctx.lineWidth=Math.max(
-    3,
-    W*.005
-  );
+  ctx.lineWidth=
+    Math.max(
+      2.5,
+      W*.004
+    );
 
   ctx.beginPath();
 
@@ -577,53 +1437,80 @@ function drawRoad(){
 
   ctx.stroke();
 
-  /* SADECE ORTA ÇİZGİ */
+  /*
+    Şerit çizgileri
+  */
 
-  drawLaneMark();
+  drawLaneMark(1);
+  drawLaneMark(2);
+
 }
 
 /* =========================================================
-   ORTA ŞERİT ÇİZGİSİ
+   ŞERİT ÇİZGİLERİ
 ========================================================= */
 
-function drawLaneMark(){
+function drawLaneMark(index){
+
+  /*
+    Hareketli çizgi efekti.
+  */
+
+  var phase=
+    (distance*.0017)%1;
 
   for(
     var i=0;
-    i<17;
+    i<18;
     i++
   ){
 
-    var a=i/17;
-    var b=(i+.43)/17;
+    var a=
+      (i/18+phase*.55)%1;
+
+    var b=
+      Math.min(
+        1,
+        a+.045+
+        .025*a
+      );
 
     var y1=
       horizon()+
-      Math.pow(a,1.8)*
+      Math.pow(
+        a,
+        1.72
+      )*
       (H-horizon());
 
     var y2=
       horizon()+
-      Math.pow(b,1.8)*
+      Math.pow(
+        b,
+        1.72
+      )*
       (H-horizon());
 
-    /*
-      İki şeridin tam ortası
-    */
-
     var x1=
-      roadCenter(y1);
+      getLaneX(
+        index,
+        y1
+      );
 
     var x2=
-      roadCenter(y2);
+      getLaneX(
+        index,
+        y2
+      );
 
     ctx.strokeStyle=
       "rgba(245,245,240,.86)";
 
-    ctx.lineWidth=Math.max(
-      2,
-      W*.004
-    );
+    ctx.lineWidth=
+      Math.max(
+        1.5,
+        W*.0038
+      );
 
     ctx.beginPath();
 
@@ -638,25 +1525,83 @@ function drawLaneMark(){
     );
 
     ctx.stroke();
+
   }
+
 }
 
 /* =========================================================
-   AĞAÇLAR
+   AĞAÇ
 ========================================================= */
 
 function addTree(){
 
   trees.push({
-    side:
-      Math.random()<.5?-1:1,
 
-    z:.02,
+    side:
+      Math.random()<.5
+      ?-1
+      :1,
+
+    z:
+      .015,
 
     offset:
-      .08+
-      Math.random()*.15
+      .09+
+      Math.random()*.13,
+
+    size:
+      .80+
+      Math.random()*.35
+
   });
+
+}
+
+function updateTrees(dt){
+
+  treeTimer-=dt;
+
+  if(treeTimer<=0){
+
+    treeTimer=
+      .22+
+      Math.random()*.25;
+
+    /*
+      Her iki tarafı dengeli üret.
+    */
+
+    addTree();
+
+    if(Math.random()<.7){
+      addTree();
+    }
+
+  }
+
+  for(
+    var i=0;
+    i<trees.length;
+    i++
+  ){
+
+    trees[i].z+=
+      dt*
+      (speed/300)*
+      .88;
+
+  }
+
+  trees=
+    trees.filter(
+      function(t){
+
+        return t.z<1.08;
+
+      }
+    );
+
 }
 
 function drawTree(
@@ -665,6 +1610,10 @@ function drawTree(
   size
 ){
 
+  /*
+    Gölge
+  */
+
   ctx.fillStyle=
     "rgba(0,0,0,.22)";
 
@@ -672,8 +1621,8 @@ function drawTree(
 
   ctx.ellipse(
     x,
-    y+size*.12,
-    size*.55,
+    y+size*.10,
+    size*.58,
     size*.13,
     0,
     0,
@@ -682,16 +1631,26 @@ function drawTree(
 
   ctx.fill();
 
-  ctx.fillStyle="#61452f";
+  /*
+    Gövde
+  */
+
+  ctx.fillStyle=
+    "#5b402c";
 
   ctx.fillRect(
     x-size*.08,
-    y-size*.65,
+    y-size*.62,
     size*.16,
-    size*.65
+    size*.62
   );
 
-  ctx.fillStyle="#173b23";
+  /*
+    Yapraklar
+  */
+
+  ctx.fillStyle=
+    "#153a23";
 
   for(
     var i=0;
@@ -702,10 +1661,11 @@ function drawTree(
     ctx.beginPath();
 
     ctx.arc(
-      x+(i-2)*size*.18,
-      y-size*(
-        .72+
-        Math.abs(i-2)*.06
+      x+(i-2)*size*.17,
+      y-size*
+      (
+        .69+
+        Math.abs(i-2)*.055
       ),
       size*.27,
       0,
@@ -713,9 +1673,11 @@ function drawTree(
     );
 
     ctx.fill();
+
   }
 
-  ctx.fillStyle="#2b6035";
+  ctx.fillStyle=
+    "#2c6337";
 
   ctx.beginPath();
 
@@ -728,42 +1690,21 @@ function drawTree(
   );
 
   ctx.fill();
-}
 
-function updateTrees(dt){
-
-  treeTimer-=dt;
-
-  if(treeTimer<=0){
-
-    treeTimer=
-      .18+
-      Math.random()*.25;
-
-    addTree();
-  }
-
-  for(
-    var i=0;
-    i<trees.length;
-    i++
-  ){
-
-    trees[i].z+=
-      dt*
-      (speed/300)*
-      .9;
-  }
-
-  trees=
-    trees.filter(
-      function(t){
-        return t.z<1.1;
-      }
-    );
 }
 
 function drawTrees(){
+
+  /*
+    Uzak ağaçlar önce,
+    yakın ağaçlar sonra.
+  */
+
+  trees.sort(
+    function(a,b){
+      return a.z-b.z;
+    }
+  );
 
   for(
     var i=0;
@@ -775,47 +1716,82 @@ function drawTrees(){
 
     var y=
       horizon()+
-      Math.pow(t.z,1.8)*
+      Math.pow(
+        t.z,
+        1.82
+      )*
       (H-horizon());
 
-    var rw=roadWidth(y);
-    var c=roadCenter(y);
+    var rw=
+      roadWidth(y);
+
+    var c=
+      roadCenter(y);
+
+    /*
+      ÖNEMLİ:
+      Ağaç her zaman yol çizgisinin
+      dışında tutuluyor.
+    */
+
+    var outsideGap=
+      W*
+      (
+        .065+
+        .055*t.z
+      );
 
     var x=
       c+
       t.side*
       (
         rw/2+
-        W*(.075+t.offset*t.z)
+        outsideGap+
+        W*.035*t.z
       );
+
+    /*
+      Aşırı kenara gelmesini engelle.
+    */
+
+    if(t.side<0){
+
+      x=
+        Math.min(
+          x,
+          c-rw/2-outsideGap
+        );
+
+    }else{
+
+      x=
+        Math.max(
+          x,
+          c+rw/2+outsideGap
+        );
+
+    }
 
     var size=
       Math.min(W,H)*
-      (.02+.13*t.z);
+      (
+        .018+
+        .13*t.z
+      )*
+      t.size;
 
     drawTree(
       x,
       y,
       size
     );
+
   }
+
 }
 
 /* =========================================================
-   ARAÇ RENKLERİ
-========================================================= */
-
-var colors=[
-  "#f0f1ed",
-  "#df302b",
-  "#2774c9",
-  "#e9a927",
-  "#3c9b58",
-  "#9a46c4"
-];
-
-/* =========================================================
-   YUVARLATILMIŞ KÖŞE
+   ROUND RECT
 ========================================================= */
 
 function roundRect(
@@ -826,11 +1802,12 @@ function roundRect(
   r
 ){
 
-  var rr=Math.min(
-    r,
-    w/2,
-    h/2
-  );
+  var rr=
+    Math.min(
+      r,
+      w/2,
+      h/2
+    );
 
   ctx.beginPath();
 
@@ -888,10 +1865,11 @@ function roundRect(
   );
 
   ctx.closePath();
+
 }
 
 /* =========================================================
-   PROFESYONEL ARAÇ
+   ARAÇ ÇİZİMİ
 ========================================================= */
 
 function drawCar(
@@ -899,15 +1877,9 @@ function drawCar(
   y,
   w,
   h,
-  colorIndex,
+  color,
   isPlayer
 ){
-
-  var color=
-    colors[
-      colorIndex%
-      colors.length
-    ];
 
   ctx.save();
 
@@ -916,18 +1888,20 @@ function drawCar(
     y
   );
 
-  /* GÖLGE */
+  /*
+    Gölge
+  */
 
   ctx.fillStyle=
-    "rgba(0,0,0,.45)";
+    "rgba(0,0,0,.46)";
 
   ctx.beginPath();
 
   ctx.ellipse(
     0,
-    h*.08,
+    h*.09,
     w*.53,
-    h*.48,
+    h*.46,
     0,
     0,
     Math.PI*2
@@ -935,7 +1909,9 @@ function drawCar(
 
   ctx.fill();
 
-  /* ANA GÖVDE */
+  /*
+    Gövde
+  */
 
   var body=
     ctx.createLinearGradient(
@@ -947,16 +1923,16 @@ function drawCar(
 
   body.addColorStop(
     0,
-    "#080a0d"
+    "#07090b"
   );
 
   body.addColorStop(
-    .07,
-    "#34383c"
+    .10,
+    "#34383b"
   );
 
   body.addColorStop(
-    .17,
+    .18,
     color
   );
 
@@ -966,18 +1942,18 @@ function drawCar(
   );
 
   body.addColorStop(
-    .83,
+    .82,
     color
   );
 
   body.addColorStop(
-    .93,
-    "#34383c"
+    .92,
+    "#34383b"
   );
 
   body.addColorStop(
     1,
-    "#080a0d"
+    "#07090b"
   );
 
   ctx.beginPath();
@@ -1042,9 +2018,12 @@ function drawCar(
   ctx.closePath();
 
   ctx.fillStyle=body;
+
   ctx.fill();
 
-  /* GÖVDE PARLAKLIĞI */
+  /*
+    Gövde parlama
+  */
 
   var shine=
     ctx.createLinearGradient(
@@ -1056,11 +2035,11 @@ function drawCar(
 
   shine.addColorStop(
     0,
-    "rgba(255,255,255,.28)"
+    "rgba(255,255,255,.27)"
   );
 
   shine.addColorStop(
-    .22,
+    .25,
     "rgba(255,255,255,.06)"
   );
 
@@ -1071,7 +2050,7 @@ function drawCar(
 
   shine.addColorStop(
     1,
-    "rgba(0,0,0,.25)"
+    "rgba(0,0,0,.27)"
   );
 
   ctx.fillStyle=shine;
@@ -1106,11 +2085,18 @@ function drawCar(
 
   ctx.fill();
 
-  /* KABİN */
+  /*
+    KABİN
+  */
 
-  var cabinW=w*.58;
-  var cabinH=h*.43;
-  var cabinY=-h*.20;
+  var cabinW=
+    w*.58;
+
+  var cabinH=
+    h*.43;
+
+  var cabinY=
+    -h*.20;
 
   ctx.beginPath();
 
@@ -1150,17 +2136,17 @@ function drawCar(
 
   glass.addColorStop(
     0,
-    "#061018"
+    "#071119"
   );
 
   glass.addColorStop(
     .35,
-    "#355666"
+    "#355665"
   );
 
   glass.addColorStop(
     .65,
-    "#1a303d"
+    "#192f3b"
   );
 
   glass.addColorStop(
@@ -1169,9 +2155,12 @@ function drawCar(
   );
 
   ctx.fillStyle=glass;
+
   ctx.fill();
 
-  /* ÖN CAM */
+  /*
+    Ön cam
+  */
 
   ctx.fillStyle=
     "rgba(137,201,220,.22)";
@@ -1202,10 +2191,12 @@ function drawCar(
 
   ctx.fill();
 
-  /* ARKA CAM */
+  /*
+    Arka cam
+  */
 
   ctx.fillStyle=
-    "rgba(5,13,18,.82)";
+    "rgba(5,13,18,.84)";
 
   ctx.beginPath();
 
@@ -1233,7 +2224,9 @@ function drawCar(
 
   ctx.fill();
 
-  /* CAM ORTA DİREĞİ */
+  /*
+    Orta direk
+  */
 
   ctx.fillStyle=
     "rgba(255,255,255,.12)";
@@ -1245,7 +2238,9 @@ function drawCar(
     cabinH*.78
   );
 
-  /* YAN CAMLAR */
+  /*
+    Yan camlar
+  */
 
   ctx.fillStyle=
     "rgba(4,10,14,.82)";
@@ -1270,46 +2265,9 @@ function drawCar(
 
   ctx.fill();
 
-  /* YAN ÇİZGİLER */
-
-  ctx.strokeStyle=
-    "rgba(255,255,255,.18)";
-
-  ctx.lineWidth=
-    Math.max(
-      1,
-      w*.012
-    );
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    -w*.40,
-    -h*.03
-  );
-
-  ctx.lineTo(
-    -w*.37,
-    h*.27
-  );
-
-  ctx.stroke();
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    w*.40,
-    -h*.03
-  );
-
-  ctx.lineTo(
-    w*.37,
-    h*.27
-  );
-
-  ctx.stroke();
-
-  /* ÖN TAMPON */
+  /*
+    Tampon
+  */
 
   ctx.fillStyle="#101419";
 
@@ -1323,7 +2281,9 @@ function drawCar(
 
   ctx.fill();
 
-  /* ÖN IZGARA */
+  /*
+    Izgara
+  */
 
   ctx.fillStyle="#050709";
 
@@ -1337,37 +2297,9 @@ function drawCar(
 
   ctx.fill();
 
-  ctx.strokeStyle=
-    "rgba(255,255,255,.16)";
-
-  ctx.lineWidth=
-    Math.max(
-      1,
-      w*.008
-    );
-
-  for(
-    var gi=-2;
-    gi<=2;
-    gi++
-  ){
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      gi*w*.065,
-      h*.37
-    );
-
-    ctx.lineTo(
-      gi*w*.065,
-      h*.425
-    );
-
-    ctx.stroke();
-  }
-
-  /* ÖN FARLAR */
+  /*
+    Farlar
+  */
 
   var lamp=
     ctx.createLinearGradient(
@@ -1414,45 +2346,23 @@ function drawCar(
 
   ctx.fill();
 
-  /* FAR PARLAMASI */
+  /*
+    Tekerlekler
+  */
 
-  ctx.fillStyle=
-    "rgba(255,250,190,.38)";
+  var wheelW=
+    w*.145;
 
-  ctx.beginPath();
-
-  ctx.arc(
-    -w*.24,
-    h*.282,
-    w*.065,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  ctx.beginPath();
-
-  ctx.arc(
-    w*.24,
-    h*.282,
-    w*.065,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fill();
-
-  /* 4 TEKERLEK */
-
-  var wheelW=w*.145;
-  var wheelH=h*.20;
+  var wheelH=
+    h*.20;
 
   var wheels=[
+
     [-w*.435,-h*.20],
     [ w*.435,-h*.20],
     [-w*.435, h*.27],
     [ w*.435, h*.27]
+
   ];
 
   for(
@@ -1461,10 +2371,14 @@ function drawCar(
     wi++
   ){
 
-    var wx=wheels[wi][0];
-    var wy=wheels[wi][1];
+    var wx=
+      wheels[wi][0];
 
-    ctx.fillStyle="#030405";
+    var wy=
+      wheels[wi][1];
+
+    ctx.fillStyle=
+      "#030405";
 
     roundRect(
       wx-wheelW/2,
@@ -1476,24 +2390,8 @@ function drawCar(
 
     ctx.fill();
 
-    ctx.strokeStyle="#171a1d";
-
-    ctx.lineWidth=Math.max(
-      1,
-      w*.009
-    );
-
-    roundRect(
-      wx-wheelW/2,
-      wy-wheelH/2,
-      wheelW,
-      wheelH,
-      wheelW*.28
-    );
-
-    ctx.stroke();
-
-    ctx.fillStyle="#9ba1a4";
+    ctx.fillStyle=
+      "#9ba1a4";
 
     ctx.beginPath();
 
@@ -1507,7 +2405,8 @@ function drawCar(
 
     ctx.fill();
 
-    ctx.fillStyle="#363c40";
+    ctx.fillStyle=
+      "#363c40";
 
     ctx.beginPath();
 
@@ -1521,24 +2420,14 @@ function drawCar(
 
     ctx.fill();
 
-    ctx.fillStyle="#c2c6c7";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      wx,
-      wy,
-      wheelW*.065,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
   }
 
-  /* ARKA STOPLAR */
+  /*
+    Stop lambaları
+  */
 
-  ctx.fillStyle="#e51f26";
+  ctx.fillStyle=
+    "#e51f26";
 
   roundRect(
     -w*.35,
@@ -1560,7 +2449,9 @@ function drawCar(
 
   ctx.fill();
 
-  /* ARKA SPOILER */
+  /*
+    Spoiler
+  */
 
   ctx.fillStyle=
     "rgba(10,12,14,.90)";
@@ -1575,21 +2466,9 @@ function drawCar(
 
   ctx.fill();
 
-  /* PLAKA */
-
-  ctx.fillStyle="#eeeee6";
-
-  roundRect(
-    -w*.15,
-    h*.435,
-    w*.30,
-    h*.04,
-    w*.008
-  );
-
-  ctx.fill();
-
-  /* OYUNCU VURGUSU */
+  /*
+    Oyuncu turuncu kontur
+  */
 
   if(isPlayer){
 
@@ -1664,21 +2543,28 @@ function drawCar(
     ctx.closePath();
 
     ctx.stroke();
+
   }
 
   ctx.restore();
+
 }
 
 /* =========================================================
-   TRAFİK — 2 ŞERİT
+   TRAFİK
 ========================================================= */
 
 function spawnCar(){
 
   var selectedLane=
     Math.floor(
-      Math.random()*2
+      Math.random()*3
     );
+
+  /*
+    Aynı şeritte çok yakın araç varsa
+    yeni araç üretme.
+  */
 
   for(
     var i=0;
@@ -1689,28 +2575,50 @@ function spawnCar(){
     if(
       cars[i].lane===
       selectedLane &&
-      cars[i].z<.20
+      cars[i].z<.22
     ){
+
       return;
+
     }
+
   }
+
+  /*
+    Trafik araçları
+    oyuncudan bağımsız rastgele.
+  */
+
+  var color=
+    1+
+    Math.floor(
+      Math.random()*
+      (carData.length-1)
+    );
 
   cars.push({
 
     lane:selectedLane,
 
-    z:.025,
+    /*
+      Araç artık sıfıra yakın noktadan
+      başlamıyor.
+      Böylece gökten düşüyor hissi azalıyor.
+    */
 
-    color:
-      Math.floor(
-        Math.random()*
-        colors.length
-      ),
+    z:.045,
+
+    color:color,
 
     speed:
-      .20+
-      Math.random()*.16
+      .22+
+      Math.random()*.16,
+
+    wobble:
+      Math.random()*Math.PI*2
+
   });
+
 }
 
 function updateCars(dt){
@@ -1721,23 +2629,36 @@ function updateCars(dt){
     i++
   ){
 
-    cars[i].z+=
+    var car=cars[i];
+
+    car.z+=
       dt*
       (speed/300)*
-      cars[i].speed;
+      car.speed;
+
+    car.wobble+=dt;
+
   }
 
   cars=
     cars.filter(
       function(car){
-        return car.z<1.12;
+
+        return car.z<1.10;
+
       }
     );
+
 }
 
 function drawCars(){
 
-  var size=getCarSize();
+  var size=
+    getCarSize();
+
+  /*
+    Uzak araç önce.
+  */
 
   cars.sort(
     function(a,b){
@@ -1755,7 +2676,10 @@ function drawCars(){
 
     var y=
       horizon()+
-      Math.pow(car.z,1.75)*
+      Math.pow(
+        car.z,
+        1.75
+      )*
       (H-horizon());
 
     var x=
@@ -1764,19 +2688,41 @@ function drawCars(){
         y
       );
 
+    /*
+      Perspektif ölçek.
+    */
+
     var p=
-      .36+
-      car.z*.64;
+      .22+
+      car.z*.78;
+
+    /*
+      Çok uzakta kaybolmasını,
+      yakında aşırı büyümesini önler.
+    */
+
+    p=
+      Math.max(
+        .18,
+        Math.min(
+          1.0,
+          p
+        )
+      );
 
     drawCar(
       x,
       y,
       size.w*p,
       size.h*p,
-      car.color,
+      carData[
+        car.color
+      ].color,
       false
     );
+
   }
+
 }
 
 /* =========================================================
@@ -1785,9 +2731,11 @@ function drawCars(){
 
 function hitTest(){
 
-  var size=getCarSize();
+  var size=
+    getCarSize();
 
-  var playerY=H*.80;
+  var playerY=
+    H*.80;
 
   for(
     var i=0;
@@ -1795,18 +2743,28 @@ function hitTest(){
     i++
   ){
 
-    var car=cars[i];
+    var car=
+      cars[i];
+
+    /*
+      Oyuncuya yaklaşmış araçları kontrol et.
+    */
 
     if(
-      car.z<.70 ||
+      car.z<.72 ||
       car.z>.99
     ){
+
       continue;
+
     }
 
     var y=
       horizon()+
-      Math.pow(car.z,1.75)*
+      Math.pow(
+        car.z,
+        1.75
+      )*
       (H-horizon());
 
     var x=
@@ -1815,23 +2773,36 @@ function hitTest(){
         y
       );
 
-    if(
+    /*
+      Araç genişliğine göre
+      daha doğru çarpışma.
+    */
+
+    var xHit=
       Math.abs(
         x-playerX
       )<
-      size.w*.60
-      &&
+      size.w*.58;
+
+    var yHit=
       Math.abs(
         y-playerY
       )<
-      size.h*.36
+      size.h*.40;
+
+    if(
+      xHit &&
+      yHit
     ){
 
       return true;
+
     }
+
   }
 
   return false;
+
 }
 
 /* =========================================================
@@ -1840,16 +2811,20 @@ function hitTest(){
 
 function drawPlayer(){
 
-  var size=getCarSize();
+  var size=
+    getCarSize();
 
   drawCar(
     playerX,
     H*.80,
     size.w,
     size.h,
-    3,
+    carData[
+      selectedCar
+    ].color,
     true
   );
+
 }
 
 /* =========================================================
@@ -1860,21 +2835,29 @@ function drawHUD(){
 
   if(!running)return;
 
-  var small=
+  var portrait=
     H>W;
 
   var hudW=
-    small?130:165;
+    portrait
+    ?155
+    :185;
 
   var hudH=
-    small?58:65;
+    portrait
+    ?63
+    :68;
+
+  /*
+    Sol HUD
+  */
 
   ctx.fillStyle=
-    "rgba(0,0,0,.48)";
+    "rgba(0,0,0,.50)";
 
   roundRect(
-    12,
-    12,
+    10,
+    10,
     hudW,
     hudH,
     14
@@ -1882,15 +2865,16 @@ function drawHUD(){
 
   ctx.fill();
 
-  ctx.fillStyle="#9aa5af";
+  ctx.fillStyle=
+    "#9aa5af";
 
   ctx.font=
     "bold 10px Arial";
 
   ctx.fillText(
     "SKOR",
-    25,
-    32
+    23,
+    29
   );
 
   ctx.fillStyle="#fff";
@@ -1901,19 +2885,38 @@ function drawHUD(){
   ctx.fillText(
     Math.floor(score)
       .toLocaleString("tr-TR"),
-    25,
-    55
+    23,
+    53
   );
 
+  ctx.fillStyle=
+    "#ffd25b";
+
+  ctx.font=
+    "bold 11px Arial";
+
+  ctx.fillText(
+    "💰 "+
+    Math.floor(score),
+    23,
+    66
+  );
+
+  /*
+    Sağ HUD
+  */
+
   var rightW=
-    small?112:130;
+    portrait
+    ?125
+    :150;
 
   ctx.fillStyle=
-    "rgba(0,0,0,.48)";
+    "rgba(0,0,0,.50)";
 
   roundRect(
-    W-rightW-12,
-    12,
+    W-rightW-10,
+    10,
     rightW,
     hudH,
     14
@@ -1921,15 +2924,16 @@ function drawHUD(){
 
   ctx.fill();
 
-  ctx.fillStyle="#9aa5af";
+  ctx.fillStyle=
+    "#9aa5af";
 
   ctx.font=
     "bold 10px Arial";
 
   ctx.fillText(
     "HIZ",
-    W-rightW+2,
-    32
+    W-rightW+4,
+    29
   );
 
   ctx.fillStyle="#fff";
@@ -1940,9 +2944,10 @@ function drawHUD(){
   ctx.fillText(
     Math.floor(speed)+
     " KM/H",
-    W-rightW+2,
-    55
+    W-rightW+4,
+    53
   );
+
 }
 
 /* =========================================================
@@ -1952,7 +2957,7 @@ function drawHUD(){
 function drawGameOver(){
 
   ctx.fillStyle=
-    "rgba(0,0,0,.64)";
+    "rgba(0,0,0,.68)";
 
   ctx.fillRect(
     0,
@@ -1964,10 +2969,10 @@ function drawGameOver(){
   var boxW=
     Math.min(
       400,
-      W*.84
+      W*.86
     );
 
-  var boxH=210;
+  var boxH=260;
 
   var bx=
     W/2-boxW/2;
@@ -1976,7 +2981,7 @@ function drawGameOver(){
     H/2-boxH/2;
 
   ctx.fillStyle=
-    "rgba(8,12,17,.97)";
+    "rgba(8,12,17,.98)";
 
   roundRect(
     bx,
@@ -1998,10 +3003,11 @@ function drawGameOver(){
   ctx.fillText(
     "YARIŞ BİTTİ",
     W/2,
-    by+55
+    by+52
   );
 
-  ctx.fillStyle="#ff7020";
+  ctx.fillStyle=
+    "#ff7020";
 
   ctx.font=
     "bold 34px Arial";
@@ -2010,25 +3016,46 @@ function drawGameOver(){
     Math.floor(score)
       .toLocaleString("tr-TR"),
     W/2,
-    by+108
+    by+101
   );
 
-  ctx.fillStyle="#9ba5ae";
+  ctx.fillStyle=
+    "#ffd25b";
 
   ctx.font=
-    "14px Arial";
+    "bold 18px Arial";
+
+  ctx.fillText(
+    "💰 +"+
+    Math.floor(score),
+    W/2,
+    by+137
+  );
+
+  ctx.fillStyle=
+    "#9ba5ae";
+
+  ctx.font=
+    "13px Arial";
+
+  ctx.fillText(
+    "Kazancın menüye eklendi",
+    W/2,
+    by+171
+  );
 
   ctx.fillText(
     "Tekrar oynamak için dokun",
     W/2,
-    by+165
+    by+207
   );
 
   ctx.textAlign="left";
+
 }
 
 /* =========================================================
-   GÜNCELLEME
+   UPDATE
 ========================================================= */
 
 function update(dt){
@@ -2038,37 +3065,66 @@ function update(dt){
     paused ||
     over
   ){
+
     return;
+
   }
+
+  /*
+    Hızlanma
+  */
 
   speed=
     Math.min(
       310,
-      speed+dt*2
+      speed+
+      dt*2.1
     );
+
+  /*
+    Mesafe
+  */
 
   distance+=
     speed*dt;
 
+  /*
+    Skor
+  */
+
   score+=
-    speed*dt*.055;
+    speed*
+    dt*
+    .055;
+
+  /*
+    Trafik üretimi
+  */
 
   spawnTimer-=dt;
 
-  if(spawnTimer<=0){
+  if(
+    spawnTimer<=0
+  ){
 
     spawnTimer=
       Math.max(
-        .42,
+        .43,
         .95-
-        distance*.000035
+        distance*.000032
       );
 
     spawnCar();
+
   }
 
   updateCars(dt);
+
   updateTrees(dt);
+
+  /*
+    Oyuncu yumuşak şerit geçişi
+  */
 
   var targetX=
     getLaneX(
@@ -2078,21 +3134,25 @@ function update(dt){
 
   playerX+=
     (
-      targetX-
-      playerX
+      targetX-playerX
     )*
     Math.min(
       1,
-      dt*11
+      dt*12
     );
 
+  engineUpdate();
+
   if(hitTest()){
+
     finishGame();
+
   }
+
 }
 
 /* =========================================================
-   OYUNU BİTİR
+   BİTİR
 ========================================================= */
 
 function finishGame(){
@@ -2101,7 +3161,18 @@ function finishGame(){
 
   over=true;
 
-  if(score>bestScore){
+  var reward=
+    Math.max(
+      1,
+      Math.floor(score)
+    );
+
+  money+=reward;
+
+  if(
+    score>
+    bestScore
+  ){
 
     bestScore=
       Math.floor(score);
@@ -2119,11 +3190,52 @@ function finishGame(){
       bestScore.toLocaleString(
         "tr-TR"
       );
+
   }
+
+  try{
+
+    localStorage.setItem(
+      "turboMoney",
+      String(money)
+    );
+
+  }catch(e){}
+
+  moneyElement.textContent=
+    money.toLocaleString(
+      "tr-TR"
+    );
+
+  /*
+    Çarpışma sesi
+  */
+
+  beep(
+    120,
+    .16,
+    "sawtooth"
+  );
+
+  setTimeout(
+    function(){
+
+      beep(
+        75,
+        .25,
+        "square"
+      );
+
+    },
+    100
+  );
+
+  engineUpdate();
+
 }
 
 /* =========================================================
-   ÇİZ
+   DRAW
 ========================================================= */
 
 function draw(){
@@ -2136,16 +3248,25 @@ function draw(){
   );
 
   drawSky();
+
   drawGround();
+
   drawTrees();
+
   drawRoad();
+
   drawCars();
+
   drawPlayer();
+
   drawHUD();
 
   if(over){
+
     drawGameOver();
+
   }
+
 }
 
 /* =========================================================
@@ -2155,74 +3276,92 @@ function draw(){
 function loop(time){
 
   if(!lastTime){
+
     lastTime=time;
+
   }
 
   var dt=
     (time-lastTime)/
     1000;
 
-  if(dt>.04){
-    dt=.04;
+  /*
+    Çok büyük frame farklarında
+    oyunun sıçramasını önle.
+  */
+
+  if(dt>.035){
+
+    dt=.035;
+
   }
 
   lastTime=time;
 
   update(dt);
+
   draw();
 
-  requestAnimationFrame(loop);
+  requestAnimationFrame(
+    loop
+  );
+
 }
 
-requestAnimationFrame(loop);
+requestAnimationFrame(
+  loop
+);
 
 /* =========================================================
-   BAŞLAT
+   OYUN BAŞLAT
 ========================================================= */
 
 function startGame(){
 
+  initAudio();
+
   running=true;
+
   paused=false;
+
   over=false;
 
   score=0;
+
   distance=0;
+
   speed=140;
 
-  /* 2 şeritli yolun sol şeridi */
-  lane=0;
+  lane=1;
 
   playerX=
     getLaneX(
-      0,
+      1,
       H*.80
     );
 
   cars=[];
+
   trees=[];
 
-  spawnTimer=.8;
-  treeTimer=.05;
+  spawnTimer=.75;
+
+  treeTimer=.08;
 
   menu.style.display="none";
-  pauseButton.style.display="block";
 
-  try{
+  garage.style.display="none";
 
-    if(
-      document.documentElement
-        .requestFullscreen &&
-      !document.fullscreenElement
-    ){
+  pauseButton.style.display=
+    "block";
 
-      document.documentElement
-        .requestFullscreen()
-        .catch(function(){});
-    }
+  enterFullscreen();
 
-  }catch(e){}
 }
+
+/* =========================================================
+   START BUTTON
+========================================================= */
 
 startButton.addEventListener(
   "click",
@@ -2231,6 +3370,7 @@ startButton.addEventListener(
     e.preventDefault();
 
     startGame();
+
   }
 );
 
@@ -2238,26 +3378,91 @@ startButton.addEventListener(
    PAUSE
 ========================================================= */
 
+function togglePause(){
+
+  if(
+    !running ||
+    over
+  ){
+
+    return;
+
+  }
+
+  paused=!paused;
+
+  pauseButton.textContent=
+    paused
+    ?"▶"
+    :"Ⅱ";
+
+  engineUpdate();
+
+}
+
 pauseButton.addEventListener(
   "click",
-  function(){
-
-    if(
-      !running ||
-      over
-    ){
-      return;
-    }
-
-    paused=!paused;
-
-    pauseButton.textContent=
-      paused?"▶":"Ⅱ";
-  }
+  togglePause
 );
 
 /* =========================================================
-   DOKUNMATİK
+   SOL / SAĞ
+========================================================= */
+
+function left(){
+
+  if(
+    !running ||
+    paused ||
+    over
+  ){
+
+    return;
+
+  }
+
+  if(lane>0){
+
+    lane--;
+
+    beep(
+      280,
+      .055,
+      "sine"
+    );
+
+  }
+
+}
+
+function right(){
+
+  if(
+    !running ||
+    paused ||
+    over
+  ){
+
+    return;
+
+  }
+
+  if(lane<2){
+
+    lane++;
+
+    beep(
+      330,
+      .055,
+      "sine"
+    );
+
+  }
+
+}
+
+/* =========================================================
+   TOUCH
 ========================================================= */
 
 var touchStartX=0;
@@ -2270,15 +3475,21 @@ canvas.addEventListener(
     if(over){
 
       startGame();
+
       return;
+
     }
 
     if(
       !e.touches ||
       !e.touches.length
     ){
+
       return;
+
     }
+
+    initAudio();
 
     touchStartX=
       e.touches[0].clientX;
@@ -2287,7 +3498,9 @@ canvas.addEventListener(
       e.touches[0].clientY;
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
 
 canvas.addEventListener(
@@ -2299,14 +3512,18 @@ canvas.addEventListener(
       paused ||
       over
     ){
+
       return;
+
     }
 
     if(
       !e.changedTouches ||
       !e.changedTouches.length
     ){
+
       return;
+
     }
 
     var x=
@@ -2321,108 +3538,93 @@ canvas.addEventListener(
     var dy=
       y-touchStartY;
 
+    /*
+      Kaydırma
+    */
+
     if(
-      Math.abs(dx)>30 &&
+      Math.abs(dx)>28 &&
       Math.abs(dx)>Math.abs(dy)
     ){
 
       if(dx<0){
+
         left();
+
       }else{
+
         right();
+
       }
 
       return;
+
     }
 
-    if(x<W/2){
+    /*
+      Ekranın yarısı
+    */
+
+    if(
+      x<W/2
+    ){
+
       left();
+
     }else{
+
       right();
+
     }
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
-
-/* =========================================================
-   SOL / SAĞ — 2 ŞERİT
-========================================================= */
-
-function left(){
-
-  if(
-    !running ||
-    paused ||
-    over
-  ){
-    return;
-  }
-
-  lane--;
-
-  if(lane<0){
-    lane=0;
-  }
-}
-
-function right(){
-
-  if(
-    !running ||
-    paused ||
-    over
-  ){
-    return;
-  }
-
-  lane++;
-
-  if(lane>1){
-    lane=1;
-  }
-}
 
 /* =========================================================
    KLAVYE
 ========================================================= */
 
-window.addEventListener(
+addEventListener(
   "keydown",
   function(e){
 
+    var key=
+      e.key.toLowerCase();
+
     if(
       e.key==="ArrowLeft" ||
-      e.key.toLowerCase()==="a"
+      key==="a"
     ){
 
       e.preventDefault();
+
       left();
+
     }
 
     if(
       e.key==="ArrowRight" ||
-      e.key.toLowerCase()==="d"
+      key==="d"
     ){
 
       e.preventDefault();
+
       right();
+
     }
 
-    if(e.key===" "){
+    if(
+      e.key===" " ||
+      key==="p"
+    ){
 
       e.preventDefault();
 
-      if(
-        running &&
-        !over
-      ){
+      togglePause();
 
-        paused=!paused;
-
-        pauseButton.textContent=
-          paused?"▶":"Ⅱ";
-      }
     }
 
     if(
@@ -2431,44 +3633,706 @@ window.addEventListener(
     ){
 
       startGame();
+
     }
+
   }
 );
 
 /* =========================================================
-   BAŞLANGIÇ AĞAÇLARI
+   SES BUTONU
+========================================================= */
+
+soundButton.addEventListener(
+  "click",
+  function(){
+
+    soundEnabled=
+      !soundEnabled;
+
+    if(soundEnabled){
+
+      soundButton.textContent=
+        "🔊 SES: AÇIK";
+
+      try{
+
+        localStorage.setItem(
+          "turboSound",
+          "on"
+        );
+
+      }catch(e){}
+
+      initAudio();
+
+    }else{
+
+      soundButton.textContent=
+        "🔇 SES: KAPALI";
+
+      try{
+
+        localStorage.setItem(
+          "turboSound",
+          "off"
+        );
+
+      }catch(e){}
+
+      if(engineGain){
+
+        engineGain.gain.value=0;
+
+      }
+
+    }
+
+  }
+);
+
+if(!soundEnabled){
+
+  soundButton.textContent=
+    "🔇 SES: KAPALI";
+
+}
+
+/* =========================================================
+   PARA GÖSTERGELERİ
+========================================================= */
+
+function updateMoneyDisplays(){
+
+  moneyElement.textContent=
+    money.toLocaleString(
+      "tr-TR"
+    );
+
+  garageMoneyElement.textContent=
+    money.toLocaleString(
+      "tr-TR"
+    );
+
+}
+
+/* =========================================================
+   GARAJ
+========================================================= */
+
+function renderGarage(){
+
+  updateMoneyDisplays();
+
+  var list=
+    document.getElementById(
+      "carsList"
+    );
+
+  list.innerHTML="";
+
+  for(
+    var i=0;
+    i<carData.length;
+    i++
+  ){
+
+    var car=
+      carData[i];
+
+    var card=
+      document.createElement(
+        "div"
+      );
+
+    card.className=
+      "carCard";
+
+    /*
+      Önizleme
+    */
+
+    var preview=
+      document.createElement(
+        "canvas"
+      );
+
+    preview.width=120;
+
+    preview.height=150;
+
+    preview.style.width=
+      "100%";
+
+    preview.style.height=
+      "130px";
+
+    var pctx=
+      preview.getContext(
+        "2d"
+      );
+
+    drawPreview(
+      pctx,
+      60,
+      70,
+      38,
+      65,
+      car.color,
+      i===selectedCar
+    );
+
+    card.appendChild(
+      preview
+    );
+
+    /*
+      İsim
+    */
+
+    var name=
+      document.createElement(
+        "div"
+      );
+
+    name.className=
+      "carName";
+
+    name.textContent=
+      car.name;
+
+    card.appendChild(
+      name
+    );
+
+    /*
+      Fiyat
+    */
+
+    var price=
+      document.createElement(
+        "div"
+      );
+
+    price.className=
+      "carPrice";
+
+    if(
+      owned.includes(i)
+    ){
+
+      price.textContent=
+        "SAHİP";
+
+    }else{
+
+      price.textContent=
+        "💰 "+
+        car.price.toLocaleString(
+          "tr-TR"
+        );
+
+    }
+
+    card.appendChild(
+      price
+    );
+
+    /*
+      Buton
+    */
+
+    var btn=
+      document.createElement(
+        "button"
+      );
+
+    btn.className=
+      "carBtn";
+
+    if(
+      selectedCar===i
+    ){
+
+      btn.textContent=
+        "✓ SEÇİLİ";
+
+      btn.classList.add(
+        "selected"
+      );
+
+    }else if(
+      owned.includes(i)
+    ){
+
+      btn.textContent=
+        "SEÇ";
+
+    }else{
+
+      btn.textContent=
+        "SATIN AL";
+
+      btn.classList.add(
+        "buy"
+      );
+
+    }
+
+    btn.addEventListener(
+      "click",
+      function(index){
+
+        return function(){
+
+          /*
+            Sahipse seç
+          */
+
+          if(
+            owned.includes(index)
+          ){
+
+            selectedCar=
+              index;
+
+            try{
+
+              localStorage.setItem(
+                "turboSelected",
+                String(index)
+              );
+
+            }catch(e){}
+
+            beep(
+              650,
+              .08,
+              "sine"
+            );
+
+            renderGarage();
+
+            return;
+
+          }
+
+          /*
+            Satın al
+          */
+
+          var price=
+            carData[index].price;
+
+          if(
+            money>=price
+          ){
+
+            money-=price;
+
+            owned.push(index);
+
+            selectedCar=
+              index;
+
+            try{
+
+              localStorage.setItem(
+                "turboMoney",
+                String(money)
+              );
+
+              localStorage.setItem(
+                "turboOwned",
+                JSON.stringify(owned)
+              );
+
+              localStorage.setItem(
+                "turboSelected",
+                String(selectedCar)
+              );
+
+            }catch(e){}
+
+            beep(
+              800,
+              .12,
+              "sine"
+            );
+
+            renderGarage();
+
+          }else{
+
+            beep(
+              140,
+              .20,
+              "square"
+            );
+
+            alert(
+              "Yeterli paran yok!"
+            );
+
+          }
+
+        };
+
+      }(i)
+    );
+
+    card.appendChild(
+      btn
+    );
+
+    list.appendChild(
+      card
+    );
+
+  }
+
+}
+
+/* =========================================================
+   GARAGE ÖNİZLEME
+========================================================= */
+
+function drawPreview(
+  pctx,
+  x,
+  y,
+  w,
+  h,
+  color,
+  selected
+){
+
+  pctx.clearRect(
+    0,
+    0,
+    120,
+    150
+  );
+
+  pctx.fillStyle=
+    "rgba(255,255,255,.025)";
+
+  pctx.fillRect(
+    0,
+    0,
+    120,
+    150
+  );
+
+  pctx.save();
+
+  pctx.translate(
+    x,
+    y
+  );
+
+  /*
+    Gölge
+  */
+
+  pctx.fillStyle=
+    "rgba(0,0,0,.4)";
+
+  pctx.beginPath();
+
+  pctx.ellipse(
+    0,
+    5,
+    w*.55,
+    h*.48,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  pctx.fill();
+
+  /*
+    Gövde
+  */
+
+  pctx.fillStyle=
+    color;
+
+  pctx.beginPath();
+
+  pctx.moveTo(
+    -w*.27,
+    -h*.48
+  );
+
+  pctx.quadraticCurveTo(
+    -w*.46,
+    -h*.28,
+    -w*.43,
+    h*.30
+  );
+
+  pctx.quadraticCurveTo(
+    0,
+    h*.55,
+    w*.43,
+    h*.30
+  );
+
+  pctx.quadraticCurveTo(
+    w*.46,
+    -h*.28,
+    w*.27,
+    -h*.48
+  );
+
+  pctx.quadraticCurveTo(
+    0,
+    -h*.57,
+    -w*.27,
+    -h*.48
+  );
+
+  pctx.closePath();
+
+  pctx.fill();
+
+  /*
+    Kabin
+  */
+
+  pctx.fillStyle=
+    "#15232c";
+
+  pctx.beginPath();
+
+  pctx.moveTo(
+    -w*.28,
+    -h*.15
+  );
+
+  pctx.quadraticCurveTo(
+    0,
+    -h*.35,
+    w*.28,
+    -h*.15
+  );
+
+  pctx.lineTo(
+    w*.25,
+    h*.28
+  );
+
+  pctx.quadraticCurveTo(
+    0,
+    h*.39,
+    -w*.25,
+    h*.28
+  );
+
+  pctx.closePath();
+
+  pctx.fill();
+
+  /*
+    Farlar
+  */
+
+  pctx.fillStyle=
+    "#fff3a6";
+
+  pctx.fillRect(
+    -w*.32,
+    h*.28,
+    w*.18,
+    h*.07
+  );
+
+  pctx.fillRect(
+    w*.14,
+    h*.28,
+    w*.18,
+    h*.07
+  );
+
+  /*
+    Tekerlekler
+  */
+
+  pctx.fillStyle=
+    "#050607";
+
+  pctx.fillRect(
+    -w*.48,
+    -h*.18,
+    w*.12,
+    h*.20
+  );
+
+  pctx.fillRect(
+    w*.36,
+    -h*.18,
+    w*.12,
+    h*.20
+  );
+
+  pctx.fillRect(
+    -w*.48,
+    h*.22,
+    w*.12,
+    h*.20
+  );
+
+  pctx.fillRect(
+    w*.36,
+    h*.22,
+    w*.12,
+    h*.20
+  );
+
+  /*
+    Seçili
+  */
+
+  if(selected){
+
+    pctx.strokeStyle=
+      "#ff7020";
+
+    pctx.lineWidth=3;
+
+    pctx.strokeRect(
+      -w*.58,
+      -h*.62,
+      w*1.16,
+      h*1.24
+    );
+
+  }
+
+  pctx.restore();
+
+}
+
+/* =========================================================
+   GARAJ AÇ
+========================================================= */
+
+garageButton.addEventListener(
+  "click",
+  function(){
+
+    menu.style.display="none";
+
+    garage.style.display="block";
+
+    renderGarage();
+
+  }
+);
+
+/* =========================================================
+   GARAJ GERİ
+========================================================= */
+
+backButton.addEventListener(
+  "click",
+  function(){
+
+    garage.style.display="none";
+
+    menu.style.display="flex";
+
+    updateMoneyDisplays();
+
+  }
+);
+
+/* =========================================================
+   İLK AĞAÇLAR
 ========================================================= */
 
 for(
   var i=0;
-  i<14;
+  i<16;
   i++
 ){
 
   trees.push({
 
     side:
-      i%2===0?-1:1,
+      i%2===0
+      ?-1
+      :1,
 
     z:
-      .04+
-      i*.065,
+      .035+
+      i*.062,
 
     offset:
       .08+
-      Math.random()*.12
+      Math.random()*.12,
+
+    size:
+      .80+
+      Math.random()*.30
+
   });
+
 }
 
-/* Başlangıç konumu: 2 şeridin solu */
+/* =========================================================
+   BAŞLANGIÇ
+========================================================= */
 
 playerX=
   getLaneX(
-    0,
+    1,
     H*.80
   );
 
 draw();
+
+/* =========================================================
+   ÇİFT TIK ZOOM ENGELLEME
+========================================================= */
+
+document.addEventListener(
+  "dblclick",
+  function(e){
+    e.preventDefault();
+  },
+  {
+    passive:false
+  }
+);
+
+/* =========================================================
+   SAYFA GÖRÜNÜRLÜK
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  function(){
+
+    if(
+      document.hidden &&
+      running &&
+      !over
+    ){
+
+      paused=true;
+
+      pauseButton.textContent=
+        "▶";
+
+      engineUpdate();
+
+    }
+
+  }
+);
 
 })();
 </script>
