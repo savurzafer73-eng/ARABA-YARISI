@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#071018">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Turbo Road - Ters Yön Trafik</title>
 
 <style>
@@ -64,7 +65,7 @@ body{
     padding:25px;
     border:1px solid rgba(255,255,255,.13);
     border-radius:25px;
-    background:rgba(7,16,24,.94);
+    background:rgba(7,16,24,.96);
     box-shadow:0 20px 70px rgba(0,0,0,.65);
     text-align:center;
 }
@@ -142,6 +143,10 @@ button.red{
 
 button:active{
     transform:scale(.98);
+}
+
+button:disabled{
+    opacity:.65;
 }
 
 .levelBox{
@@ -337,7 +342,7 @@ button:active{
 
 .touchZone{
     position:absolute;
-    top:45%;
+    top:35%;
     bottom:0;
     width:50%;
     pointer-events:auto;
@@ -483,7 +488,6 @@ button:active{
 
 <canvas id="game"></canvas>
 
-<!-- ANA MENÜ -->
 <div id="menu" class="screen active">
     <div class="panel">
         <div class="logo">TURBO <span>ROAD</span></div>
@@ -520,7 +524,6 @@ button:active{
     </div>
 </div>
 
-<!-- GARAJ -->
 <div id="garage" class="screen">
     <div class="panel">
         <div class="gameTitle">🚗 GARAJ</div>
@@ -543,7 +546,6 @@ button:active{
     </div>
 </div>
 
-<!-- AYARLAR -->
 <div id="settings" class="screen">
     <div class="panel">
         <div class="gameTitle">⚙️ AYARLAR</div>
@@ -559,7 +561,6 @@ button:active{
     </div>
 </div>
 
-<!-- GAME HUD -->
 <div id="hud">
     <div class="hudTop">
         <div class="hudBox">
@@ -583,31 +584,24 @@ button:active{
     <button id="pauseBtn">Ⅱ</button>
 </div>
 
-<!-- KONTROLLER -->
 <div id="controls">
     <div id="leftZone" class="touchZone"></div>
     <div id="rightZone" class="touchZone"></div>
-
     <div id="leftHint" class="controlHint">◀</div>
     <div id="rightHint" class="controlHint">▶</div>
 </div>
 
-<!-- LEVEL UP -->
 <div id="levelUp">
     <strong>LEVEL UP!</strong>
     <span>Yeni seviyeye ulaştın! +<b id="levelBonus">0</b> 💰</span>
 </div>
 
-<!-- GAME OVER -->
 <div id="gameOver" class="screen">
     <div class="panel">
         <div class="gameTitle">💥 KAZA!</div>
-
         <div class="finalScore" id="finalScore">0</div>
 
-        <div class="resultLine">
-            Skor
-        </div>
+        <div class="resultLine">Skor</div>
 
         <div class="stats">
             <div class="stat">
@@ -632,41 +626,40 @@ button:active{
 <script>
 "use strict";
 
-/* =========================================================
-   TURBO ROAD
-   Ters yön trafik + level sistemi + gelişmiş ses
-========================================================= */
+/* =========================
+   CANVAS
+========================= */
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d", {alpha:false});
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-let W = 0;
-let H = 0;
-let DPR = 1;
+let W=innerWidth;
+let H=innerHeight;
+let DPR=1;
 
 function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth;
-    H = window.innerHeight;
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=innerWidth;
+    H=innerHeight;
 
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
+    canvas.width=Math.floor(W*DPR);
+    canvas.height=Math.floor(H*DPR);
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
 
     ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 
-window.addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 resize();
 
-/* =========================================================
+/* =========================
    SAVE
-========================================================= */
+========================= */
 
-const SAVE_KEY = "turboRoadUltimateSave_v8";
+const SAVE_KEY="turboRoadUltimateSave_v9";
 
-let save = {
+let save={
     coins:0,
     xp:0,
     best:0,
@@ -676,12 +669,26 @@ let save = {
 };
 
 try{
-    const old = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if(old){
-        save = Object.assign(save,old);
-        if(!Array.isArray(save.owned) || save.owned.length !== 6){
-            save.owned = [true,false,false,false,false,false];
+    const old=JSON.parse(localStorage.getItem(SAVE_KEY));
+
+    if(old && typeof old==="object"){
+        save=Object.assign(save,old);
+
+        if(!Array.isArray(save.owned)){
+            save.owned=[true,false,false,false,false,false];
         }
+
+        while(save.owned.length<6){
+            save.owned.push(false);
+        }
+
+        save.owned=save.owned.slice(0,6);
+
+        if(typeof save.coins!=="number")save.coins=0;
+        if(typeof save.xp!=="number")save.xp=0;
+        if(typeof save.best!=="number")save.best=0;
+        if(typeof save.selectedCar!=="number")save.selectedCar=0;
+        if(typeof save.sound!=="boolean")save.sound=true;
     }
 }catch(e){}
 
@@ -691,11 +698,11 @@ function saveGame(){
     }catch(e){}
 }
 
-/* =========================================================
-   LEVEL SYSTEM
-========================================================= */
+/* =========================
+   LEVEL
+========================= */
 
-const levelXP = [
+const levelXP=[
     0,
     500,
     1200,
@@ -719,62 +726,57 @@ const levelXP = [
 ];
 
 function getLevel(xp){
-    let level = 1;
+    let level=1;
 
     for(let i=0;i<levelXP.length;i++){
-        if(xp >= levelXP[i]){
-            level = i+1;
-        }else{
-            break;
-        }
+        if(xp>=levelXP[i])level=i+1;
+        else break;
     }
 
-    if(level > 20){
-        level = 20 + Math.floor((xp-levelXP[19])/12000);
+    if(level>20){
+        level=20+Math.floor((xp-levelXP[19])/12000);
     }
 
     return level;
 }
 
-function xpForNextLevel(level){
-    if(level < levelXP.length){
-        return levelXP[level];
-    }
+function xpForCurrentLevel(level){
+    if(level<=1)return 0;
+    if(level<=20)return levelXP[level-1];
 
-    return levelXP[19] + (level-19)*12000;
+    return levelXP[19]+(level-20)*12000;
 }
 
-function xpForCurrentLevel(level){
-    if(level <= 1) return 0;
-    if(level <= levelXP.length) return levelXP[level-1];
+function xpForNextLevel(level){
+    if(level<20)return levelXP[level];
 
-    return levelXP[19] + (level-20)*12000;
+    return levelXP[19]+(level-19)*12000;
 }
 
 function updateMenuStats(){
-    const level = getLevel(save.xp);
-    const current = save.xp - xpForCurrentLevel(level);
-    const need = xpForNextLevel(level)-xpForCurrentLevel(level);
+    const level=getLevel(save.xp);
+    const current=save.xp-xpForCurrentLevel(level);
+    const need=xpForNextLevel(level)-xpForCurrentLevel(level);
 
-    document.getElementById("menuLevel").textContent = level;
-    document.getElementById("menuCoins").textContent = save.coins;
-    document.getElementById("menuBest").textContent = Math.floor(save.best);
+    document.getElementById("menuLevel").textContent=level;
+    document.getElementById("menuCoins").textContent=Math.floor(save.coins);
+    document.getElementById("menuBest").textContent=Math.floor(save.best);
 
-    document.getElementById("garageLevel").textContent = level;
-    document.getElementById("garageCoins").textContent = save.coins;
+    document.getElementById("garageLevel").textContent=level;
+    document.getElementById("garageCoins").textContent=Math.floor(save.coins);
 
-    document.getElementById("menuXP").textContent =
-        Math.floor(current) + " / " + Math.floor(need) + " XP";
+    document.getElementById("menuXP").textContent=
+        Math.floor(current)+" / "+Math.floor(need)+" XP";
 
-    document.getElementById("menuXPFill").style.width =
-        Math.min(100,(current/need)*100) + "%";
+    document.getElementById("menuXPFill").style.width=
+        Math.min(100,current/Math.max(1,need)*100)+"%";
 }
 
-/* =========================================================
+/* =========================
    CARS
-========================================================= */
+========================= */
 
-const cars = [
+const cars=[
     {
         name:"Mustang",
         price:0,
@@ -790,7 +792,7 @@ const cars = [
         unlock:2,
         color:"#c62828",
         accent:"#ffccbc",
-        speed:7.0,
+        speed:7,
         steer:5.9
     },
     {
@@ -826,44 +828,52 @@ const cars = [
         unlock:10,
         color:"#007f83",
         accent:"#9ff9ee",
-        speed:10.0,
+        speed:10,
         steer:6.6
     }
 ];
 
 function renderGarage(){
-    const grid = document.getElementById("garageGrid");
-    const level = getLevel(save.xp);
+    const grid=document.getElementById("garageGrid");
+    const level=getLevel(save.xp);
 
-    grid.innerHTML = "";
+    grid.innerHTML="";
 
     cars.forEach((car,i)=>{
-        const card = document.createElement("div");
-        card.className = "carCard";
+        const card=document.createElement("div");
+        card.className="carCard";
 
-        const owned = !!save.owned[i];
-        const selected = save.selectedCar === i;
+        const owned=!!save.owned[i];
+        const selected=save.selectedCar===i;
 
-        let action = "";
+        let action="";
 
-        if(level < car.unlock){
-            action = `<button class="secondary" disabled>🔒 LEVEL ${car.unlock}</button>`;
-        }else if(!owned && car.price > 0){
-            action = `<button class="green" data-buy="${i}">${car.price} 💰 SATIN AL</button>`;
-        }else if(selected){
-            action = `<button class="secondary" disabled>✓ SEÇİLDİ</button>`;
-        }else{
-            action = `<button data-select="${i}">SEÇ</button>`;
+        if(level<car.unlock){
+            action=
+                `<button class="secondary" disabled>🔒 LEVEL ${car.unlock}</button>`;
+        }
+        else if(!owned && car.price>0){
+            action=
+                `<button class="green" data-buy="${i}">
+                    ${car.price} 💰 SATIN AL
+                </button>`;
+        }
+        else if(selected){
+            action=
+                `<button class="secondary" disabled>✓ SEÇİLDİ</button>`;
+        }
+        else{
+            action=
+                `<button data-select="${i}">SEÇ</button>`;
         }
 
-        card.innerHTML = `
-            <div class="carVisual" style="background:${car.color}">
-            </div>
+        card.innerHTML=`
+            <div class="carVisual" style="background:${car.color}"></div>
             <div class="carName">${car.name}</div>
             <div class="carInfo">
                 Hız: ${car.speed.toFixed(1)}<br>
                 Direksiyon: ${car.steer.toFixed(1)}<br>
-                ${owned ? "✓ Sahip" : "🔒 Level "+car.unlock}
+                ${owned?"✓ Sahip":"🔒 Level "+car.unlock}
             </div>
             ${action}
         `;
@@ -873,30 +883,27 @@ function renderGarage(){
 
     grid.querySelectorAll("[data-buy]").forEach(btn=>{
         btn.onclick=()=>{
-            const i=Number(btn.dataset.buy);
-            buyCar(i);
+            buyCar(Number(btn.dataset.buy));
         };
     });
 
     grid.querySelectorAll("[data-select]").forEach(btn=>{
         btn.onclick=()=>{
-            const i=Number(btn.dataset.select);
-            selectCar(i);
+            selectCar(Number(btn.dataset.select));
         };
     });
 }
 
 function buyCar(i){
-    const car = cars[i];
-    const level = getLevel(save.xp);
+    const car=cars[i];
 
-    if(level < car.unlock) return;
-    if(save.owned[i]) return;
-    if(save.coins < car.price) return;
+    if(getLevel(save.xp)<car.unlock)return;
+    if(save.owned[i])return;
+    if(save.coins<car.price)return;
 
-    save.coins -= car.price;
-    save.owned[i] = true;
-    save.selectedCar = i;
+    save.coins-=car.price;
+    save.owned[i]=true;
+    save.selectedCar=i;
 
     saveGame();
     renderGarage();
@@ -904,85 +911,84 @@ function buyCar(i){
 }
 
 function selectCar(i){
-    if(!save.owned[i]) return;
+    if(!save.owned[i])return;
 
-    save.selectedCar = i;
+    save.selectedCar=i;
     saveGame();
     renderGarage();
 }
 
-/* =========================================================
-   GAME STATE
-========================================================= */
+/* =========================
+   GAME
+========================= */
 
-let running = false;
-let paused = false;
+let running=false;
+let paused=false;
 
-let score = 0;
-let distance = 0;
-let gameSpeed = 0;
+let score=0;
+let distance=0;
+let gameSpeed=0;
 
-let playerX = 0;
-let playerTargetX = 0;
+let playerX=0;
+let playerTargetX=0;
 
-let traffic = [];
-let particles = [];
+let traffic=[];
+let particles=[];
 
-let spawnTimer = 0;
-let roadOffset = 0;
+let spawnTimer=0;
+let roadOffset=0;
 
-let lastTime = 0;
-let currentLevel = 1;
-let lastLevel = 1;
+let lastTime=0;
+let currentLevel=1;
+let lastLevel=1;
 
-let steeringLeft = false;
-let steeringRight = false;
+let steeringLeft=false;
+let steeringRight=false;
 
-let gear = 1;
-let lastGear = 1;
+let roadCurve=0;
+let curveTarget=0;
 
-/* =========================================================
+/* =========================
    ROAD
-========================================================= */
+========================= */
 
 function roadGeometry(y){
-    const horizon = H * .20;
-    const bottom = H * 1.05;
+    const horizon=H*.20;
+    const bottom=H*1.05;
 
-    let t = (y-horizon)/(bottom-horizon);
-    t = Math.max(0,Math.min(1,t));
+    let t=(y-horizon)/(bottom-horizon);
+    t=Math.max(0,Math.min(1,t));
 
-    const roadWidth = W*(.20 + .57*Math.pow(t,.78));
-    const center = W*.5;
+    const roadWidth=W*(.20+.57*Math.pow(t,.78));
 
-    return {
+    const curve=Math.sin((distance*.001)+(t*2.2))*W*.055;
+    const center=W*.5+curve;
+
+    return{
         left:center-roadWidth/2,
         right:center+roadWidth/2,
         width:roadWidth,
+        center:center,
         t:t
     };
 }
 
-function roadAtPlayer(){
-    return roadGeometry(H*.88);
-}
-
-/* =========================================================
+/* =========================
    BACKGROUND
-========================================================= */
+========================= */
 
-let scenery = [];
+let scenery=[];
 
 function createScenery(){
     scenery=[];
 
-    for(let i=0;i<65;i++){
+    for(let i=0;i<75;i++){
         scenery.push({
-            y:Math.random()*H,
+            depth:Math.random(),
             side:Math.random()<.5?-1:1,
-            size:12+Math.random()*22,
-            type:Math.random()<.75?"tree":"bush",
-            offset:30+Math.random()*90
+            size:10+Math.random()*25,
+            type:Math.random()<.72?"tree":"bush",
+            offset:35+Math.random()*130
         });
     }
 }
@@ -990,8 +996,1257 @@ function createScenery(){
 createScenery();
 
 function drawBackground(){
-    const skyGrad = ctx.createLinearGradient(0,0,0,H);
-    skyGrad.addColorStop(0,"#76b7d4");
-    skyGrad.addColorStop(.38,"#b9d7d4");
-    skyGrad.addColorStop(.39,"#6e9d62");
-    skyGrad.addColorSt
+    const sky=ctx.createLinearGradient(0,0,0,H);
+
+    sky.addColorStop(0,"#76b7d4");
+    sky.addColorStop(.36,"#b9d7d4");
+    sky.addColorStop(.39,"#789f67");
+    sky.addColorStop(1,"#355d35");
+
+    ctx.fillStyle=sky;
+    ctx.fillRect(0,0,W,H);
+
+    /* Uzak dağlar */
+
+    ctx.fillStyle="rgba(45,76,78,.55)";
+    ctx.beginPath();
+
+    ctx.moveTo(0,H*.39);
+
+    for(let x=0;x<=W;x+=40){
+        const y=
+            H*.31+
+            Math.sin(x*.011)*22+
+            Math.sin(x*.025)*10;
+
+        ctx.lineTo(x,y);
+    }
+
+    ctx.lineTo(W,H*.45);
+    ctx.lineTo(0,H*.45);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Çimen */
+
+    ctx.fillStyle="#4c793f";
+    ctx.fillRect(0,H*.38,W,H*.62);
+
+    /* Yol */
+
+    const top=roadGeometry(H*.20);
+    const bottom=roadGeometry(H*1.08);
+
+    ctx.fillStyle="#272d31";
+
+    ctx.beginPath();
+    ctx.moveTo(top.left,H*.20);
+    ctx.lineTo(top.right,H*.20);
+    ctx.lineTo(bottom.right,H*1.08);
+    ctx.lineTo(bottom.left,H*1.08);
+    ctx.closePath();
+    ctx.fill();
+
+    /* yol kenarları */
+
+    ctx.strokeStyle="#e6e0c8";
+    ctx.lineWidth=5;
+
+    ctx.beginPath();
+    ctx.moveTo(top.left,H*.20);
+    ctx.lineTo(bottom.left,H*1.08);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(top.right,H*.20);
+    ctx.lineTo(bottom.right,H*1.08);
+    ctx.stroke();
+
+    /* Kesikli orta çizgi */
+
+    ctx.fillStyle="#f6e7a2";
+
+    const dashOffset=(roadOffset%80);
+
+    for(let y=H*.22-dashOffset;y<H;y+=80){
+        if(y< H*.20)continue;
+
+        const geo=roadGeometry(y);
+        const lineW=Math.max(2,geo.width*.018);
+        const lineH=18+geo.t*28;
+
+        ctx.fillRect(
+            geo.center-lineW/2,
+            y,
+            lineW,
+            lineH
+        );
+    }
+
+    drawScenery();
+}
+
+function drawScenery(){
+    const sorted=[...scenery].sort((a,b)=>a.depth-b.depth);
+
+    for(const s of sorted){
+        let y=H*.20+s.depth*H*.9;
+
+        const geo=roadGeometry(y);
+
+        const x=
+            s.side<0
+                ?geo.left-s.offset*(.3+s.depth)
+                :geo.right+s.offset*(.3+s.depth);
+
+        const scale=.25+s.depth*1.15;
+        const size=s.size*scale;
+
+        if(x<-100||x>W+100)continue;
+
+        if(s.type==="tree"){
+            drawTree(x,y,size);
+        }else{
+            drawBush(x,y,size*.65);
+        }
+    }
+}
+
+function drawTree(x,y,size){
+    ctx.save();
+
+    ctx.fillStyle="#5a3d28";
+    ctx.fillRect(
+        x-size*.10,
+        y-size*.8,
+        size*.20,
+        size*.8
+    );
+
+    ctx.fillStyle="#214f2b";
+
+    ctx.beginPath();
+    ctx.arc(x,y-size*.95,size*.52,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle="#2e6834";
+
+    ctx.beginPath();
+    ctx.arc(x-size*.25,y-size*1.2,size*.38,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x+size*.25,y-size*1.17,size*.34,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function drawBush(x,y,size){
+    ctx.save();
+
+    ctx.fillStyle="#285b31";
+
+    ctx.beginPath();
+    ctx.arc(x,y-size*.3,size*.45,0,Math.PI*2);
+    ctx.arc(x-size*.35,y-size*.15,size*.35,0,Math.PI*2);
+    ctx.arc(x+size*.35,y-size*.15,size*.35,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/* =========================
+   CAR DRAWING
+========================= */
+
+function drawCar(x,y,w,h,car,player=false){
+    ctx.save();
+
+    const left=x-w/2;
+    const top=y-h/2;
+
+    /* gölge */
+
+    ctx.fillStyle="rgba(0,0,0,.38)";
+    ctx.beginPath();
+    ctx.ellipse(
+        x,
+        y+h*.43,
+        w*.48,
+        h*.14,
+        0,
+        0,
+        Math.PI*2
+    );
+    ctx.fill();
+
+    /* lastikler */
+
+    ctx.fillStyle="#080b0d";
+
+    ctx.fillRect(left-w*.08,top+h*.19,w*.17,h*.25);
+    ctx.fillRect(x+w*.91-w*.17,top+h*.19,w*.17,h*.25);
+
+    ctx.fillRect(left-w*.08,top+h*.65,w*.17,h*.25);
+    ctx.fillRect(x+w*.91-w*.17,top+h*.65,w*.17,h*.25);
+
+    /* gövde */
+
+    const grad=ctx.createLinearGradient(left,top,left+w,top);
+
+    grad.addColorStop(0,shadeColor(car.color,-25));
+    grad.addColorStop(.5,car.color);
+    grad.addColorStop(1,shadeColor(car.color,20));
+
+    ctx.fillStyle=grad;
+
+    roundRect(
+        ctx,
+        left,
+        top,
+        w,
+        h,
+        Math.max(5,w*.18)
+    );
+
+    ctx.fill();
+
+    /* cam */
+
+    ctx.fillStyle=car.accent;
+
+    roundRect(
+        ctx,
+        x-w*.30,
+        top+h*.13,
+        w*.60,
+        h*.27,
+        w*.09
+    );
+
+    ctx.fill();
+
+    /* cam gölgesi */
+
+    ctx.fillStyle="rgba(20,40,50,.55)";
+
+    ctx.beginPath();
+    ctx.moveTo(x-w*.27,top+h*.16);
+    ctx.lineTo(x+w*.27,top+h*.16);
+    ctx.lineTo(x+w*.20,top+h*.34);
+    ctx.lineTo(x-w*.20,top+h*.34);
+    ctx.closePath();
+    ctx.fill();
+
+    /* orta şerit */
+
+    if(player){
+        ctx.fillStyle="rgba(255,255,255,.22)";
+        ctx.fillRect(x-w*.035,top+h*.38,w*.07,h*.45);
+    }
+
+    /* farlar */
+
+    ctx.fillStyle="#fff3b0";
+
+    ctx.fillRect(
+        x-w*.34,
+        top+h*.045,
+        w*.18,
+        h*.055
+    );
+
+    ctx.fillRect(
+        x+w*.16,
+        top+h*.045,
+        w*.18,
+        h*.055
+    );
+
+    /* stoplar */
+
+    ctx.fillStyle="#ef3030";
+
+    ctx.fillRect(
+        x-w*.34,
+        top+h*.90,
+        w*.18,
+        h*.055
+    );
+
+    ctx.fillRect(
+        x+w*.16,
+        top+h*.90,
+        w*.18,
+        h*.055
+    );
+
+    /* tampon */
+
+    ctx.fillStyle="rgba(0,0,0,.28)";
+    ctx.fillRect(x-w*.34,top+h*.93,w*.68,h*.035);
+
+    ctx.restore();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+    r=Math.min(r,w/2,h/2);
+
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+}
+
+function shadeColor(hex,percent){
+    let c=hex.replace("#","");
+
+    if(c.length===3){
+        c=c.split("").map(x=>x+x).join("");
+    }
+
+    let n=parseInt(c,16);
+
+    let r=(n>>16)+percent;
+    let g=((n>>8)&255)+percent;
+    let b=(n&255)+percent;
+
+    r=Math.max(0,Math.min(255,r));
+    g=Math.max(0,Math.min(255,g));
+    b=Math.max(0,Math.min(255,b));
+
+    return "#"+
+        ((1<<24)+(r<<16)+(g<<8)+b)
+        .toString(16)
+        .slice(1);
+}
+
+/* =========================
+   TRAFFIC
+========================= */
+
+const trafficColors=[
+    ["#d32f2f","#ffcdd2"],
+    ["#1976d2","#bbdefb"],
+    ["#eeeeee","#b0bec5"],
+    ["#212121","#90a4ae"],
+    ["#f9a825","#fff59d"],
+    ["#7b1fa2","#e1bee7"],
+    ["#00897b","#b2dfdb"]
+];
+
+function spawnTraffic(){
+    const level=getLevel(save.xp);
+
+    const lanes=[-.31,-.10,.10,.31];
+
+    let lane=lanes[Math.floor(Math.random()*lanes.length)];
+
+    /* Aynı bölgede üst üste araç oluşmasını azalt */
+
+    for(let tries=0;tries<5;tries++){
+        const candidate=lanes[Math.floor(Math.random()*lanes.length)];
+
+        const blocked=traffic.some(v=>
+            Math.abs(v.lane-candidate)<.04 &&
+            v.y<220
+        );
+
+        if(!blocked){
+            lane=candidate;
+            break;
+        }
+    }
+
+    const col=
+        trafficColors[
+            Math.floor(Math.random()*trafficColors.length)
+        ];
+
+    traffic.push({
+        lane:lane,
+        y:H*.13-Math.random()*120,
+        speed:.65+Math.random()*.45+level*.018,
+        w:32+Math.random()*7,
+        h:62+Math.random()*14,
+        color:col[0],
+        accent:col[1],
+        wobble:Math.random()*Math.PI*2
+    });
+}
+
+function updateTraffic(dt){
+    const level=getLevel(save.xp);
+
+    const multiplier=
+        1+
+        gameSpeed*.065+
+        level*.025;
+
+    for(let i=traffic.length-1;i>=0;i--){
+        const car=traffic[i];
+
+        car.y+=
+            (2.4+
+             car.speed+
+             level*.05)*
+            multiplier*
+            dt*60;
+
+        car.wobble+=dt*2;
+
+        if(car.y>H+120){
+            traffic.splice(i,1);
+
+            score+=10;
+            distance+=4;
+
+            continue;
+        }
+    }
+
+    const maxTraffic=Math.min(13,5+Math.floor(level*.45));
+
+    if(traffic.length<maxTraffic){
+        spawnTimer-=dt;
+
+        const interval=Math.max(
+            .28,
+            .95-level*.025-gameSpeed*.012
+        );
+
+        if(spawnTimer<=0){
+            spawnTraffic();
+            spawnTimer=interval;
+        }
+    }
+}
+
+/* =========================
+   PARTICLES
+========================= */
+
+function addParticle(x,y){
+    particles.push({
+        x:x,
+        y:y,
+        vx:(Math.random()-.5)*2,
+        vy:Math.random()*2+1,
+        life:.5+Math.random()*.5,
+        size:2+Math.random()*3
+    });
+}
+
+function updateParticles(dt){
+    for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i];
+
+        p.x+=p.vx*dt*60;
+        p.y+=p.vy*dt*60;
+        p.life-=dt;
+
+        if(p.life<=0){
+            particles.splice(i,1);
+        }
+    }
+}
+
+function drawParticles(){
+    for(const p of particles){
+        ctx.globalAlpha=Math.max(0,p.life);
+        ctx.fillStyle="#ddd";
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    ctx.globalAlpha=1;
+}
+
+/* =========================
+   PLAYER
+========================= */
+
+function playerDimensions(){
+    const geo=roadGeometry(H*.87);
+
+    const w=Math.min(
+        62,
+        Math.max(43,geo.width*.16)
+    );
+
+    return{
+        w:w,
+        h:w*1.62
+    };
+}
+
+function playerY(){
+    return H*.87;
+}
+
+function drawPlayer(){
+    const car=cars[save.selectedCar]||cars[0];
+    const d=playerDimensions();
+
+    drawCar(
+        playerX,
+        playerY(),
+        d.w,
+        d.h,
+        car,
+        true
+    );
+}
+
+function checkCollision(){
+    const d=playerDimensions();
+
+    for(const car of traffic){
+        const geo=roadGeometry(car.y);
+
+        const x=geo.center+car.lane*geo.width;
+
+        const cw=car.w*(.55+geo.t*.55);
+        const ch=car.h*(.55+geo.t*.55);
+
+        const dx=Math.abs(playerX-x);
+        const dy=Math.abs(playerY()-car.y);
+
+        if(
+            dx < (d.w*.42+cw*.42) &&
+            dy < (d.h*.40+ch*.40)
+        ){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/* =========================
+   SOUND
+========================= */
+
+let audioCtx=null;
+let engineOsc=null;
+let engineGain=null;
+let engineFilter=null;
+let audioReady=false;
+
+function initAudio(){
+    if(!save.sound)return;
+
+    try{
+        if(!audioCtx){
+            const AC=window.AudioContext||window.webkitAudioContext;
+
+            if(!AC)return;
+
+            audioCtx=new AC();
+
+            engineOsc=audioCtx.createOscillator();
+            engineGain=audioCtx.createGain();
+            engineFilter=audioCtx.createBiquadFilter();
+
+            engineOsc.type="sawtooth";
+
+            engineFilter.type="lowpass";
+            engineFilter.frequency.value=800;
+
+            engineGain.gain.value=0;
+
+            engineOsc.connect(engineFilter);
+            engineFilter.connect(engineGain);
+            engineGain.connect(audioCtx.destination);
+
+            engineOsc.start();
+
+            audioReady=true;
+        }
+
+        if(audioCtx.state==="suspended"){
+            audioCtx.resume();
+        }
+    }catch(e){
+        audioReady=false;
+    }
+}
+
+function updateEngineSound(){
+    if(!audioReady||!save.sound||!engineOsc)return;
+
+    const speedRatio=Math.max(
+        0,
+        Math.min(1,gameSpeed/12)
+    );
+
+    const freq=
+        70+
+        speedRatio*190+
+        Math.sin(performance.now()*.004)*4;
+
+    engineOsc.frequency.setTargetAtTime(
+        freq,
+        audioCtx.currentTime,
+        .025
+    );
+
+    engineFilter.frequency.setTargetAtTime(
+        500+speedRatio*1500,
+        audioCtx.currentTime,
+        .04
+    );
+
+    const volume=
+        running&&!paused
+            ?0.018+speedRatio*.035
+            :0;
+
+    engineGain.gain.setTargetAtTime(
+        volume,
+        audioCtx.currentTime,
+        .06
+    );
+}
+
+function stopEngine(){
+    if(engineGain&&audioCtx){
+        engineGain.gain.setTargetAtTime(
+            0,
+            audioCtx.currentTime,
+            .05
+        );
+    }
+}
+
+function crashSound(){
+    if(!save.sound)return;
+
+    try{
+        initAudio();
+
+        if(!audioCtx)return;
+
+        const osc=audioCtx.createOscillator();
+        const gain=audioCtx.createGain();
+
+        osc.type="square";
+        osc.frequency.setValueAtTime(
+            110,
+            audioCtx.currentTime
+        );
+
+        osc.frequency.exponentialRampToValueAtTime(
+            45,
+            audioCtx.currentTime+.3
+        );
+
+        gain.gain.setValueAtTime(
+            .08,
+            audioCtx.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            .001,
+            audioCtx.currentTime+.3
+        );
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime+.3);
+    }catch(e){}
+}
+
+/* =========================
+   LEVEL UPDATE
+========================= */
+
+function updateLevel(){
+    const level=getLevel(save.xp);
+
+    document.getElementById("levelHUD").textContent=level;
+
+    const current=save.xp-xpForCurrentLevel(level);
+    const need=xpForNextLevel(level)-xpForCurrentLevel(level);
+
+    document.getElementById("xpHUD").style.width=
+        Math.min(100,current/Math.max(1,need)*100)+"%";
+
+    if(level>lastLevel){
+        const difference=level-lastLevel;
+
+        const bonus=50*difference;
+
+        save.coins+=bonus;
+
+        document.getElementById("levelBonus").textContent=bonus;
+
+        const box=document.getElementById("levelUp");
+
+        box.classList.add("show");
+
+        setTimeout(()=>{
+            box.classList.remove("show");
+        },1700);
+
+        saveGame();
+
+        lastLevel=level;
+    }
+
+    currentLevel=level;
+}
+
+/* =========================
+   GAME START
+========================= */
+
+function startGame(){
+    initAudio();
+
+    document.getElementById("menu").classList.remove("active");
+    document.getElementById("garage").classList.remove("active");
+    document.getElementById("settings").classList.remove("active");
+    document.getElementById("gameOver").classList.remove("active");
+
+    document.getElementById("hud").classList.add("active");
+    document.getElementById("controls").classList.add("active");
+
+    score=0;
+    distance=0;
+    gameSpeed=0;
+
+    traffic=[];
+    particles=[];
+
+    spawnTimer=.2;
+    roadOffset=0;
+
+    currentLevel=getLevel(save.xp);
+    lastLevel=currentLevel;
+
+    const geo=roadGeometry(H*.87);
+
+    playerX=geo.center;
+    playerTargetX=geo.center;
+
+    steeringLeft=false;
+    steeringRight=false;
+
+    paused=false;
+    running=true;
+
+    document.getElementById("scoreHUD").textContent="0";
+    document.getElementById("speedHUD").textContent="0";
+
+    lastTime=performance.now();
+
+    updateEngineSound();
+}
+
+/* =========================
+   GAME OVER
+========================= */
+
+function gameOver(){
+    if(!running)return;
+
+    running=false;
+    paused=false;
+
+    stopEngine();
+    crashSound();
+
+    const earned=
+        Math.max(
+            10,
+            Math.floor(score/12)+
+            Math.floor(distance/20)
+        );
+
+    save.coins+=earned;
+
+    const gainedXP=
+        Math.max(
+            25,
+            Math.floor(score*.65)+
+            Math.floor(distance*.8)
+        );
+
+    save.xp+=gainedXP;
+
+    if(score>save.best){
+        save.best=score;
+    }
+
+    saveGame();
+
+    document.getElementById("hud").classList.remove("active");
+    document.getElementById("controls").classList.remove("active");
+
+    document.getElementById("finalScore").textContent=
+        Math.floor(score);
+
+    document.getElementById("finalLevel").textContent=
+        getLevel(save.xp);
+
+    document.getElementById("earnedCoins").textContent=
+        earned;
+
+    document.getElementById("finalBest").textContent=
+        Math.floor(save.best);
+
+    document.getElementById("gameOver").classList.add("active");
+
+    updateMenuStats();
+}
+
+/* =========================
+   PAUSE
+========================= */
+
+function togglePause(){
+    if(!running)return;
+
+    paused=!paused;
+
+    document.getElementById("pauseBtn").textContent=
+        paused?"▶":"Ⅱ";
+
+    if(paused){
+        stopEngine();
+    }else{
+        lastTime=performance.now();
+        initAudio();
+    }
+}
+
+/* =========================
+   UPDATE
+========================= */
+
+function update(dt){
+    if(!running||paused)return;
+
+    const car=cars[save.selectedCar]||cars[0];
+
+    const level=getLevel(save.xp);
+
+    const maxSpeed=
+        car.speed+
+        Math.min(3,level*.07);
+
+    /* hızlanma */
+
+    gameSpeed+=
+        (maxSpeed-gameSpeed)*
+        Math.min(1,dt*1.8);
+
+    /* Direksiyon */
+
+    const steerPower=
+        car.steer*
+        dt*
+        (1+gameSpeed*.045);
+
+    if(steeringLeft){
+        playerTargetX-=steerPower*16;
+    }
+
+    if(steeringRight){
+        playerTargetX+=steerPower*16;
+    }
+
+    const geo=roadGeometry(H*.87);
+
+    const margin=geo.width*.20;
+
+    const minX=geo.left+margin;
+    const maxX=geo.right-margin;
+
+    playerTargetX=
+        Math.max(minX,Math.min(maxX,playerTargetX));
+
+    playerX+=
+        (playerTargetX-playerX)*
+        Math.min(1,dt*12);
+
+    /* Yol animasyonu */
+
+    roadOffset+=
+        gameSpeed*
+        dt*
+        55;
+
+    distance+=
+        gameSpeed*
+        dt*
+        .75;
+
+    score+=
+        gameSpeed*
+        dt*
+        2.5;
+
+    /* XP oyun içinde */
+
+    save.xp+=
+        gameSpeed*
+        dt*
+        .11;
+
+    updateTraffic(dt);
+    updateParticles(dt);
+
+    if(Math.random()<.12){
+        const d=playerDimensions();
+
+        addParticle(
+            playerX+(Math.random()-.5)*d.w,
+            playerY()+d.h*.45
+        );
+    }
+
+    updateLevel();
+
+    if(checkCollision()){
+        gameOver();
+        return;
+    }
+
+    document.getElementById("scoreHUD").textContent=
+        Math.floor(score);
+
+    document.getElementById("speedHUD").textContent=
+        Math.floor(gameSpeed*28);
+
+    updateEngineSound();
+}
+
+/* =========================
+   DRAW
+========================= */
+
+function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    drawBackground();
+
+    /* trafik */
+
+    for(const car of traffic){
+        const geo=roadGeometry(car.y);
+
+        const x=
+            geo.center+
+            car.lane*geo.width;
+
+        const scale=.45+geo.t*.72;
+
+        drawCar(
+            x,
+            car.y,
+            car.w*scale,
+            car.h*scale,
+            car,
+            false
+        );
+    }
+
+    drawPlayer();
+    drawParticles();
+
+    /* Hafif hız efekti */
+
+    if(running&&!paused&&gameSpeed>6){
+        ctx.strokeStyle="rgba(255,255,255,.10)";
+        ctx.lineWidth=2;
+
+        for(let i=0;i<8;i++){
+            const x=Math.random()*W;
+            const y=Math.random()*H*.7;
+
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+            ctx.lineTo(
+                x,
+                y+20+gameSpeed*3
+            );
+            ctx.stroke();
+        }
+    }
+
+    if(paused&&running){
+        ctx.fillStyle="rgba(0,0,0,.42)";
+        ctx.fillRect(0,0,W,H);
+
+        ctx.fillStyle="#fff";
+        ctx.textAlign="center";
+        ctx.font="900 34px Arial";
+        ctx.fillText("DURAKLATILDI",W/2,H/2);
+
+        ctx.font="15px Arial";
+        ctx.fillStyle="#b9c7ce";
+        ctx.fillText(
+            "Devam etmek için ▶ düğmesine bas",
+            W/2,
+            H/2+35
+        );
+    }
+}
+
+/* =========================
+   LOOP
+========================= */
+
+function loop(now){
+    const dt=
+        Math.min(
+            .033,
+            Math.max(
+                .001,
+                (now-lastTime)/1000
+            )
+        );
+
+    lastTime=now;
+
+    update(dt);
+    draw();
+
+    requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
+
+/* =========================
+   TOUCH
+========================= */
+
+function setLeft(value){
+    steeringLeft=value;
+}
+
+function setRight(value){
+    steeringRight=value;
+}
+
+const leftZone=document.getElementById("leftZone");
+const rightZone=document.getElementById("rightZone");
+
+function prevent(e){
+    e.preventDefault();
+}
+
+[
+    leftZone,
+    rightZone
+].forEach(el=>{
+    el.addEventListener("touchstart",prevent,{passive:false});
+    el.addEventListener("touchmove",prevent,{passive:false});
+    el.addEventListener("touchend",prevent,{passive:false});
+    el.addEventListener("touchcancel",prevent,{passive:false});
+});
+
+leftZone.addEventListener("touchstart",()=>{
+    setLeft(true);
+},{passive:false});
+
+leftZone.addEventListener("touchend",()=>{
+    setLeft(false);
+},{passive:false});
+
+leftZone.addEventListener("touchcancel",()=>{
+    setLeft(false);
+},{passive:false});
+
+rightZone.addEventListener("touchstart",()=>{
+    setRight(true);
+},{passive:false});
+
+rightZone.addEventListener("touchend",()=>{
+    setRight(false);
+},{passive:false});
+
+rightZone.addEventListener("touchcancel",()=>{
+    setRight(false);
+},{passive:false});
+
+/* =========================
+   KEYBOARD
+========================= */
+
+window.addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a"){
+        steeringLeft=true;
+    }
+
+    if(e.key==="ArrowRight"||e.key.toLowerCase()==="d"){
+        steeringRight=true;
+    }
+
+    if(e.key===" "){
+        e.preventDefault();
+        togglePause();
+    }
+});
+
+window.addEventListener("keyup",e=>{
+    if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a"){
+        steeringLeft=false;
+    }
+
+    if(e.key==="ArrowRight"||e.key.toLowerCase()==="d"){
+        steeringRight=false;
+    }
+});
+
+/* =========================
+   BUTTONS
+========================= */
+
+document.getElementById("startBtn").onclick=()=>{
+    startGame();
+};
+
+document.getElementById("garageBtn").onclick=()=>{
+    document.getElementById("menu").classList.remove("active");
+    document.getElementById("garage").classList.add("active");
+
+    renderGarage();
+};
+
+document.getElementById("garageBack").onclick=()=>{
+    document.getElementById("garage").classList.remove("active");
+    document.getElementById("menu").classList.add("active");
+
+    updateMenuStats();
+};
+
+document.getElementById("settingsBtn").onclick=()=>{
+    document.getElementById("menu").classList.remove("active");
+    document.getElementById("settings").classList.add("active");
+
+    updateSoundSwitch();
+};
+
+document.getElementById("settingsBack").onclick=()=>{
+    document.getElementById("settings").classList.remove("active");
+    document.getElementById("menu").classList.add("active");
+
+    updateMenuStats();
+};
+
+document.getElementById("pauseBtn").onclick=()=>{
+    togglePause();
+};
+
+document.getElementById("retryBtn").onclick=()=>{
+    startGame();
+};
+
+document.getElementById("gameOverMenu").onclick=()=>{
+    document.getElementById("gameOver").classList.remove("active");
+    document.getElementById("menu").classList.add("active");
+
+    updateMenuStats();
+};
+
+document.getElementById("soundSwitch").onclick=()=>{
+    save.sound=!save.sound;
+
+    if(!save.sound){
+        stopEngine();
+    }else{
+        initAudio();
+    }
+
+    saveGame();
+    updateSoundSwitch();
+};
+
+function updateSoundSwitch(){
+    const sw=document.getElementById("soundSwitch");
+
+    sw.classList.toggle("on",save.sound);
+}
+
+document.getElementById("resetBtn").onclick=()=>{
+    const ok=confirm(
+        "Tüm para, XP, araçlar ve rekor silinecek. Emin misin?"
+    );
+
+    if(!ok)return;
+
+    save={
+        coins:0,
+        xp:0,
+        best:0,
+        selectedCar:0,
+        owned:[true,false,false,false,false,false],
+        sound:true
+    };
+
+    saveGame();
+
+    updateMenuStats();
+    renderGarage();
+    updateSoundSwitch();
+};
+
+/* =========================
+   MENÜ BAŞLANGIÇ
+========================= */
+
+updateMenuStats();
+renderGarage();
+updateSoundSwitch();
+
+/* =========================
+   AUDIO TOUCH UNLOCK
+========================= */
+
+document.addEventListener("touchstart",()=>{
+    if(save.sound){
+        initAudio();
+    }
+},{once:true,passive:true});
+
+document.addEventListener("click",()=>{
+    if(save.sound){
+        initAudio();
+    }
+},{once:true});
+
+/* =========================
+   EKRAN ORYANTASYONU
+========================= */
+
+function orientationCheck(){
+    /*
+       Oyun özellikle dikey kullanım için tasarlanmıştır.
+       Telefon yatay çevrilirse oyun yine çalışmaya devam eder.
+    */
+}
+
+window.addEventListener("orientationchange",()=>{
+    setTimeout(()=>{
+        resize();
+        orientationCheck();
+    },150);
+});
+
+orientationCheck();
+
+</script>
+
+</body>
+</html>
