@@ -198,9 +198,11 @@ button:active{
 <body>
 
 <div id="game">
+
   <canvas id="canvas"></canvas>
 
   <div id="hud">
+
     <div class="hudBox">
       HIZ<br>
       <span id="speed">0 km/h</span>
@@ -210,38 +212,74 @@ button:active{
       SKOR<br>
       <span id="score">0</span>
     </div>
+
   </div>
 
-  <div id="hint">SOL / SAĞ düğmeleriyle aracı kontrol et</div>
+  <div id="hint">
+    SOL / SAĞ düğmeleriyle aracı kontrol et
+  </div>
 
   <div id="controls">
-    <div class="control" id="left">‹</div>
-    <div class="control" id="right">›</div>
+
+    <div class="control" id="left">
+      ‹
+    </div>
+
+    <div class="control" id="right">
+      ›
+    </div>
+
   </div>
 
   <div id="menu">
+
     <div class="panel">
-      <div class="title">TURBO ROAD</div>
+
+      <div class="title">
+        TURBO ROAD
+      </div>
+
       <div class="subtitle">
         Ters yönlü trafik yarışına hazır ol!
       </div>
 
-      <button id="startBtn">OYUNA BAŞLA</button>
-      <button class="secondary" id="soundBtn">🔊 SES AÇIK</button>
+      <button id="startBtn">
+        OYUNA BAŞLA
+      </button>
+
+      <button class="secondary" id="soundBtn">
+        🔊 SES AÇIK
+      </button>
+
     </div>
+
   </div>
 
   <div id="gameOver" class="hidden">
+
     <div class="panel">
-      <div class="title">ÇARPIŞMA!</div>
-      <div class="subtitle">
-        Skorun: <strong id="finalScore">0</strong>
+
+      <div class="title">
+        ÇARPIŞMA!
       </div>
 
-      <button id="restartBtn">TEKRAR OYNA</button>
-      <button class="secondary" id="menuBtn">ANA MENÜ</button>
+      <div class="subtitle">
+        Skorun:
+        <strong id="finalScore">0</strong>
+      </div>
+
+      <button id="restartBtn">
+        TEKRAR OYNA
+      </button>
+
+      <button class="secondary" id="menuBtn">
+        ANA MENÜ
+      </button>
+
     </div>
+
   </div>
+
 </div>
 
 <script>
@@ -249,45 +287,77 @@ button:active{
 
 "use strict";
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const canvas =
+  document.getElementById("canvas");
 
-const menu = document.getElementById("menu");
-const gameOver = document.getElementById("gameOver");
+const ctx =
+  canvas.getContext("2d");
 
-const startBtn = document.getElementById("startBtn");
-const restartBtn = document.getElementById("restartBtn");
-const menuBtn = document.getElementById("menuBtn");
-const soundBtn = document.getElementById("soundBtn");
+const menu =
+  document.getElementById("menu");
 
-const scoreEl = document.getElementById("score");
-const speedEl = document.getElementById("speed");
-const finalScoreEl = document.getElementById("finalScore");
+const gameOver =
+  document.getElementById("gameOver");
 
-const leftBtn = document.getElementById("left");
-const rightBtn = document.getElementById("right");
+const startBtn =
+  document.getElementById("startBtn");
 
-let W = 0;
-let H = 0;
-let dpr = 1;
+const restartBtn =
+  document.getElementById("restartBtn");
 
-let running = false;
-let lastTime = 0;
+const menuBtn =
+  document.getElementById("menuBtn");
 
-let score = 0;
-let distance = 0;
+const soundBtn =
+  document.getElementById("soundBtn");
 
-let soundEnabled = true;
-let audioCtx = null;
-let engineOsc = null;
-let engineGain = null;
+const scoreEl =
+  document.getElementById("score");
 
-const keys = {
+const speedEl =
+  document.getElementById("speed");
+
+const finalScoreEl =
+  document.getElementById("finalScore");
+
+const leftBtn =
+  document.getElementById("left");
+
+const rightBtn =
+  document.getElementById("right");
+
+
+let W=0;
+let H=0;
+let dpr=1;
+
+let running=false;
+let lastTime=0;
+
+let score=0;
+let distance=0;
+
+let soundEnabled=true;
+
+let audioCtx=null;
+
+let engineOsc=null;
+let engineGain=null;
+
+let roadNoiseSource=null;
+let roadNoiseGain=null;
+
+let windOsc=null;
+let windGain=null;
+
+
+const keys={
   left:false,
   right:false
 };
 
-const player = {
+
+const player={
   x:0,
   y:0,
   width:38,
@@ -297,16 +367,19 @@ const player = {
   steer:0
 };
 
-let traffic = [];
 
-let road = {
+let traffic=[];
+
+
+const road={
   left:0,
   right:0,
   width:0,
   center:0
 };
 
-const trafficColors = [
+
+const trafficColors=[
   "#e53935",
   "#1976d2",
   "#f4c542",
@@ -317,114 +390,376 @@ const trafficColors = [
   "#555555"
 ];
 
+
+/* =========================
+   EKRAN
+========================= */
+
 function resize(){
 
-  dpr = Math.min(window.devicePixelRatio || 1,2);
+  dpr=
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
 
-  W = window.innerWidth;
-  H = window.innerHeight;
+  W=window.innerWidth;
+  H=window.innerHeight;
 
-  canvas.width = Math.floor(W*dpr);
-  canvas.height = Math.floor(H*dpr);
+  canvas.width=
+    Math.floor(W*dpr);
 
-  canvas.style.width = W+"px";
-  canvas.style.height = H+"px";
+  canvas.height=
+    Math.floor(H*dpr);
 
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+  canvas.style.width=W+"px";
+  canvas.style.height=H+"px";
 
-  road.width = Math.min(W * .72, 420);
-  road.left = (W-road.width)/2;
-  road.right = road.left + road.width;
-  road.center = W/2;
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
 
-  player.width = Math.max(32, road.width*.105);
-  player.height = player.width*1.82;
+  road.width=
+    Math.min(
+      W*.72,
+      420
+    );
 
-  player.y = H - Math.max(135,H*.17);
+  road.left=
+    (W-road.width)/2;
+
+  road.right=
+    road.left+road.width;
+
+  road.center=
+    W/2;
+
+  player.width=
+    Math.max(
+      32,
+      road.width*.105
+    );
+
+  player.height=
+    player.width*1.82;
+
+  player.y=
+    H-Math.max(
+      135,
+      H*.17
+    );
 
   if(!running){
-    player.x = road.center;
+
+    player.x=
+      road.center;
+
   }else{
-    player.x = clamp(player.x, road.left+player.width/2+6,
-                           road.right-player.width/2-6);
+
+    player.x=
+      clamp(
+        player.x,
+        road.left+
+        player.width/2+
+        6,
+
+        road.right-
+        player.width/2-
+        6
+      );
   }
 }
 
-window.addEventListener("resize",resize);
+window.addEventListener(
+  "resize",
+  resize
+);
+
 resize();
 
+
 function clamp(v,min,max){
-  return Math.max(min,Math.min(max,v));
+
+  return Math.max(
+    min,
+    Math.min(max,v)
+  );
 }
+
 
 function random(min,max){
-  return Math.random()*(max-min)+min;
+
+  return Math.random()*
+    (max-min)+min;
 }
+
 
 function laneX(lane){
-  const lanes = 3;
-  const laneWidth = road.width/lanes;
 
-  return road.left + laneWidth*(lane+.5);
+  const lanes=3;
+
+  const laneWidth=
+    road.width/lanes;
+
+  return road.left+
+    laneWidth*(lane+.5);
 }
 
-function createTraffic(y=-120){
 
-  const lane = Math.floor(Math.random()*3);
+/* =========================
+   TRAFİK
+========================= */
 
-  const width = player.width * random(.82,1.02);
-  const height = width * random(1.55,1.85);
+/*
+  Aynı şeritteki araçların
+  birbirine girmemesi için
+  minimum dikey mesafe.
+*/
+
+function trafficSafeY(lane,y,height){
+
+  const minimumGap=
+    Math.max(
+      95,
+      player.height*1.45
+    );
+
+  for(const car of traffic){
+
+    if(car.lane!==lane)
+      continue;
+
+    const required=
+      (height+car.height)/2+
+      minimumGap;
+
+    if(Math.abs(y-car.y)<required){
+
+      if(y<=car.y){
+
+        y=
+          car.y-
+          required;
+
+      }else{
+
+        y=
+          car.y+
+          required;
+      }
+    }
+  }
+
+  return y;
+}
+
+
+function createTraffic(
+  y=-120,
+  preferredLane=null
+){
+
+  let lane;
+
+  if(
+    preferredLane!==null &&
+    preferredLane>=0 &&
+    preferredLane<3
+  ){
+
+    lane=preferredLane;
+
+  }else{
+
+    /*
+      Mümkünse en az dolu şeridi seç.
+    */
+
+    const counts=[0,0,0];
+
+    for(const car of traffic){
+
+      if(car.lane>=0 &&
+         car.lane<3){
+
+        counts[car.lane]++;
+      }
+    }
+
+    const minCount=
+      Math.min(...counts);
+
+    const available=[];
+
+    for(let i=0;i<3;i++){
+
+      if(counts[i]===minCount){
+
+        available.push(i);
+      }
+    }
+
+    lane=
+      available[
+        Math.floor(
+          Math.random()*
+          available.length
+        )
+      ];
+  }
+
+
+  const width=
+    player.width*
+    random(.82,1.02);
+
+  const height=
+    width*
+    random(1.55,1.85);
+
+
+  /*
+    Yeni aracın aynı şeritteki
+    başka araçlarla çakışmamasını sağla.
+  */
+
+  y=
+    trafficSafeY(
+      lane,
+      y,
+      height
+    );
+
 
   traffic.push({
+
     x:laneX(lane),
-    y,
-    width,
-    height,
+
+    y:y,
+
+    width:width,
+
+    height:height,
+
     speed:random(2.5,4.4),
-    color:trafficColors[
-      Math.floor(Math.random()*trafficColors.length)
-    ],
-    lane,
-    wobble:random(-.12,.12)
+
+    color:
+      trafficColors[
+        Math.floor(
+          Math.random()*
+          trafficColors.length
+        )
+      ],
+
+    lane:lane,
+
+    wobble:random(-.035,.035)
+
   });
 }
 
+
 function resetTraffic(){
 
-  traffic = [];
+  traffic=[];
 
-  const count = Math.max(4,Math.floor(H/230));
+  const count=
+    Math.max(
+      4,
+      Math.floor(H/250)
+    );
+
+
+  /*
+    Araçları önce farklı şeritlere
+    dağıtıyoruz.
+  */
 
   for(let i=0;i<count;i++){
 
-    const lane = i%3;
+    const lane=
+      i%3;
 
-    const width = player.width*random(.82,1);
+    const width=
+      player.width*
+      random(.82,1);
+
+    const height=
+      width*1.7;
+
+    let y=
+      -180-
+      i*280;
+
+    y=
+      trafficSafeY(
+        lane,
+        y,
+        height
+      );
+
 
     traffic.push({
+
       x:laneX(lane),
-      y:-180-i*250,
-      width,
-      height:width*1.7,
+
+      y:y,
+
+      width:width,
+
+      height:height,
+
       speed:random(2.5,4.3),
-      color:trafficColors[
-        Math.floor(Math.random()*trafficColors.length)
-      ],
-      lane,
-      wobble:random(-.12,.12)
+
+      color:
+        trafficColors[
+          Math.floor(
+            Math.random()*
+            trafficColors.length
+          )
+        ],
+
+      lane:lane,
+
+      wobble:random(-.035,.035)
+
     });
   }
 }
 
+
+/* =========================
+   DOĞA
+========================= */
+
 function drawBackground(){
 
   ctx.fillStyle="#2c632b";
-  ctx.fillRect(0,0,W,H);
 
-  // uzak doğa
-  for(let x=0;x<W;x+=55){
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
 
-    const offset=(Math.sin(x*0.08+distance*.001)*12);
+
+  for(
+    let x=0;
+    x<W;
+    x+=55
+  ){
+
+    const offset=
+      Math.sin(
+        x*.08+
+        distance*.001
+      )*12;
 
     drawTree(
       x+offset,
@@ -433,106 +768,266 @@ function drawBackground(){
     );
   }
 
-  // yol dışındaki ağaçlar
-  const sideGap = Math.max(35,(W-road.width)/2-8);
 
-  for(let y=-40;y<H+100;y+=95){
+  const sideGap=
+    Math.max(
+      35,
+      (W-road.width)/2-8
+    );
 
-    const move=(distance*0.7)%95;
+
+  for(
+    let y=-40;
+    y<H+100;
+    y+=95
+  ){
+
+    const move=
+      (distance*.7)%95;
 
     drawTree(
-      road.left-sideGap*.45,
+      road.left-
+      sideGap*.45,
+
       y+move,
+
       18
     );
 
     drawTree(
-      road.right+sideGap*.45,
+      road.right+
+      sideGap*.45,
+
       y+move+40,
+
       18
     );
   }
 }
 
-function drawTree(x,y,size){
+
+function drawTree(
+  x,
+  y,
+  size
+){
 
   ctx.save();
 
   ctx.fillStyle="#5a351d";
-  ctx.fillRect(x-size*.12,y,size*.24,size*.65);
+
+  ctx.fillRect(
+    x-size*.12,
+    y,
+    size*.24,
+    size*.65
+  );
+
 
   ctx.beginPath();
+
   ctx.fillStyle="#174d24";
-  ctx.arc(x,y,size*.45,0,Math.PI*2);
+
+  ctx.arc(
+    x,
+    y,
+    size*.45,
+    0,
+    Math.PI*2
+  );
+
   ctx.fill();
 
+
   ctx.beginPath();
+
   ctx.fillStyle="#226d2d";
-  ctx.arc(x-size*.22,y+size*.15,size*.38,0,Math.PI*2);
-  ctx.arc(x+size*.22,y+size*.15,size*.38,0,Math.PI*2);
+
+  ctx.arc(
+    x-size*.22,
+    y+size*.15,
+    size*.38,
+    0,
+    Math.PI*2
+  );
+
+  ctx.arc(
+    x+size*.22,
+    y+size*.15,
+    size*.38,
+    0,
+    Math.PI*2
+  );
+
   ctx.fill();
 
   ctx.restore();
 }
 
+
+/* =========================
+   YOL
+========================= */
+
 function drawRoad(){
 
-  // yol
   ctx.fillStyle="#25292c";
-  ctx.fillRect(road.left,0,road.width,H);
 
-  // kenar çizgileri
+  ctx.fillRect(
+    road.left,
+    0,
+    road.width,
+    H
+  );
+
+
   ctx.fillStyle="#d8d8d8";
 
   ctx.fillRect(
-    road.left+4,0,4,H
+    road.left+4,
+    0,
+    4,
+    H
   );
 
   ctx.fillRect(
-    road.right-8,0,4,H
+    road.right-8,
+    0,
+    4,
+    H
   );
 
-  // orta şerit çizgileri
-  const laneWidth=road.width/3;
+
+  const laneWidth=
+    road.width/3;
 
   ctx.fillStyle="#e9e9e9";
 
   const dash=52;
   const gap=42;
-  const offset=(distance*1.25)%(dash+gap);
 
-  for(let lane=1;lane<3;lane++){
+  const offset=
+    (distance*1.25)%
+    (dash+gap);
 
-    const x=road.left+laneWidth*lane;
 
-    for(let y=-dash+offset;y<H+dash;y+=dash+gap){
+  for(
+    let lane=1;
+    lane<3;
+    lane++
+  ){
 
-      ctx.fillRect(x-2,y,4,dash);
+    const x=
+      road.left+
+      laneWidth*lane;
+
+
+    for(
+      let y=-dash+offset;
+      y<H+dash;
+      y+=dash+gap
+    ){
+
+      ctx.fillRect(
+        x-2,
+        y,
+        4,
+        dash
+      );
     }
   }
 
-  // yol kenarı asfalt gölgesi
-  ctx.fillStyle="rgba(0,0,0,.18)";
-  ctx.fillRect(road.left,0,7,H);
-  ctx.fillRect(road.right-7,0,7,H);
+
+  ctx.fillStyle=
+    "rgba(0,0,0,.18)";
+
+  ctx.fillRect(
+    road.left,
+    0,
+    7,
+    H
+  );
+
+  ctx.fillRect(
+    road.right-7,
+    0,
+    7,
+    H
+  );
 }
 
-function roundedRect(x,y,w,h,r){
+
+/* =========================
+   ARAÇ
+========================= */
+
+function roundedRect(
+  x,y,w,h,r
+){
 
   ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r);
-  ctx.quadraticCurveTo(x,y,x+r,y);
+
+  ctx.moveTo(
+    x+r,
+    y
+  );
+
+  ctx.lineTo(
+    x+w-r,
+    y
+  );
+
+  ctx.quadraticCurveTo(
+    x+w,
+    y,
+    x+w,
+    y+r
+  );
+
+  ctx.lineTo(
+    x+w,
+    y+h-r
+  );
+
+  ctx.quadraticCurveTo(
+    x+w,
+    y+h,
+    x+w-r,
+    y+h
+  );
+
+  ctx.lineTo(
+    x+r,
+    y+h
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y+h,
+    x,
+    y+h-r
+  );
+
+  ctx.lineTo(
+    x,
+    y+r
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y,
+    x+r,
+    y
+  );
+
   ctx.closePath();
 }
 
-function drawCar(car,isPlayer=false){
+
+function drawCar(
+  car,
+  isPlayer=false
+){
 
   const x=car.x;
   const y=car.y;
@@ -541,8 +1036,10 @@ function drawCar(car,isPlayer=false){
 
   ctx.save();
 
-  // gölge
-  ctx.fillStyle="rgba(0,0,0,.35)";
+
+  ctx.fillStyle=
+    "rgba(0,0,0,.35)";
+
   roundedRect(
     x-w/2+4,
     y-h/2+6,
@@ -550,10 +1047,14 @@ function drawCar(car,isPlayer=false){
     h,
     w*.18
   );
+
   ctx.fill();
 
-  // gövde
-  ctx.fillStyle=isPlayer ? "#101820" : car.color;
+
+  ctx.fillStyle=
+    isPlayer
+      ? "#101820"
+      : car.color;
 
   roundedRect(
     x-w/2,
@@ -562,10 +1063,14 @@ function drawCar(car,isPlayer=false){
     h,
     w*.18
   );
+
   ctx.fill();
 
-  // Mustang benzeri kaput/ön bölüm
-  ctx.fillStyle=isPlayer ? "#c7c7c7" : "#222";
+
+  ctx.fillStyle=
+    isPlayer
+      ? "#c7c7c7"
+      : "#222";
 
   roundedRect(
     x-w*.36,
@@ -574,9 +1079,10 @@ function drawCar(car,isPlayer=false){
     h*.28,
     w*.08
   );
+
   ctx.fill();
 
-  // cam
+
   ctx.fillStyle="#182c38";
 
   roundedRect(
@@ -586,10 +1092,13 @@ function drawCar(car,isPlayer=false){
     h*.25,
     w*.06
   );
+
   ctx.fill();
 
-  // cam yansıması
-  ctx.fillStyle="rgba(255,255,255,.25)";
+
+  ctx.fillStyle=
+    "rgba(255,255,255,.25)";
+
   ctx.fillRect(
     x-w*.25,
     y-h*.10,
@@ -597,7 +1106,7 @@ function drawCar(car,isPlayer=false){
     h*.15
   );
 
-  // farlar
+
   ctx.fillStyle="#fff3b0";
 
   ctx.fillRect(
@@ -614,7 +1123,7 @@ function drawCar(car,isPlayer=false){
     h*.07
   );
 
-  // stoplar
+
   ctx.fillStyle="#ff2424";
 
   ctx.fillRect(
@@ -631,7 +1140,7 @@ function drawCar(car,isPlayer=false){
     h*.07
   );
 
-  // oyuncu aracı için ön tampon
+
   if(isPlayer){
 
     ctx.fillStyle="#d7d7d7";
@@ -643,7 +1152,7 @@ function drawCar(car,isPlayer=false){
       h*.035
     );
 
-    // orta Mustang şeridi
+
     ctx.fillStyle="#ffffff";
 
     ctx.fillRect(
@@ -654,302 +1163,849 @@ function drawCar(car,isPlayer=false){
     );
   }
 
+
   ctx.restore();
 }
 
+
+/* =========================
+   OYUN GÜNCELLEME
+========================= */
+
 function update(dt){
 
-  const frame = Math.min(dt/16.67,2);
+  const frame=
+    Math.min(
+      dt/16.67,
+      2
+    );
 
-  // oyuncu hızı
-  player.targetSpeed =
-    6.0 + Math.min(5.5,score/650);
 
-  player.speed +=
-    (player.targetSpeed-player.speed)*.025*frame;
+  player.targetSpeed=
+    6.0+
+    Math.min(
+      5.5,
+      score/650
+    );
+
+
+  player.speed+=
+    (
+      player.targetSpeed-
+      player.speed
+    )*.025*frame;
+
 
   let steer=0;
 
-  if(keys.left) steer-=1;
-  if(keys.right) steer+=1;
+  if(keys.left)
+    steer-=1;
 
-  player.steer +=
-    (steer-player.steer)*.22*frame;
+  if(keys.right)
+    steer+=1;
 
-  player.x +=
-    player.steer * 5.8 * frame;
 
-  player.x = clamp(
-    player.x,
-    road.left+player.width/2+8,
-    road.right-player.width/2-8
-  );
+  player.steer+=
+    (
+      steer-
+      player.steer
+    )*.22*frame;
 
-  // dünya oyuncunun ilerlediği yönde aşağıya akar
-  distance += player.speed*frame;
 
-  score += player.speed*.018*frame;
+  player.x+=
+    player.steer*
+    5.8*
+    frame;
 
-  // TRAFİK
-  // ÖNEMLİ:
-  // Oyuncu aşağıdan yukarı ilerliyor.
-  // Trafik araçları yukarıdan aşağı geliyor.
+
+  player.x=
+    clamp(
+      player.x,
+
+      road.left+
+      player.width/2+
+      8,
+
+      road.right-
+      player.width/2-
+      8
+    );
+
+
+  /*
+    Oyuncu yukarı gider.
+    Dünya aşağı doğru akar.
+  */
+
+  distance+=
+    player.speed*
+    frame;
+
+
+  score+=
+    player.speed*
+    .018*
+    frame;
+
+
+  /*
+    KARŞIDAN GELEN TRAFİK
+  */
+
   for(const car of traffic){
 
-    car.y +=
-      (car.speed + player.speed*.82) * frame;
+    car.y+=
+      (
+        car.speed+
+        player.speed*.82
+      )*
+      frame;
 
-    car.x +=
-      Math.sin(distance*.01+car.y*.01)*
+
+    car.x+=
+      Math.sin(
+        distance*.01+
+        car.y*.01
+      )*
       car.wobble;
 
-    car.x=clamp(
-      car.x,
-      road.left+car.width/2+8,
-      road.right-car.width/2-8
-    );
+
+    car.x=
+      clamp(
+        car.x,
+
+        road.left+
+        car.width/2+
+        8,
+
+        road.right-
+        car.width/2-
+        8
+      );
   }
 
-  for(let i=traffic.length-1;i>=0;i--){
 
-    if(traffic[i].y > H+160){
+  /*
+    Trafik araçlarının aynı şeritte
+    birbirine yaklaşmasını sürekli
+    kontrol et.
+  */
 
-      traffic.splice(i,1);
+  for(let i=0;i<traffic.length;i++){
 
-      createTraffic(-random(100,420));
+    for(
+      let j=i+1;
+      j<traffic.length;
+      j++
+    ){
 
-      score += 8;
+      const a=traffic[i];
+      const b=traffic[j];
+
+      if(a.lane!==b.lane)
+        continue;
+
+
+      const minGap=
+        (
+          a.height+
+          b.height
+        )/2+
+        Math.max(
+          35,
+          player.height*.48
+        );
+
+
+      const dy=
+        b.y-a.y;
+
+
+      if(Math.abs(dy)<minGap){
+
+        if(dy>=0){
+
+          b.y=
+            a.y+
+            minGap;
+
+        }else{
+
+          a.y=
+            b.y+
+            minGap;
+        }
+      }
     }
   }
 
-  if(traffic.length<4){
-    createTraffic(-random(150,500));
+
+  /*
+    Ekrandan çıkan araçların yerine
+    yeni araç koy.
+  */
+
+  for(
+    let i=traffic.length-1;
+    i>=0;
+    i--
+  ){
+
+    if(
+      traffic[i].y>
+      H+160
+    ){
+
+      const oldLane=
+        traffic[i].lane;
+
+      traffic.splice(i,1);
+
+      /*
+        Aynı şeride hemen araç koymak
+        yerine önce güvenli mesafeyi
+        kontrol eden sistem kullanılır.
+      */
+
+      createTraffic(
+        -random(
+          180,
+          520
+        ),
+        oldLane
+      );
+
+      score+=8;
+    }
   }
+
+
+  while(traffic.length<4){
+
+    createTraffic(
+      -random(
+        200,
+        650
+      )
+    );
+  }
+
 
   checkCollision();
 
-  scoreEl.textContent=Math.floor(score);
+
+  scoreEl.textContent=
+    Math.floor(score);
+
+
   speedEl.textContent=
-    Math.floor(80+player.speed*18)+" km/h";
+    Math.floor(
+      80+
+      player.speed*18
+    )+
+    " km/h";
+
 
   updateEngineSound();
+  updateRoadSound();
 }
+
+
+/* =========================
+   ÇARPIŞMA
+========================= */
 
 function checkCollision(){
 
   const px=player.x;
   const py=player.y;
 
+
   for(const car of traffic){
 
-    const dx=Math.abs(px-car.x);
-    const dy=Math.abs(py-car.y);
+    const dx=
+      Math.abs(
+        px-car.x
+      );
 
-    const hitX=(player.width+car.width)*.38;
-    const hitY=(player.height+car.height)*.40;
+    const dy=
+      Math.abs(
+        py-car.y
+      );
 
-    if(dx<hitX && dy<hitY){
+
+    const hitX=
+      (
+        player.width+
+        car.width
+      )*.38;
+
+
+    const hitY=
+      (
+        player.height+
+        car.height
+      )*.40;
+
+
+    if(
+      dx<hitX &&
+      dy<hitY
+    ){
 
       endGame();
+
       return;
     }
   }
 }
 
+
+/* =========================
+   ÇİZİM
+========================= */
+
 function draw(){
 
-  ctx.clearRect(0,0,W,H);
+  ctx.clearRect(
+    0,
+    0,
+    W,
+    H
+  );
+
 
   drawBackground();
+
   drawRoad();
 
-  // trafik
+
   for(const car of traffic){
-    drawCar(car,false);
+
+    drawCar(
+      car,
+      false
+    );
   }
 
-  // oyuncu
-  drawCar(player,true);
+
+  drawCar(
+    player,
+    true
+  );
 }
+
+
+/* =========================
+   OYUN DÖNGÜSÜ
+========================= */
 
 function loop(time){
 
-  if(!running)return;
+  if(!running)
+    return;
 
-  const dt=time-lastTime;
+
+  const dt=
+    time-lastTime;
+
   lastTime=time;
 
+
   update(dt);
+
   draw();
 
-  requestAnimationFrame(loop);
+
+  requestAnimationFrame(
+    loop
+  );
 }
+
+
+/* =========================
+   BAŞLAT
+========================= */
 
 function startGame(){
 
   initAudio();
 
+
   running=true;
+
   score=0;
+
   distance=0;
 
-  menu.classList.add("hidden");
-  gameOver.classList.add("hidden");
+
+  menu.classList.add(
+    "hidden"
+  );
+
+  gameOver.classList.add(
+    "hidden"
+  );
+
 
   resize();
 
-  player.x=road.center;
+
+  player.x=
+    road.center;
+
 
   resetTraffic();
 
-  lastTime=performance.now();
 
-  requestAnimationFrame(loop);
+  lastTime=
+    performance.now();
+
+
+  requestAnimationFrame(
+    loop
+  );
 }
+
 
 function endGame(){
 
   running=false;
 
-  finalScoreEl.textContent=Math.floor(score);
 
-  gameOver.classList.remove("hidden");
+  finalScoreEl.textContent=
+    Math.floor(score);
 
-  stopEngineSound();
+
+  gameOver.classList.remove(
+    "hidden"
+  );
+
+
+  stopAllSounds();
 }
+
 
 function backMenu(){
 
   running=false;
 
-  gameOver.classList.add("hidden");
-  menu.classList.remove("hidden");
 
-  stopEngineSound();
+  gameOver.classList.add(
+    "hidden"
+  );
+
+  menu.classList.remove(
+    "hidden"
+  );
+
+
+  stopAllSounds();
 }
 
-startBtn.addEventListener("click",startGame);
-restartBtn.addEventListener("click",startGame);
-menuBtn.addEventListener("click",backMenu);
 
-soundBtn.addEventListener("click",()=>{
+startBtn.addEventListener(
+  "click",
+  startGame
+);
 
-  soundEnabled=!soundEnabled;
+restartBtn.addEventListener(
+  "click",
+  startGame
+);
 
-  soundBtn.textContent=
-    soundEnabled
-    ? "🔊 SES AÇIK"
-    : "🔇 SES KAPALI";
+menuBtn.addEventListener(
+  "click",
+  backMenu
+);
 
-  if(!soundEnabled){
-    stopEngineSound();
-  }else if(running){
-    initAudio();
+
+/* =========================
+   SES BUTONU
+========================= */
+
+soundBtn.addEventListener(
+  "click",
+  ()=>{
+
+    soundEnabled=
+      !soundEnabled;
+
+
+    soundBtn.textContent=
+      soundEnabled
+        ? "🔊 SES AÇIK"
+        : "🔇 SES KAPALI";
+
+
+    if(!soundEnabled){
+
+      stopAllSounds();
+
+    }else if(running){
+
+      initAudio();
+    }
   }
-});
+);
+
+
+/* =========================
+   DOKUNMATİK
+========================= */
 
 function pressLeft(e){
+
   e.preventDefault();
+
   keys.left=true;
 }
 
 function releaseLeft(e){
+
   e.preventDefault();
+
   keys.left=false;
 }
 
 function pressRight(e){
+
   e.preventDefault();
+
   keys.right=true;
 }
 
 function releaseRight(e){
+
   e.preventDefault();
+
   keys.right=false;
 }
 
-leftBtn.addEventListener("pointerdown",pressLeft);
-leftBtn.addEventListener("pointerup",releaseLeft);
-leftBtn.addEventListener("pointercancel",releaseLeft);
-leftBtn.addEventListener("pointerleave",releaseLeft);
 
-rightBtn.addEventListener("pointerdown",pressRight);
-rightBtn.addEventListener("pointerup",releaseRight);
-rightBtn.addEventListener("pointercancel",releaseRight);
-rightBtn.addEventListener("pointerleave",releaseRight);
+leftBtn.addEventListener(
+  "pointerdown",
+  pressLeft
+);
 
-window.addEventListener("keydown",e=>{
+leftBtn.addEventListener(
+  "pointerup",
+  releaseLeft
+);
 
-  if(e.key==="ArrowLeft" || e.key.toLowerCase()==="a"){
-    keys.left=true;
+leftBtn.addEventListener(
+  "pointercancel",
+  releaseLeft
+);
+
+leftBtn.addEventListener(
+  "pointerleave",
+  releaseLeft
+);
+
+
+rightBtn.addEventListener(
+  "pointerdown",
+  pressRight
+);
+
+rightBtn.addEventListener(
+  "pointerup",
+  releaseRight
+);
+
+rightBtn.addEventListener(
+  "pointercancel",
+  releaseRight
+);
+
+rightBtn.addEventListener(
+  "pointerleave",
+  releaseRight
+);
+
+
+/* =========================
+   KLAVYE
+========================= */
+
+window.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key==="ArrowLeft" ||
+      e.key.toLowerCase()==="a"
+    ){
+
+      keys.left=true;
+    }
+
+
+    if(
+      e.key==="ArrowRight" ||
+      e.key.toLowerCase()==="d"
+    ){
+
+      keys.right=true;
+    }
   }
+);
 
-  if(e.key==="ArrowRight" || e.key.toLowerCase()==="d"){
-    keys.right=true;
+
+window.addEventListener(
+  "keyup",
+  e=>{
+
+    if(
+      e.key==="ArrowLeft" ||
+      e.key.toLowerCase()==="a"
+    ){
+
+      keys.left=false;
+    }
+
+
+    if(
+      e.key==="ArrowRight" ||
+      e.key.toLowerCase()==="d"
+    ){
+
+      keys.right=false;
+    }
   }
-});
+);
 
-window.addEventListener("keyup",e=>{
 
-  if(e.key==="ArrowLeft" || e.key.toLowerCase()==="a"){
+window.addEventListener(
+  "blur",
+  ()=>{
+
     keys.left=false;
-  }
-
-  if(e.key==="ArrowRight" || e.key.toLowerCase()==="d"){
     keys.right=false;
   }
-});
+);
 
-window.addEventListener("blur",()=>{
-  keys.left=false;
-  keys.right=false;
-});
 
-/* SES */
+/* =========================
+   SES SİSTEMİ
+========================= */
 
 function initAudio(){
 
-  if(!soundEnabled)return;
+  if(!soundEnabled)
+    return;
+
 
   try{
 
     if(!audioCtx){
+
       audioCtx=
-        new(window.AudioContext ||
-        window.webkitAudioContext)();
+        new(
+          window.AudioContext ||
+          window.webkitAudioContext
+        )();
     }
 
-    if(audioCtx.state==="suspended"){
+
+    if(
+      audioCtx.state===
+      "suspended"
+    ){
+
       audioCtx.resume();
     }
 
-    if(engineOsc)return;
 
-    engineOsc=audioCtx.createOscillator();
-    engineGain=audioCtx.createGain();
+    if(!engineOsc){
 
-    engineOsc.type="sawtooth";
-    engineOsc.frequency.value=90;
+      /* MOTOR SESİ */
 
-    engineGain.gain.value=.035;
+      engineOsc=
+        audioCtx.createOscillator();
 
-    engineOsc.connect(engineGain);
-    engineGain.connect(audioCtx.destination);
+      engineGain=
+        audioCtx.createGain();
 
-    engineOsc.start();
 
-  }catch(e){}
+      engineOsc.type=
+        "sawtooth";
+
+      engineOsc.frequency.value=
+        90;
+
+
+      engineGain.gain.value=
+        .028;
+
+
+      engineOsc.connect(
+        engineGain
+      );
+
+      engineGain.connect(
+        audioCtx.destination
+      );
+
+
+      engineOsc.start();
+    }
+
+
+    /*
+      YOL / FON SESİ
+      Web Audio ile düşük seviyeli
+      sürekli yol ambiyansı.
+    */
+
+    if(!roadNoiseSource){
+
+      const bufferSize=
+        audioCtx.sampleRate*2;
+
+      const buffer=
+        audioCtx.createBuffer(
+          1,
+          bufferSize,
+          audioCtx.sampleRate
+        );
+
+
+      const data=
+        buffer.getChannelData(0);
+
+
+      for(
+        let i=0;
+        i<bufferSize;
+        i++
+      ){
+
+        data[i]=
+          (
+            Math.random()*
+            2-1
+          )*.35;
+      }
+
+
+      roadNoiseSource=
+        audioCtx.createBufferSource();
+
+
+      roadNoiseSource.buffer=
+        buffer;
+
+      roadNoiseSource.loop=
+        true;
+
+
+      /*
+        Yol sesini daha yumuşak
+        hale getirmek için filtre.
+      */
+
+      const filter=
+        audioCtx.createBiquadFilter();
+
+      filter.type=
+        "lowpass";
+
+      filter.frequency.value=
+        850;
+
+
+      roadNoiseGain=
+        audioCtx.createGain();
+
+      roadNoiseGain.gain.value=
+        .008;
+
+
+      roadNoiseSource
+        .connect(filter);
+
+      filter
+        .connect(
+          roadNoiseGain
+        );
+
+      roadNoiseGain
+        .connect(
+          audioCtx.destination
+        );
+
+
+      roadNoiseSource.start();
+    }
+
+
+    /*
+      Hafif rüzgar sesi.
+    */
+
+    if(!windOsc){
+
+      windOsc=
+        audioCtx.createOscillator();
+
+      windGain=
+        audioCtx.createGain();
+
+
+      windOsc.type=
+        "sine";
+
+      windOsc.frequency.value=
+        45;
+
+
+      windGain.gain.value=
+        .004;
+
+
+      windOsc.connect(
+        windGain
+      );
+
+      windGain.connect(
+        audioCtx.destination
+      );
+
+
+      windOsc.start();
+    }
+
+  }catch(e){
+
+    console.log(
+      "Ses başlatılamadı:",
+      e
+    );
+  }
 }
+
+
+/* =========================
+   MOTOR SESİ
+========================= */
 
 function updateEngineSound(){
 
-  if(!soundEnabled ||
-     !audioCtx ||
-     !engineOsc ||
-     !engineGain)return;
+  if(
+    !soundEnabled ||
+    !audioCtx ||
+    !engineOsc ||
+    !engineGain
+  )
+    return;
+
 
   const freq=
-    70+player.speed*25;
+    70+
+    player.speed*25;
+
 
   engineOsc.frequency.setTargetAtTime(
     freq,
@@ -957,53 +2013,191 @@ function updateEngineSound(){
     .04
   );
 
+
   engineGain.gain.setTargetAtTime(
-    .025+player.speed*.003,
+    .022+
+    player.speed*.0028,
     audioCtx.currentTime,
     .05
   );
 }
 
-function stopEngineSound(){
 
-  if(!engineOsc)return;
+/* =========================
+   YOL SESİ
+========================= */
 
-  try{
-    engineGain.gain.setTargetAtTime(
-      0,
+function updateRoadSound(){
+
+  if(
+    !soundEnabled ||
+    !audioCtx
+  )
+    return;
+
+
+  if(roadNoiseGain){
+
+    roadNoiseGain.gain.setTargetAtTime(
+      .005+
+      player.speed*.0012,
       audioCtx.currentTime,
-      .05
+      .08
     );
+  }
 
-    setTimeout(()=>{
 
-      try{
-        engineOsc.stop();
-      }catch(e){}
+  if(windGain){
 
-      engineOsc=null;
-      engineGain=null;
+    windGain.gain.setTargetAtTime(
+      .002+
+      player.speed*.0007,
+      audioCtx.currentTime,
+      .08
+    );
+  }
 
-    },100);
 
-  }catch(e){
-    engineOsc=null;
-    engineGain=null;
+  if(windOsc){
+
+    windOsc.frequency.setTargetAtTime(
+      40+
+      player.speed*2,
+      audioCtx.currentTime,
+      .08
+    );
   }
 }
 
-/* İlk ekran çizimi */
+
+/* =========================
+   TÜM SESLERİ DURDUR
+========================= */
+
+function stopAllSounds(){
+
+  if(
+    !audioCtx
+  ){
+
+    return;
+  }
+
+
+  try{
+
+    if(engineGain){
+
+      engineGain.gain.setTargetAtTime(
+        0,
+        audioCtx.currentTime,
+        .05
+      );
+    }
+
+
+    if(roadNoiseGain){
+
+      roadNoiseGain.gain.setTargetAtTime(
+        0,
+        audioCtx.currentTime,
+        .05
+      );
+    }
+
+
+    if(windGain){
+
+      windGain.gain.setTargetAtTime(
+        0,
+        audioCtx.currentTime,
+        .05
+      );
+    }
+
+
+    setTimeout(
+      ()=>{
+
+        try{
+
+          if(engineOsc)
+            engineOsc.stop();
+
+        }catch(e){}
+
+
+        try{
+
+          if(roadNoiseSource)
+            roadNoiseSource.stop();
+
+        }catch(e){}
+
+
+        try{
+
+          if(windOsc)
+            windOsc.stop();
+
+        }catch(e){}
+
+
+        engineOsc=null;
+        engineGain=null;
+
+        roadNoiseSource=null;
+        roadNoiseGain=null;
+
+        windOsc=null;
+        windGain=null;
+
+      },
+      120
+    );
+
+  }catch(e){
+
+    engineOsc=null;
+    engineGain=null;
+
+    roadNoiseSource=null;
+    roadNoiseGain=null;
+
+    windOsc=null;
+    windGain=null;
+  }
+}
+
+
+/* =========================
+   İLK GÖRÜNÜM
+========================= */
 
 function preview(){
 
   drawBackground();
+
   drawRoad();
 
-  player.x=road.center;
-  player.y=H-Math.max(135,H*.17);
 
-  drawCar(player,true);
+  player.x=
+    road.center;
+
+  player.y=
+    H-
+    Math.max(
+      135,
+      H*.17
+    );
+
+
+  drawCar(
+    player,
+    true
+  );
 }
+
 
 preview();
 
