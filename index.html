@@ -1,1301 +1,816 @@
-```html
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#05070b">
-<title>Turbo Road Ultimate</title>
-
+<title>Turbo Road X</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070b;font-family:Arial,sans-serif;color:#fff}
-body{display:flex;align-items:center;justify-content:center}
-#game{position:relative;width:100vw;height:100vh;max-width:520px;overflow:hidden;background:#111}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-
-#hud{
-position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 12px) 10px 0;
-display:flex;justify-content:space-between;z-index:10;pointer-events:none
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#05070b;font-family:Arial,sans-serif}
+canvas{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#ui{position:fixed;inset:0;pointer-events:none}
+#top{
+ position:absolute;top:12px;left:12px;right:12px;
+ display:flex;gap:8px;justify-content:space-between
 }
-.hudBox{
-min-width:78px;padding:7px 9px;border-radius:12px;text-align:center;
-background:rgba(5,8,14,.78);border:1px solid rgba(255,255,255,.12)
+.stat{
+ min-width:75px;padding:8px 11px;border-radius:12px;
+ background:rgba(5,8,13,.78);color:#fff;
+ border:1px solid rgba(255,255,255,.12);font-size:10px;
+ text-align:center
 }
-.hudLabel{font-size:9px;color:#9da8b8;letter-spacing:1px}
-.hudValue{font-size:16px;font-weight:900;margin-top:2px}
-
-.screen{
-position:absolute;inset:0;z-index:30;display:none;flex-direction:column;
-align-items:center;justify-content:center;padding:20px;
-background:linear-gradient(180deg,rgba(3,6,11,.76),rgba(3,5,9,.97))
+.stat b{display:block;font-size:17px;margin-top:2px}
+#pause{
+ pointer-events:auto;width:44px;height:44px;border:0;border-radius:12px;
+ background:rgba(5,8,13,.82);color:#fff;font-size:17px
 }
-.screen.active{display:flex}
-
-.logo{
-font-size:42px;font-weight:1000;line-height:.9;font-style:italic;
-text-align:center;letter-spacing:-2px
+#controls{
+ position:absolute;left:0;right:0;bottom:22px;
+ display:flex;justify-content:space-between;padding:0 22px
 }
-.logo span{display:block;font-size:14px;letter-spacing:5px;color:#ffb000;margin-top:8px;font-style:normal}
-
-.menuCard{
-width:min(420px,94%);padding:19px;border-radius:22px;
-background:rgba(12,17,27,.94);border:1px solid rgba(255,255,255,.11)
-}
-.menuStats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
-.stat{background:#080c13;border-radius:12px;padding:9px 4px;text-align:center}
-.stat small{display:block;color:#8290a3;font-size:8px}
-.stat b{display:block;font-size:16px;margin-top:3px}
-
-button{
-width:100%;border:0;color:#fff;font-weight:900;font-size:14px;padding:14px;
-border-radius:14px;margin-top:8px;background:linear-gradient(135deg,#ff9d00,#ff4d00);
-cursor:pointer
-}
-button:active{transform:scale(.97)}
-button.secondary{background:#171e2a}
-button.blue{background:linear-gradient(135deg,#287dff,#1449c7)}
-
-.title{font-size:27px;font-weight:1000;margin-bottom:13px}
-
-#pauseBtn{
-position:absolute;right:12px;top:82px;z-index:20;width:42px;height:42px;
-border-radius:50%;padding:0;margin:0;background:rgba(5,8,13,.8)
-}
-
-#controls{position:absolute;left:0;right:0;bottom:0;height:180px;z-index:15;pointer-events:none}
 .control{
-pointer-events:auto;position:absolute;bottom:22px;width:76px;height:76px;
-border-radius:50%;border:1px solid rgba(255,255,255,.2);
-background:rgba(8,12,19,.68);color:#fff;font-size:27px;
-display:flex;align-items:center;justify-content:center
+ pointer-events:auto;width:78px;height:78px;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;
+ color:#fff;font-size:35px;
+ background:rgba(5,8,13,.62);
+ border:1px solid rgba(255,255,255,.2)
 }
-#leftBtn{left:20px}
-#rightBtn{left:110px}
-#nitroBtn{right:20px;width:86px;height:86px;font-size:12px}
-
-.garageCard{width:min(430px,94%);background:#0a0f17;border-radius:22px;padding:17px}
+#nitro{
+ pointer-events:auto;position:absolute;right:25px;bottom:118px;
+ width:78px;height:78px;border-radius:50%;
+ background:rgba(0,120,255,.28);border:2px solid #42b9ff;
+ color:white;font-size:11px;font-weight:bold;
+ display:flex;align-items:center;justify-content:center
+}
+#screen{
+ position:fixed;inset:0;z-index:20;
+ display:flex;align-items:center;justify-content:center;
+ background:linear-gradient(180deg,#080c13,#020305)
+}
+.card{
+ width:min(92vw,430px);padding:28px;border-radius:25px;
+ background:rgba(12,17,25,.96);
+ border:1px solid rgba(255,255,255,.12);
+ color:white;text-align:center;
+ box-shadow:0 25px 90px #000
+}
+.logo{font-size:40px;font-weight:900;letter-spacing:2px}
+.logo span{color:#ff4324}
+.sub{font-size:11px;color:#8290a0;letter-spacing:3px;margin:6px 0 22px}
 .carPreview{
-height:175px;border-radius:18px;display:flex;align-items:center;justify-content:center;
-background:radial-gradient(circle,rgba(255,130,0,.17),transparent 40%),#080c12
+ width:110px;height:190px;margin:0 auto 20px;
+ position:relative
 }
-.previewCar{
-width:78px;height:145px;border-radius:25px 25px 18px 18px;
-background:linear-gradient(90deg,#55130e,#e13a20,#74150f);
-position:relative
+.carBody{
+ position:absolute;left:12px;right:12px;top:18px;bottom:18px;
+ background:linear-gradient(90deg,#8e120c,#f34b26,#9c130e);
+ border-radius:28px 28px 18px 18px;
+ box-shadow:0 10px 30px rgba(255,50,20,.3)
 }
-.previewCar:before{
-content:"";position:absolute;top:20px;left:11px;right:11px;height:50px;
-border-radius:12px;background:linear-gradient(145deg,#a9c6d8,#182734 55%,#071018)
+.carRoof{
+ position:absolute;left:27px;right:27px;top:40px;height:55px;
+ background:#171d24;
+ border-radius:28px 28px 8px 8px;
+ border:3px solid #a92a19
 }
-.previewCar:after{
-content:"";position:absolute;bottom:15px;left:10px;right:10px;height:29px;
-background:#ffad00;border-radius:4px
+.carGlass{
+ position:absolute;left:34px;right:34px;top:48px;height:36px;
+ background:#182b3b;border-radius:16px 16px 4px 4px
 }
-.carName{text-align:center;font-size:21px;font-weight:1000;margin-top:10px}
-.level{text-align:center;color:#ffb000;font-size:11px;margin-top:3px}
-.upgrade{
-display:flex;align-items:center;justify-content:space-between;
-background:#080d14;padding:9px;border-radius:12px;margin-top:7px
+.w{
+ position:absolute;width:18px;height:48px;background:#050608;border-radius:8px
 }
-.upgradeInfo b{display:block;font-size:12px}
-.upgradeInfo small{font-size:9px;color:#7f8b9d}
-.upgrade button{width:auto;min-width:92px;margin:0;padding:9px;font-size:10px}
-
-.mission{
-width:min(430px,94%);background:#0b1018;border:1px solid rgba(255,255,255,.09);
-padding:14px;border-radius:16px;margin-top:7px
+.w1{left:0;top:48px}.w2{right:0;top:48px}
+.w3{left:0;bottom:48px}.w4{right:0;bottom:48px}
+button.start{
+ width:100%;padding:16px;border:0;border-radius:15px;
+ color:white;background:linear-gradient(135deg,#ff582b,#d51d13);
+ font-size:16px;font-weight:900
 }
-.mission b{display:block;font-size:13px}
-.mission small{color:#7f8c9e}
-.bar{height:7px;background:#1b2330;border-radius:10px;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;width:0%;background:#ff9d00}
-
-.bigScore{font-size:48px;font-weight:1000;color:#ffb000}
-.resultText{text-align:center;color:#9ba6b5;line-height:1.5}
-
-@media(max-height:650px){
-.control{bottom:10px}
-#controls{height:145px}
-.logo{font-size:34px}
-}
+.help{margin-top:15px;color:#758191;font-size:11px;line-height:1.6}
+#gameover{display:none}
+.result{color:#aab5c2;line-height:1.8;margin:15px 0}
 </style>
 </head>
-
 <body>
-<div id="game">
-<canvas id="canvas"></canvas>
 
-<div id="hud">
-<div class="hudBox"><div class="hudLabel">SKOR</div><div class="hudValue" id="score">0</div></div>
-<div class="hudBox"><div class="hudLabel">HIZ</div><div class="hudValue"><span id="speed">0</span> KM/H</div></div>
-<div class="hudBox"><div class="hudLabel">PARA</div><div class="hudValue">₺<span id="money">0</span></div></div>
+<canvas id="c"></canvas>
+
+<div id="ui">
+ <div id="top">
+  <div class="stat">SKOR<b id="score">0</b></div>
+  <div class="stat">PARA<b id="money">0</b></div>
+  <div class="stat">SEVİYE<b id="level">1</b></div>
+  <div class="stat">HIZ<b id="speed">0</b></div>
+  <button id="pause">Ⅱ</button>
+ </div>
+
+ <div id="nitro">NITRO</div>
+
+ <div id="controls">
+  <div class="control" id="left">‹</div>
+  <div class="control" id="right">›</div>
+ </div>
 </div>
 
-<button id="pauseBtn">Ⅱ</button>
+<div id="screen">
+ <div class="card" id="menu">
+  <div class="logo">TURBO <span>ROAD</span></div>
+  <div class="sub">MUSTANG X</div>
 
-<div id="controls">
-<div class="control" id="leftBtn">◀</div>
-<div class="control" id="rightBtn">▶</div>
-<div class="control" id="nitroBtn">NITRO<br>BOOST</div>
-</div>
+  <div class="carPreview">
+   <div class="carBody"></div>
+   <div class="carRoof"></div>
+   <div class="carGlass"></div>
+   <div class="w w1"></div><div class="w w2"></div>
+   <div class="w w3"></div><div class="w w4"></div>
+  </div>
 
-<section class="screen active" id="menu">
-<div class="logo">TURBO ROAD<span>ULTIMATE</span></div>
-<div class="menuCard">
-<div class="menuStats">
-<div class="stat"><small>SEVİYE</small><b id="menuLevel">1</b></div>
-<div class="stat"><small>PARA</small><b>₺<span id="menuMoney">0</span></b></div>
-<div class="stat"><small>REKOR</small><b id="menuBest">0</b></div>
-</div>
-<button id="startBtn">🏁 YARIŞA BAŞLA</button>
-<button class="secondary" id="garageBtn">🚘 GARAJ</button>
-<button class="secondary" id="missionBtn">🎯 GÖREVLER</button>
-<button class="secondary" id="settingsBtn">⚙ AYARLAR</button>
-</div>
-</section>
+  <button class="start" id="start">YARIŞA BAŞLA</button>
 
-<section class="screen" id="garage">
-<div class="title">🚘 GARAJ</div>
-<div class="garageCard">
-<div class="carPreview"><div class="previewCar"></div></div>
-<div class="carName">1969 MUSTANG</div>
-<div class="level">SEVİYE <span id="garageLevel">1</span></div>
+  <div class="help">
+   PC: ← → veya A / D<br>
+   Telefon: alt soldan / sağdan dokun<br>
+   Nitro: SPACE veya NITRO tuşu
+  </div>
+ </div>
 
-<div class="upgrade">
-<div class="upgradeInfo"><b>⚡ MOTOR</b><small>Azami hızı artırır</small></div>
-<button id="engineBtn">YÜKSELT</button>
-</div>
-
-<div class="upgrade">
-<div class="upgradeInfo"><b>🛞 YOL TUTUŞU</b><small>Direksiyon kontrolü</small></div>
-<button id="handlingBtn">YÜKSELT</button>
-</div>
-
-<div class="upgrade">
-<div class="upgradeInfo"><b>🔥 NITRO</b><small>Nitro gücü</small></div>
-<button id="nitroUpgradeBtn">YÜKSELT</button>
-</div>
-
-<button class="secondary" data-back="menu">GERİ</button>
-</div>
-</section>
-
-<section class="screen" id="missions">
-<div class="title">🎯 GÖREVLER</div>
-<div class="mission"><b>Yol Ustası</b><small>5000 metre sürüş yap</small><div class="bar"><i id="m1bar"></i></div><small id="m1text">0 / 5000</small></div>
-<div class="mission"><b>Hız Canavarı</b><small>200 KM/H hıza ulaş</small><div class="bar"><i id="m2bar"></i></div><small id="m2text">0 / 200</small></div>
-<div class="mission"><b>Trafik Avcısı</b><small>20 araç geç</small><div class="bar"><i id="m3bar"></i></div><small id="m3text">0 / 20</small></div>
-<div class="garageCard"><b>Görev ödülleri otomatik olarak hesabına eklenir.</b><button class="secondary" data-back="menu">GERİ</button></div>
-</section>
-
-<section class="screen" id="settings">
-<div class="title">⚙ AYARLAR</div>
-<div class="menuCard">
-<button id="soundBtn">🔊 SES: AÇIK</button>
-<button id="nightBtn">🌙 GECE MODU: KAPALI</button>
-<button class="secondary" id="resetBtn">♻ İLERLEMEYİ SIFIRLA</button>
-<button class="secondary" data-back="menu">GERİ</button>
-</div>
-</section>
-
-<section class="screen" id="pause">
-<div class="title">OYUN DURAKLATILDI</div>
-<div class="menuCard">
-<button id="resumeBtn">▶ DEVAM ET</button>
-<button class="secondary" id="pauseMenuBtn">ANA MENÜ</button>
-</div>
-</section>
-
-<section class="screen" id="gameover">
-<div class="title">YARIŞ BİTTİ</div>
-<div class="bigScore" id="finalScore">0</div>
-<div class="resultText">SKOR<br>Kazandığın para: ₺<b id="earnedMoney">0</b></div>
-<div class="menuCard">
-<button id="retryBtn">🔄 TEKRAR YARIŞ</button>
-<button class="secondary" id="overMenuBtn">ANA MENÜ</button>
-</div>
-</section>
-
+ <div class="card" id="gameover">
+  <div class="logo">KAZA!</div>
+  <div class="result" id="result"></div>
+  <button class="start" id="again">TEKRAR OYNA</button>
+  <button class="start" id="back" style="background:#202833;margin-top:10px">
+   ANA MENÜ
+  </button>
+ </div>
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
+"use strict";
+
+const canvas=document.getElementById("c");
 const ctx=canvas.getContext("2d");
-let W=0,H=0,DPR=1;
+
+let W=innerWidth,H=innerHeight,DPR=1;
 
 function resize(){
-DPR=Math.min(devicePixelRatio||1,2);
-W=canvas.clientWidth;
-H=canvas.clientHeight;
-canvas.width=W*DPR;
-canvas.height=H*DPR;
-ctx.setTransform(DPR,0,0,DPR,0,0);
+ DPR=Math.min(devicePixelRatio||1,2);
+ W=innerWidth;H=innerHeight;
+ canvas.width=W*DPR;
+ canvas.height=H*DPR;
+ canvas.style.width=W+"px";
+ canvas.style.height=H+"px";
+ ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 addEventListener("resize",resize);
 resize();
 
-let save=JSON.parse(localStorage.getItem("turboRoadSave")||"null")||{
-money:0,level:1,best:0,engine:1,handling:1,nitro:1,
-distance:0,topSpeed:0,passed:0,sound:true,night:false,
-m1done:false,m2done:false,m3done:false
+/* SAVE */
+let best=+localStorage.getItem("tr_best")||0;
+let bank=+localStorage.getItem("tr_money")||0;
+
+/* GAME */
+let playing=false;
+let paused=false;
+let last=0;
+let score=0;
+let earned=0;
+let level=1;
+let worldSpeed=6;
+let roadMove=0;
+let spawn=0;
+let targetLane=1;
+let cars=[];
+let nitro=100;
+let nitroOn=false;
+
+/*
+  TÜM ARAÇLARIN TEMEL BOYUTU AYNI.
+  Perspektif sadece uzaklık nedeniyle görsel olarak küçültür.
+*/
+const CAR_W=58;
+const CAR_H=96;
+
+const player={
+ x:0,
+ lane:1,
+ y:0,
+ w:CAR_W,
+ h:CAR_H
 };
 
-const $=id=>document.getElementById(id);
-
-function persist(){
-localStorage.setItem("turboRoadSave",JSON.stringify(save));
-updateUI();
+/* ROAD */
+function horizon(){
+ return H*.22;
 }
 
-function updateUI(){
-$("money").textContent=Math.floor(save.money);
-$("menuMoney").textContent=Math.floor(save.money);
-$("menuLevel").textContent=save.level;
-$("menuBest").textContent=Math.floor(save.best);
-$("garageLevel").textContent=save.level;
-
-$("m1text").textContent=Math.min(5000,Math.floor(save.distance))+" / 5000";
-$("m2text").textContent=Math.min(200,Math.floor(save.topSpeed))+" / 200";
-$("m3text").textContent=Math.min(20,save.passed)+" / 20";
-
-$("m1bar").style.width=Math.min(100,save.distance/50)+"%";
-$("m2bar").style.width=Math.min(100,save.topSpeed/2)+"%";
-$("m3bar").style.width=Math.min(100,save.passed*5)+"%";
-
-$("soundBtn").textContent=save.sound?"🔊 SES: AÇIK":"🔇 SES: KAPALI";
-$("nightBtn").textContent=save.night?"🌙 GECE MODU: AÇIK":"☀️ GECE MODU: KAPALI";
-
-upgradeButton("engineBtn",save.engine,700);
-upgradeButton("handlingBtn",save.handling,650);
-upgradeButton("nitroUpgradeBtn",save.nitro,800);
+function roadWidth(z){
+ return W*(.16+.76*z);
 }
 
-function upgradeButton(id,lvl,base){
-const b=$(id);
-if(lvl>=8){b.textContent="MAX";b.disabled=true;return}
-b.disabled=false;
-b.textContent="₺"+Math.floor(base*lvl);
+function roadY(z){
+ return horizon()+z*(H*.82-horizon());
 }
 
-function show(id){
-document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-$(id).classList.add("active");
+function laneX(lane,z){
+ const rw=roadWidth(z);
+ return W/2-rw/2+rw*(lane+.5)/3;
 }
 
-function hideMenus(){
-document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+/* DRAW BACKGROUND */
+function background(){
+
+ const g=ctx.createLinearGradient(0,0,0,H);
+ g.addColorStop(0,"#142337");
+ g.addColorStop(.45,"#5d7180");
+ g.addColorStop(1,"#304c2d");
+ ctx.fillStyle=g;
+ ctx.fillRect(0,0,W,H);
+
+ /* sun */
+ ctx.fillStyle="rgba(255,235,170,.65)";
+ ctx.beginPath();
+ ctx.arc(W*.78,H*.16,35,0,Math.PI*2);
+ ctx.fill();
+
+ /* mountains */
+ ctx.fillStyle="#263936";
+ ctx.beginPath();
+ ctx.moveTo(0,H*.43);
+ ctx.lineTo(W*.14,H*.27);
+ ctx.lineTo(W*.27,H*.4);
+ ctx.lineTo(W*.42,H*.25);
+ ctx.lineTo(W*.57,H*.39);
+ ctx.lineTo(W*.72,H*.24);
+ ctx.lineTo(W,H*.39);
+ ctx.lineTo(W,H*.55);
+ ctx.lineTo(0,H*.55);
+ ctx.fill();
+
+ ctx.fillStyle="#34552f";
+ ctx.fillRect(0,H*.43,W,H*.57);
 }
 
-/* AUDIO */
-let audioCtx=null,engineOsc=null,engineGain=null;
+/* TREES */
+function tree(x,y,s){
 
-function initAudio(){
-if(!save.sound)return;
-if(!audioCtx){
-try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
-}
-if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();
-}
+ ctx.fillStyle="#493a2b";
+ ctx.fillRect(x-s*.07,y-s*.45,s*.14,s*.45);
 
-function beep(freq,duration,type="sine",volume=.04){
-if(!save.sound)return;
-initAudio();
-if(!audioCtx)return;
-const o=audioCtx.createOscillator();
-const g=audioCtx.createGain();
-o.type=type;
-o.frequency.value=freq;
-g.gain.value=volume;
-o.connect(g);
-g.connect(audioCtx.destination);
-o.start();
-g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
-o.stop(audioCtx.currentTime+duration);
+ ctx.fillStyle="#1c3922";
+ ctx.beginPath();
+ ctx.arc(x,y-s*.58,s*.28,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.beginPath();
+ ctx.arc(x-s*.17,y-s*.45,s*.22,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.beginPath();
+ ctx.arc(x+s*.17,y-s*.45,s*.22,0,Math.PI*2);
+ ctx.fill();
 }
 
-function startEngine(){
-if(!save.sound)return;
-initAudio();
-if(!audioCtx||engineOsc)return;
-engineOsc=audioCtx.createOscillator();
-engineGain=audioCtx.createGain();
-engineOsc.type="sawtooth";
-engineGain.gain.value=.012;
-engineOsc.connect(engineGain);
-engineGain.connect(audioCtx.destination);
-engineOsc.start();
-}
+function nature(){
 
-function stopEngine(){
-if(engineOsc){
-try{engineOsc.stop()}catch(e){}
-engineOsc=null;
-engineGain=null;
-}
-}
+ for(let i=0;i<12;i++){
 
-function updateEngine(){
-if(engineOsc&&engineGain){
-engineOsc.frequency.value=55+player.speed*1.7;
-engineGain.gain.value=.007+player.speed/15000;
-}
+  let z=(i/12+roadMove*.002)%1;
+  let y=roadY(z);
+  let rw=roadWidth(z);
+
+  let size=12+z*43;
+
+  tree(W/2-rw/2-size*.8,y,size);
+  tree(W/2+rw/2+size*.8,y,size);
+ }
 }
 
 /* ROAD */
-function roadBounds(){
-const horizon=H*.29;
-const bottom=H*1.05;
-const topWidth=Math.min(W*.18,88);
-const bottomWidth=Math.min(W*.86,430);
-return{
-horizon,
-bottom,
-leftTop:W/2-topWidth,
-rightTop:W/2+topWidth,
-leftBottom:W/2-bottomWidth/2,
-rightBottom:W/2+bottomWidth/2
-};
+function road(){
+
+ let top=roadWidth(0);
+ let bottom=roadWidth(1);
+ let hy=roadY(0);
+ let by=roadY(1);
+
+ /* shoulders */
+ ctx.fillStyle="#55564d";
+ ctx.beginPath();
+ ctx.moveTo(W/2-top/2,hy);
+ ctx.lineTo(W/2+top/2,hy);
+ ctx.lineTo(W/2+bottom/2,by);
+ ctx.lineTo(W/2-bottom/2,by);
+ ctx.closePath();
+ ctx.fill();
+
+ /* asphalt */
+ ctx.fillStyle="#282c31";
+ ctx.beginPath();
+ ctx.moveTo(W/2-top/2+7,hy);
+ ctx.lineTo(W/2+top/2-7,hy);
+ ctx.lineTo(W/2+bottom/2-7,by);
+ ctx.lineTo(W/2-bottom/2+7,by);
+ ctx.closePath();
+ ctx.fill();
+
+ /* edges */
+ ctx.strokeStyle="#f0f0ed";
+ ctx.lineWidth=3;
+ ctx.beginPath();
+ ctx.moveTo(W/2-top/2,hy);
+ ctx.lineTo(W/2-bottom/2,by);
+ ctx.moveTo(W/2+top/2,hy);
+ ctx.lineTo(W/2+bottom/2,by);
+ ctx.stroke();
+
+ /* lane marks */
+ for(let lane=1;lane<3;lane++){
+
+  for(let i=0;i<16;i++){
+
+   let a=(i/16+roadMove*.018)%1;
+   let b=Math.min(1,a+.025+.035*a);
+
+   let x1=laneX(lane,a);
+   let x2=laneX(lane,b);
+
+   ctx.strokeStyle="rgba(255,255,255,.72)";
+   ctx.lineWidth=2+3*b;
+
+   ctx.beginPath();
+   ctx.moveTo(x1,roadY(a));
+   ctx.lineTo(x2,roadY(b));
+   ctx.stroke();
+  }
+ }
 }
 
-function laneX(lane,y){
-const r=roadBounds();
-const t=Math.max(0,Math.min(1,(y-r.horizon)/(r.bottom-r.horizon)));
-const left=r.leftTop+(r.leftBottom-r.leftTop)*t;
-const right=r.rightTop+(r.rightBottom-r.rightTop)*t;
-return left+(right-left)*(lane+.5)/3;
+/* CAR */
+function car(x,y,w,h,color,playerCar){
+
+ ctx.save();
+ ctx.translate(x,y);
+
+ /* shadow */
+ ctx.fillStyle="rgba(0,0,0,.35)";
+ ctx.beginPath();
+ ctx.ellipse(0,h*.43,w*.48,h*.09,0,0,Math.PI*2);
+ ctx.fill();
+
+ /* wheels */
+ ctx.fillStyle="#050609";
+
+ ctx.fillRect(-w*.53,-h*.25,w*.18,h*.35);
+ ctx.fillRect(w*.35,-h*.25,w*.18,h*.35);
+ ctx.fillRect(-w*.53,h*.08,w*.18,h*.35);
+ ctx.fillRect(w*.35,h*.08,w*.18,h*.35);
+
+ /* body */
+ let grad=ctx.createLinearGradient(-w/2,0,w/2,0);
+
+ if(playerCar){
+  grad.addColorStop(0,"#8d100c");
+  grad.addColorStop(.5,"#f34a24");
+  grad.addColorStop(1,"#8d100c");
+ }else{
+  grad.addColorStop(0,"#111820");
+  grad.addColorStop(.5,color);
+  grad.addColorStop(1,"#111820");
+ }
+
+ ctx.fillStyle=grad;
+
+ ctx.beginPath();
+ ctx.roundRect(-w*.43,-h*.48,w*.86,h*.9,w*.17);
+ ctx.fill();
+
+ /* roof */
+ ctx.fillStyle=playerCar?"#161b21":"#10161d";
+
+ ctx.beginPath();
+ ctx.moveTo(-w*.30,-h*.30);
+ ctx.lineTo(-w*.22,-h*.43);
+ ctx.quadraticCurveTo(0,-h*.52,w*.22,-h*.43);
+ ctx.lineTo(w*.30,-h*.30);
+ ctx.closePath();
+ ctx.fill();
+
+ /* glass */
+ ctx.fillStyle="#173044";
+
+ ctx.beginPath();
+ ctx.moveTo(-w*.22,-h*.31);
+ ctx.lineTo(-w*.15,-h*.41);
+ ctx.lineTo(w*.15,-h*.41);
+ ctx.lineTo(w*.22,-h*.31);
+ ctx.closePath();
+ ctx.fill();
+
+ /* center stripe on Mustang */
+ if(playerCar){
+  ctx.fillStyle="rgba(255,255,255,.13)";
+  ctx.fillRect(-w*.035,-h*.48,w*.07,h*.84);
+ }
+
+ /* headlights */
+ ctx.fillStyle="#fff4bd";
+ ctx.fillRect(-w*.31,-h*.03,w*.14,h*.07);
+ ctx.fillRect(w*.17,-h*.03,w*.14,h*.07);
+
+ /* grille */
+ ctx.fillStyle="#080a0d";
+ ctx.fillRect(-w*.22,h*.24,w*.44,h*.07);
+
+ ctx.restore();
 }
 
-/* GAME STATE */
-let running=false,paused=false,last=0;
-let distance=0,score=0,runMoney=0;
-let roadOffset=0,spawnTimer=0,coinTimer=0,shake=0;
+/* PLAYER */
+function drawPlayer(){
 
-const player={
-lane:1,x:0,speed:0,nitro:100,width:46,height:84
-};
+ player.y=H*.78;
 
-let traffic=[];
-let coins=[];
+ player.x+=(laneX(targetLane,.91)-player.x)*.17;
+
+ car(
+  player.x,
+  player.y,
+  CAR_W,
+  CAR_H,
+  "#e43620",
+  true
+ );
+
+ if(nitroOn && nitro>0){
+
+  ctx.fillStyle="#32bfff";
+
+  for(let side of [-1,1]){
+   ctx.beginPath();
+   ctx.moveTo(
+    player.x+side*CAR_W*.13,
+    player.y+CAR_H*.42
+   );
+   ctx.lineTo(
+    player.x+side*CAR_W*.08,
+    player.y+CAR_H*.75+Math.random()*15
+   );
+   ctx.lineTo(
+    player.x+side*CAR_W*.03,
+    player.y+CAR_H*.42
+   );
+   ctx.fill();
+  }
+ }
+}
+
+/* TRAFFIC */
 
 /*
-=========================================================
-YENİ TRAFİK SİSTEMİ
-=========================================================
-Araçlar "gökten" başlamıyor.
-Ufukta, yolun gerçek başlangıç noktasında doğuyor.
-Aynı şeritte minimum mesafe korunuyor.
+  Aynı şeritte araçlar arasında güvenli Z mesafesi.
+  Yeni araç doğrudan başka aracın üstüne doğmaz.
 */
+function canSpawn(lane){
 
-const TRAFFIC_GAP=155;
-
-function canSpawnInLane(lane){
-for(const car of traffic){
-if(car.lane!==lane)continue;
-
-if(car.y<260){
-return false;
-}
-}
-return true;
+ return !cars.some(c=>
+  c.lane===lane && c.z<.28
+ );
 }
 
-function spawnTraffic(){
+function spawnCar(){
 
-/* Önce uygun şeritleri bul */
-let lanes=[0,1,2].filter(canSpawnInLane);
+ let lanes=[0,1,2]
+  .sort(()=>Math.random()-.5);
 
-if(!lanes.length)return;
+ for(let lane of lanes){
 
-/* Oyuncunun bulunduğu şeride ilk başta daha az araç */
-if(player.speed>0){
-lanes.sort((a,b)=>{
-const da=Math.abs(a-player.lane);
-const db=Math.abs(b-player.lane);
-return db-da;
+  if(!canSpawn(lane))continue;
+
+  cars.push({
+   lane:lane,
+   z:.01,
+   color:[
+    "#e9e9e9",
+    "#1976b9",
+    "#d82c25",
+    "#e0a51c",
+    "#35a35d",
+    "#7d49b8"
+   ][Math.floor(Math.random()*6)],
+   speed:.19+Math.random()*.055
+  });
+
+  return;
+ }
+}
+
+function trafficSize(z){
+
+ /*
+   Uzak araçlar perspektifte küçülür.
+   Ancak oyuncu ile trafik aynı z mesafesinde
+   aynı temel boyut oranını kullanır.
+ */
+ let scale=.24+.76*z;
+
+ return {
+  w:CAR_W*scale,
+  h:CAR_H*scale
+ };
+}
+
+function updateCars(dt){
+
+ for(let i=cars.length-1;i>=0;i--){
+
+  let a=cars[i];
+
+  a.z+=a.speed*dt*(worldSpeed/6);
+
+  /*
+    Aynı şeritteki araçların birbirine yaklaşmasını engelle.
+  */
+  for(let j=0;j<cars.length;j++){
+
+   if(i===j)continue;
+
+   let b=cars[j];
+
+   if(a.lane===b.lane){
+
+    let dz=b.z-a.z;
+
+    if(dz>0 && dz<.105){
+     a.z=b.z-.105;
+    }
+   }
+  }
+
+  if(a.z>1.18){
+
+   cars.splice(i,1);
+   score+=25;
+   earned++;
+  }
+ }
+}
+
+/* COLLISION */
+function collision(){
+
+ for(let c of cars){
+
+  /*
+    Çarpışma yalnızca araçlar fiziksel olarak
+    oyuncuya yakın olduğunda kontrol edilir.
+  */
+  if(c.z<.76 || c.z>1.03)continue;
+
+  let s=trafficSize(c.z);
+
+  let x=laneX(c.lane,c.z);
+  let y=roadY(c.z);
+
+  let dx=Math.abs(x-player.x);
+  let dy=Math.abs(y-player.y);
+
+  if(
+   dx<(s.w+CAR_W)*.42 &&
+   dy<(s.h+CAR_H)*.42
+  ){
+   finish();
+   return;
+  }
+ }
+}
+
+/* INPUT */
+function leftMove(){
+ if(!playing||paused)return;
+ targetLane=Math.max(0,targetLane-1);
+}
+
+function rightMove(){
+ if(!playing||paused)return;
+ targetLane=Math.min(2,targetLane+1);
+}
+
+document.getElementById("left").onpointerdown=e=>{
+ e.preventDefault();leftMove();
+};
+
+document.getElementById("right").onpointerdown=e=>{
+ e.preventDefault();rightMove();
+};
+
+document.getElementById("nitro").onpointerdown=e=>{
+ e.preventDefault();nitroOn=true;
+};
+
+document.getElementById("nitro").onpointerup=()=>{
+ nitroOn=false;
+};
+
+document.getElementById("nitro").onpointercancel=()=>{
+ nitroOn=false;
+};
+
+addEventListener("keydown",e=>{
+
+ if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a"){
+  e.preventDefault();leftMove();
+ }
+
+ if(e.key==="ArrowRight"||e.key.toLowerCase()==="d"){
+  e.preventDefault();rightMove();
+ }
+
+ if(e.code==="Space"){
+  e.preventDefault();nitroOn=true;
+ }
+
+ if(e.key==="Escape")pauseGame();
 });
-}
 
-const lane=lanes[Math.floor(Math.random()*Math.min(2,lanes.length))];
-
-/*
-Araç doğrudan -110 gibi görünür bir noktaya
-atılmıyor. Ufuk çizgisinin biraz arkasından geliyor.
-*/
-const r=roadBounds();
-const spawnY=r.horizon-55-Math.random()*45;
-
-const types=[
-{color:"#e8eaed",w:.82,h:.84,speed:82},
-{color:"#2868ae",w:.78,h:.86,speed:92},
-{color:"#d43b2d",w:.80,h:.84,speed:88},
-{color:"#252a31",w:.80,h:.90,speed:100},
-{color:"#e9a51b",w:.76,h:.82,speed:86},
-{color:"#803b9e",w:.80,h:.84,speed:96}
-];
-
-const type=types[Math.floor(Math.random()*types.length)];
-
-traffic.push({
-lane,
-y:spawnY,
-speed:type.speed+Math.random()*25+save.level*2,
-color:type.color,
-scale:type.w,
-h:type.h,
-passed:false,
-spawned:false
+addEventListener("keyup",e=>{
+ if(e.code==="Space")nitroOn=false;
 });
+
+/* PAUSE */
+function pauseGame(){
+
+ if(!playing)return;
+
+ paused=!paused;
+
+ document.getElementById("pause").textContent=
+  paused?"▶":"Ⅱ";
+
+ if(!paused){
+  last=performance.now();
+  requestAnimationFrame(loop);
+ }
 }
 
-function spawnCoin(){
-const lanes=[0,1,2];
-const lane=lanes[Math.floor(Math.random()*3)];
-
-coins.push({
-lane,
-y:roadBounds().horizon-20,
-spin:Math.random()*Math.PI*2
-});
-}
+document.getElementById("pause").onclick=pauseGame;
 
 /* START */
 function startGame(){
-initAudio();
-running=true;
-paused=false;
-last=performance.now();
 
-distance=0;
-score=0;
-runMoney=0;
-roadOffset=0;
-spawnTimer=1.2;
-coinTimer=.8;
-traffic=[];
-coins=[];
+ playing=true;
+ paused=false;
 
-player.lane=1;
-player.speed=0;
-player.nitro=100;
-player.x=laneX(1,H*.82);
+ score=0;
+ earned=0;
+ level=1;
+ worldSpeed=6;
+ roadMove=0;
+ spawn=0;
+ targetLane=1;
+ nitro=100;
+ nitroOn=false;
+ cars=[];
 
-hideMenus();
-$("hud").style.display="flex";
-$("controls").style.display="block";
+ player.x=laneX(1,.91);
 
-startEngine();
-requestAnimationFrame(loop);
+ document.getElementById("screen").style.display="none";
+ document.getElementById("menu").style.display="block";
+ document.getElementById("gameover").style.display="none";
+
+ last=performance.now();
+ requestAnimationFrame(loop);
 }
 
-function gameOver(){
-running=false;
-stopEngine();
+/* FINISH */
+function finish(){
 
-if(score>save.best)save.best=score;
+ if(!playing)return;
 
-const reward=Math.floor(runMoney);
-save.money+=reward;
-save.distance+=distance;
+ playing=false;
 
-if(player.speed>save.topSpeed)save.topSpeed=player.speed;
+ bank+=earned;
 
-if(save.distance>=5000&&!save.m1done){
-save.m1done=true;
-save.money+=1000;
+ if(score>best)best=Math.floor(score);
+
+ localStorage.setItem("tr_best",best);
+ localStorage.setItem("tr_money",bank);
+
+ document.getElementById("result").innerHTML=
+  "Skor: <b>"+Math.floor(score)+"</b><br>"+
+  "Kazanılan para: <b>"+earned+" ₺</b><br>"+
+  "En yüksek skor: <b>"+best+"</b><br>"+
+  "Toplam para: <b>"+bank+" ₺</b>";
+
+ document.getElementById("screen").style.display="flex";
+ document.getElementById("menu").style.display="none";
+ document.getElementById("gameover").style.display="block";
 }
-
-if(save.topSpeed>=200&&!save.m2done){
-save.m2done=true;
-save.money+=1500;
-}
-
-if(save.passed>=20&&!save.m3done){
-save.m3done=true;
-save.money+=2000;
-}
-
-const lvl=Math.floor(save.distance/5000)+1;
-if(lvl>save.level){
-save.level=lvl;
-save.money+=500;
-}
-
-persist();
-
-$("finalScore").textContent=Math.floor(score);
-$("earnedMoney").textContent=reward;
-show("gameover");
-}
-
-/* MOVEMENT */
-function moveLeft(){
-if(!running||paused)return;
-if(player.lane>0){
-player.lane--;
-beep(280,.06,"square",.025);
-}
-}
-
-function moveRight(){
-if(!running||paused)return;
-if(player.lane<2){
-player.lane++;
-beep(320,.06,"square",.025);
-}
-}
-
-$("leftBtn").addEventListener("pointerdown",e=>{
-e.preventDefault();moveLeft();
-});
-
-$("rightBtn").addEventListener("pointerdown",e=>{
-e.preventDefault();moveRight();
-});
-
-let nitroHeld=false;
-
-$("nitroBtn").addEventListener("pointerdown",e=>{
-e.preventDefault();
-nitroHeld=true;
-initAudio();
-});
-
-["pointerup","pointercancel","pointerleave"].forEach(ev=>{
-$("nitroBtn").addEventListener(ev,()=>nitroHeld=false);
-});
-
-document.addEventListener("keydown",e=>{
-if(e.repeat)return;
-if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")moveLeft();
-if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")moveRight();
-if(e.key===" "||e.key.toLowerCase()==="n")nitroHeld=true;
-if(e.key==="Escape"&&running)togglePause();
-});
-
-document.addEventListener("keyup",e=>{
-if(e.key===" "||e.key.toLowerCase()==="n")nitroHeld=false;
-});
 
 /* UPDATE */
 function update(dt){
 
-const levelFactor=1+(save.level-1)*.045;
+ if(paused)return;
 
-let desired=95+save.engine*7;
+ level=1+Math.floor(score/600);
 
-if(nitroHeld&&player.nitro>0){
-desired+=95+save.nitro*10;
-player.nitro-=34*dt;
-}else{
-player.nitro+=7*dt;
-}
+ if(nitroOn && nitro>0){
+  nitro-=45*dt;
+  worldSpeed=10;
+ }else{
+  nitroOn=false;
+  nitro=Math.min(100,nitro+9*dt);
+  worldSpeed=6+Math.min(3.5,level*.22);
+ }
 
-player.nitro=Math.max(0,Math.min(100,player.nitro));
+ score+=worldSpeed*dt*2;
+ roadMove+=worldSpeed*dt;
 
-player.speed+=(desired*levelFactor-player.speed)*dt*2.1;
-player.speed=Math.max(0,Math.min(280,player.speed));
+ spawn-=dt;
 
-const target=laneX(player.lane,H*.82);
-player.x+=(target-player.x)*Math.min(1,dt*(6+save.handling));
+ let delay=Math.max(.48,1.0-level*.02);
 
-distance+=player.speed*dt*.22;
-score+=player.speed*dt*.72;
-roadOffset+=player.speed*dt*.006;
+ if(spawn<=0){
+  spawnCar();
+  spawn=delay;
+ }
 
-save.topSpeed=Math.max(save.topSpeed,player.speed);
+ updateCars(dt);
+ collision();
 
-/*
----------------------------------------------------------
-TRAFİK SPAWN
----------------------------------------------------------
-Trafik hızı oyuncuya yakın tutuluyor.
-Bu sayede araçlar bir anda üst üste binmiyor.
-*/
-spawnTimer-=dt;
-
-if(spawnTimer<=0){
-
-/* Trafik çok sıkışmışsa yeni araç çıkarma */
-const activeNear=traffic.filter(c=>c.y<420).length;
-
-if(activeNear<5){
-spawnTraffic();
-}
-
-spawnTimer=Math.max(.72,1.15-(save.level-1)*.035)+Math.random()*.5;
-}
-
-/* COINS */
-coinTimer-=dt;
-
-if(coinTimer<=0){
-spawnCoin();
-coinTimer=1.4+Math.random()*1.5;
-}
-
-/*
----------------------------------------------------------
-TRAFİK HAREKETİ
----------------------------------------------------------
-Araçlar birbirine yaklaşırsa arkadaki araç yavaşlar.
-Böylece araçların içine girmesi engelleniyor.
-*/
-for(let i=0;i<traffic.length;i++){
-
-const car=traffic[i];
-
-let moveSpeed=player.speed*.62+car.speed*.38;
-
-/* Aynı şeritte önündeki aracı kontrol et */
-let nearest=null;
-let nearestDist=Infinity;
-
-for(let j=0;j<traffic.length;j++){
-if(i===j)continue;
-
-const other=traffic[j];
-
-if(other.lane!==car.lane)continue;
-
-const d=other.y-car.y;
-
-if(d>0&&d<nearestDist){
-nearestDist=d;
-nearest=other;
-}
-}
-
-/* Öndeki araç fazla yakındaysa yavaşla */
-if(nearest && nearestDist<TRAFFIC_GAP){
-
-const safe=Math.max(0,nearestDist-80);
-const factor=Math.max(.15,safe/TRAFFIC_GAP);
-
-moveSpeed*=factor;
-}
-
-/* Oyuncu da aynı şeritte ve önde ise */
-if(car.lane===player.lane){
-
-const playerY=H*.82;
-const d=playerY-car.y;
-
-if(d>0&&d<TRAFFIC_GAP){
-
-const factor=Math.max(.12,(d-65)/TRAFFIC_GAP);
-moveSpeed*=factor;
-}
-}
-
-car.y+=moveSpeed*dt;
-}
-
-/*
----------------------------------------------------------
-TRAFİK TEMİZLEME + ÇARPIŞMA
----------------------------------------------------------
-*/
-for(let i=traffic.length-1;i>=0;i--){
-
-const car=traffic[i];
-
-if(car.y>H+130){
-
-if(!car.passed){
-score+=60;
-save.passed++;
-car.passed=true;
-}
-
-traffic.splice(i,1);
-continue;
-}
-
-const x=laneX(car.lane,car.y);
-
-/*
-Araçlar çok uzaktayken çarpışma kontrolü yapılmıyor.
-Bu da perspektif hatalı temasları önlüyor.
-*/
-if(car.y<roadBounds().horizon+35)continue;
-
-const perspective=Math.max(
-.32,
-Math.min(1.15,(car.y-roadBounds().horizon)/(H-roadBounds().horizon))
-);
-
-const obj={
-x:x,
-y:car.y,
-width:player.width*car.scale*perspective,
-height:player.height*car.h*perspective
-};
-
-const p={
-x:player.x,
-y:H*.82,
-width:player.width*.72,
-height:player.height*.78
-};
-
-if(hit(p,obj)){
-beep(75,.4,"sawtooth",.12);
-shake=14;
-gameOver();
-return;
-}
-}
-
-/* COINS */
-for(let i=coins.length-1;i>=0;i--){
-
-const c=coins[i];
-
-if(c.y>H+50){
-coins.splice(i,1);
-continue;
-}
-
-const x=laneX(c.lane,c.y);
-
-if(Math.abs(player.x-x)<35&&Math.abs(H*.82-c.y)<55){
-runMoney+=25;
-score+=150;
-beep(880,.08,"sine",.05);
-coins.splice(i,1);
-}
-}
-
-for(const c of coins){
-c.y+=(player.speed*.70+38)*dt;
-c.spin+=dt*8;
-}
-
-updateEngine();
-
-if(shake>0)shake-=dt*35;
-}
-
-function hit(a,b){
-return Math.abs(a.x-b.x)<(a.width+b.width)*.42&&
-Math.abs(a.y-b.y)<(a.height+b.height)*.40;
+ document.getElementById("score").textContent=Math.floor(score);
+ document.getElementById("money").textContent=earned;
+ document.getElementById("level").textContent=level;
+ document.getElementById("speed").textContent=Math.floor(worldSpeed*24);
 }
 
 /* DRAW */
-function drawSky(){
-
-const g=ctx.createLinearGradient(0,0,0,H*.45);
-
-if(save.night){
-g.addColorStop(0,"#030613");
-g.addColorStop(.65,"#101b38");
-g.addColorStop(1,"#25364a");
-}else{
-g.addColorStop(0,"#55afe7");
-g.addColorStop(.55,"#b8e1f6");
-g.addColorStop(1,"#d6d9c4");
-}
-
-ctx.fillStyle=g;
-ctx.fillRect(0,0,W,H*.48);
-
-if(save.night){
-ctx.fillStyle="#fff";
-for(let i=0;i<40;i++){
-ctx.globalAlpha=.5;
-ctx.fillRect((i*97)%W,(i*53)%(H*.25),1.3,1.3);
-}
-ctx.globalAlpha=1;
-
-ctx.fillStyle="#f4f1c8";
-ctx.beginPath();
-ctx.arc(W*.78,H*.12,22,0,Math.PI*2);
-ctx.fill();
-}else{
-ctx.fillStyle="rgba(255,238,150,.7)";
-ctx.beginPath();
-ctx.arc(W*.82,H*.12,30,0,Math.PI*2);
-ctx.fill();
-}
-}
-
-function drawMountains(){
-
-ctx.fillStyle=save.night?"#101827":"#78919a";
-ctx.beginPath();
-ctx.moveTo(0,H*.37);
-
-for(let x=0;x<=W;x+=45){
-ctx.lineTo(x,H*.27+Math.sin(x*.015)*30+Math.sin(x*.038)*17);
-}
-
-ctx.lineTo(W,H*.48);
-ctx.lineTo(0,H*.48);
-ctx.closePath();
-ctx.fill();
-
-ctx.fillStyle=save.night?"#17202b":"#59776c";
-ctx.beginPath();
-ctx.moveTo(0,H*.43);
-
-for(let x=0;x<=W;x+=30){
-ctx.lineTo(x,H*.35+Math.sin(x*.025)*18);
-}
-
-ctx.lineTo(W,H*.5);
-ctx.lineTo(0,H*.5);
-ctx.closePath();
-ctx.fill();
-}
-
-function drawRoad(){
-
-const r=roadBounds();
-
-ctx.fillStyle=save.night?"#07120d":"#4e874c";
-ctx.fillRect(0,r.horizon,W,H);
-
-ctx.beginPath();
-ctx.moveTo(r.leftTop,r.horizon);
-ctx.lineTo(r.rightTop,r.horizon);
-ctx.lineTo(r.rightBottom,r.bottom);
-ctx.lineTo(r.leftBottom,r.bottom);
-ctx.closePath();
-
-const roadG=ctx.createLinearGradient(0,r.horizon,0,H);
-roadG.addColorStop(0,save.night?"#252b34":"#596066");
-roadG.addColorStop(1,save.night?"#11151b":"#30353a");
-ctx.fillStyle=roadG;
-ctx.fill();
-
-ctx.lineWidth=6;
-ctx.strokeStyle="#eee";
-
-ctx.beginPath();
-ctx.moveTo(r.leftTop,r.horizon);
-ctx.lineTo(r.leftBottom,r.bottom);
-ctx.moveTo(r.rightTop,r.horizon);
-ctx.lineTo(r.rightBottom,r.bottom);
-ctx.stroke();
-
-for(let lane=1;lane<=2;lane++){
-
-const xt=r.leftTop+(r.rightTop-r.leftTop)*lane/3;
-const xb=r.leftBottom+(r.rightBottom-r.leftBottom)*lane/3;
-
-for(let i=0;i<22;i++){
-
-const t1=((i/22+roadOffset)%1);
-const t2=Math.min(t1+.035,1);
-
-const y1=r.horizon+(r.bottom-r.horizon)*t1;
-const y2=r.horizon+(r.bottom-r.horizon)*t2;
-
-const x1=xt+(xb-xt)*t1;
-const x2=xt+(xb-xt)*t2;
-
-ctx.strokeStyle="#f5f5f5";
-ctx.lineWidth=3;
-ctx.beginPath();
-ctx.moveTo(x1,y1);
-ctx.lineTo(x2,y2);
-ctx.stroke();
-}
-}
-}
-
-function drawTree(x,y,s){
-
-ctx.save();
-ctx.translate(x,y);
-
-ctx.fillStyle="#543b25";
-ctx.fillRect(-4*s,0,8*s,35*s);
-
-ctx.fillStyle=save.night?"#10261b":"#1d5e2d";
-
-for(let i=0;i<3;i++){
-ctx.beginPath();
-ctx.arc((i-1)*8*s,-10*s,16*s,0,Math.PI*2);
-ctx.fill();
-}
-
-ctx.restore();
-}
-
-function drawEnvironment(){
-
-const r=roadBounds();
-
-for(let i=0;i<10;i++){
-
-const t=((i*.13+roadOffset*.65)%1);
-const y=r.horizon+(r.bottom-r.horizon)*t;
-
-const left=r.leftTop+(r.leftBottom-r.leftTop)*t;
-const right=r.rightTop+(r.rightBottom-r.rightTop)*t;
-
-const scale=.22+t*.9;
-
-drawTree(left-27*scale,y,scale);
-drawTree(right+27*scale,y,scale);
-}
-}
-
-function drawCar(x,y,w,h,color,isPlayer=false){
-
-ctx.save();
-ctx.translate(x,y);
-
-/* shadow */
-ctx.fillStyle="rgba(0,0,0,.35)";
-ctx.beginPath();
-ctx.ellipse(0,h*.43,w*.62,h*.16,0,0,Math.PI*2);
-ctx.fill();
-
-/* nitro */
-if(isPlayer&&nitroHeld&&player.nitro>0){
-
-const flame=30+Math.random()*18;
-
-const fg=ctx.createLinearGradient(0,h*.4,0,h*.9);
-fg.addColorStop(0,"#fff");
-fg.addColorStop(.35,"#ffcc00");
-fg.addColorStop(1,"rgba(255,40,0,0)");
-
-ctx.fillStyle=fg;
-ctx.beginPath();
-ctx.moveTo(-11,h*.4);
-ctx.lineTo(0,h*.4+flame);
-ctx.lineTo(11,h*.4);
-ctx.closePath();
-ctx.fill();
-}
-
-/* body */
-const body=ctx.createLinearGradient(-w/2,0,w/2,0);
-body.addColorStop(0,"#310b09");
-body.addColorStop(.18,color);
-body.addColorStop(.5,isPlayer?"#ed3d23":color);
-body.addColorStop(.82,color);
-body.addColorStop(1,"#260907");
-
-ctx.fillStyle=body;
-ctx.beginPath();
-ctx.roundRect(-w/2,-h/2,w,h,Math.min(12,w*.25));
-ctx.fill();
-
-/* roof */
-ctx.fillStyle=isPlayer?"#7f2118":"#293746";
-ctx.beginPath();
-ctx.roundRect(-w*.35,-h*.34,w*.7,h*.42,7);
-ctx.fill();
-
-/* windows */
-ctx.fillStyle="#101d28";
-ctx.beginPath();
-ctx.moveTo(-w*.27,-h*.27);
-ctx.lineTo(w*.27,-h*.27);
-ctx.lineTo(w*.24,-h*.02);
-ctx.lineTo(-w*.24,-h*.02);
-ctx.closePath();
-ctx.fill();
-
-/* lights */
-ctx.fillStyle="#ffdfad";
-ctx.fillRect(-w*.37,-h*.43,w*.22,5);
-ctx.fillRect(w*.15,-h*.43,w*.22,5);
-
-ctx.fillStyle="#ff251b";
-ctx.fillRect(-w*.37,h*.37,w*.22,5);
-ctx.fillRect(w*.15,h*.37,w*.22,5);
-
-/* wheels */
-ctx.fillStyle="#070809";
-ctx.fillRect(-w*.58,-h*.28,w*.18,h*.27);
-ctx.fillRect(w*.4,-h*.28,w*.18,h*.27);
-ctx.fillRect(-w*.58,h*.02,w*.18,h*.27);
-ctx.fillRect(w*.4,h*.02,w*.18,h*.27);
-
-ctx.restore();
-}
-
-function drawTraffic(){
-
-const r=roadBounds();
-
-for(const car of traffic){
-
-/*
-Perspektif ölçek:
-ufukta çok küçük,
-oyuncuya yaklaşınca büyüyor.
-*/
-const t=Math.max(0,Math.min(1,(car.y-r.horizon)/(H-r.horizon)));
-const scale=.18+t*.88;
-
-const x=laneX(car.lane,car.y);
-
-drawCar(
-x,
-car.y,
-player.width*car.scale*scale,
-player.height*car.h*scale,
-car.color,
-false
-);
-}
-}
-
-function drawCoins(){
-
-for(const c of coins){
-
-const r=roadBounds();
-const t=Math.max(0,Math.min(1,(c.y-r.horizon)/(H-r.horizon)));
-const scale=.35+t*.9;
-
-const x=laneX(c.lane,c.y);
-
-ctx.save();
-ctx.translate(x,c.y);
-ctx.scale(scale,scale);
-ctx.rotate(c.spin*.2);
-
-ctx.fillStyle="#ffb400";
-ctx.beginPath();
-ctx.arc(0,0,10,0,Math.PI*2);
-ctx.fill();
-
-ctx.fillStyle="#ffe27a";
-ctx.beginPath();
-ctx.arc(0,0,6,0,Math.PI*2);
-ctx.fill();
-
-ctx.fillStyle="#8b5900";
-ctx.font="bold 8px Arial";
-ctx.textAlign="center";
-ctx.textBaseline="middle";
-ctx.fillText("₺",0,1);
-
-ctx.restore();
-}
-}
-
-function drawPlayer(){
-drawCar(player.x,H*.82,player.width,player.height,"#d93620",true);
-}
-
-function drawSpeedLines(){
-
-if(player.speed<150)return;
-
-ctx.globalAlpha=Math.min(.2,(player.speed-150)/500);
-
-for(let i=0;i<12;i++){
-
-const x=Math.random()*W;
-const y=Math.random()*H*.75;
-
-ctx.strokeStyle="#fff";
-ctx.lineWidth=1;
-
-ctx.beginPath();
-ctx.moveTo(x,y);
-ctx.lineTo(x+(x-W/2)*.08,y+35+Math.random()*45);
-ctx.stroke();
-}
-
-ctx.globalAlpha=1;
-}
-
 function draw(){
 
-ctx.clearRect(0,0,W,H);
+ ctx.clearRect(0,0,W,H);
 
-ctx.save();
+ background();
+ nature();
+ road();
 
-if(shake>0){
-ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
-}
+ /*
+   Uzak araçları önce,
+   yakın araçları sonra çiziyoruz.
+   Böylece görsel olarak doğru perspektif oluşur.
+ */
+ cars
+  .slice()
+  .sort((a,b)=>a.z-b.z)
+  .forEach(c=>{
 
-drawSky();
-drawMountains();
-drawRoad();
-drawEnvironment();
-drawCoins();
-drawTraffic();
-drawPlayer();
-drawSpeedLines();
+   if(c.z<0||c.z>1.2)return;
 
-ctx.restore();
+   let s=trafficSize(c.z);
 
-if(running){
+   car(
+    laneX(c.lane,c.z),
+    roadY(c.z),
+    s.w,
+    s.h,
+    c.color,
+    false
+   );
+  });
 
-const bw=Math.min(160,W*.38);
-const bx=(W-bw)/2;
-const by=H-23;
-
-ctx.fillStyle="rgba(0,0,0,.55)";
-ctx.fillRect(bx,by,bw,6);
-
-const g=ctx.createLinearGradient(bx,0,bx+bw,0);
-g.addColorStop(0,"#21a5ff");
-g.addColorStop(1,"#5b3dff");
-
-ctx.fillStyle=g;
-ctx.fillRect(bx,by,bw*(player.nitro/100),6);
-
-ctx.font="bold 8px Arial";
-ctx.textAlign="center";
-ctx.fillStyle="#fff";
-ctx.fillText("NITRO",W/2,by-4);
-}
+ drawPlayer();
 }
 
 /* LOOP */
 function loop(now){
 
-if(!running)return;
+ if(!playing||paused)return;
 
-const dt=Math.min(.035,(now-last)/1000);
-last=now;
+ let dt=Math.min(.035,(now-last)/1000);
+ last=now;
 
-if(!paused){
-update(dt);
-draw();
+ update(dt);
+ draw();
 
-$("score").textContent=Math.floor(score);
-$("speed").textContent=Math.floor(player.speed);
-$("money").textContent=Math.floor(save.money+runMoney);
+ requestAnimationFrame(loop);
 }
-
-if(running)requestAnimationFrame(loop);
-}
-
-/* PAUSE */
-function togglePause(){
-
-if(!running)return;
-
-paused=!paused;
-
-if(paused){
-stopEngine();
-show("pause");
-}else{
-hideMenus();
-last=performance.now();
-startEngine();
-}
-}
-
-$("pauseBtn").onclick=togglePause;
-
-$("resumeBtn").onclick=()=>{
-paused=false;
-hideMenus();
-last=performance.now();
-startEngine();
-};
-
-$("pauseMenuBtn").onclick=()=>{
-running=false;
-stopEngine();
-show("menu");
-};
 
 /* BUTTONS */
-$("startBtn").onclick=()=>{
-beep(500,.08);
-startGame();
+document.getElementById("start").onclick=startGame;
+document.getElementById("again").onclick=startGame;
+
+document.getElementById("back").onclick=()=>{
+
+ playing=false;
+ paused=false;
+
+ document.getElementById("screen").style.display="flex";
+ document.getElementById("menu").style.display="block";
+ document.getElementById("gameover").style.display="none";
 };
 
-$("retryBtn").onclick=startGame;
+/* INITIAL */
+draw();
 
-$("overMenuBtn").onclick=()=>show("menu");
-
-$("garageBtn").onclick=()=>{
-updateUI();
-show("garage");
-};
-
-$("missionBtn").onclick=()=>{
-updateUI();
-show("missions");
-};
-
-$("settingsBtn").onclick=()=>{
-updateUI();
-show("settings");
-};
-
-document.querySelectorAll("[data-back]").forEach(b=>{
-b.onclick=()=>show(b.dataset.back);
-});
-
-/* UPGRADES */
-function buyUpgrade(type,base){
-
-const lvl=save[type];
-
-if(lvl>=8)return;
-
-const cost=Math.floor(base*lvl);
-
-if(save.money<cost){
-beep(120,.15,"square",.04);
-alert("Yeterli paran yok! Yarış yaparak para kazan.");
-return;
-}
-
-save.money-=cost;
-save[type]++;
-
-beep(700,.1,"sine",.05);
-persist();
-}
-
-$("engineBtn").onclick=()=>buyUpgrade("engine",700);
-$("handlingBtn").onclick=()=>buyUpgrade("handling",650);
-$("nitroUpgradeBtn").onclick=()=>buyUpgrade("nitro",800);
-
-$("soundBtn").onclick=()=>{
-save.sound=!save.sound;
-if(!save.sound)stopEngine();
-persist();
-if(save.sound)beep(650,.08);
-};
-
-$("nightBtn").onclick=()=>{
-save.night=!save.night;
-persist();
-};
-
-$("resetBtn").onclick=()=>{
-if(confirm("Tüm ilerleme silinsin mi?")){
-localStorage.removeItem("turboRoadSave");
-location.reload();
-}
-};
-
-/* MOBİL GESTURE */
-document.addEventListener("touchmove",e=>{
-if(e.target.closest("#game"))e.preventDefault();
-},{passive:false});
-
-document.addEventListener("contextmenu",e=>e.preventDefault());
-
-$("hud").style.display="none";
-$("controls").style.display="none";
-
-updateUI();
-
-addEventListener("orientationchange",()=>{
-setTimeout(resize,200);
-});
 </script>
 </body>
 </html>
-```
