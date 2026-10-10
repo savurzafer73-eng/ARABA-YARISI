@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mina Video AI V51.12.3 FIXED — GeldStory Studio</title>
+<title>Mina Video AI V51.14 MULTI-LANGUAGE VOICES — GeldStory Studio</title>
 
 <style>
 *{box-sizing:border-box}
@@ -2513,6 +2513,28 @@ function normalizePiperResult(result){
   );
 }
 
+// Her içerik dili kendi konuşmacısını kullanır; arayüz dili bundan bağımsızdır.
+function getVoiceForCurrentLanguage(){
+  var voiceFor={
+    de:"de_DE-thorsten-medium", // Almanca: Thorsten
+    en:"en_US-lessac-medium",  // İngilizce: Lessac
+    tr:"tr_TR-dfki-medium"     // Türkçe: DFKI
+  };
+  var id=voiceFor[minaVideoLanguage];
+  if(!id){
+    throw new Error("Bu dil için yerleşik ses yok. Kurmancî için sahneye harici MP3/WAV yükle.");
+  }
+  var voice=document.getElementById("voiceId");
+  if(voice){
+    var exists=Array.from(voice.options).some(function(o){return o.value===id;});
+    if(!exists){
+      throw new Error("Seçilen dilin ses modeli bu sürümde bulunamadı: "+id);
+    }
+    voice.value=id;
+  }
+  return id;
+}
+
 async function testPiper(){
 
   try{
@@ -2534,9 +2556,7 @@ async function testPiper(){
       );
     }
 
-    var voiceId=
-      $("voiceId").value||
-      "de_DE-thorsten-medium";
+    var voiceId=getVoiceForCurrentLanguage();
 
     var result=
       await tts.predict(
@@ -3088,9 +3108,7 @@ async function generateSceneVoice(index){
       );
     }
 
-    var voiceId=
-      $("voiceId").value||
-      "de_DE-thorsten-medium";
+    var voiceId=getVoiceForCurrentLanguage();
 
     var chunks=
       splitForTTS(
@@ -4769,10 +4787,11 @@ function setVideoLanguage(lang){
   var voice=document.getElementById("voiceId");
   var help=document.getElementById("videoLanguageHelp");
   var voiceFor={de:"de_DE-thorsten-medium",en:"en_US-lessac-medium",tr:"tr_TR-dfki-medium"};
+  var speakerFor={de:"Almanca — Thorsten",en:"İngilizce — Lessac",tr:"Türkçe — DFKI"};
   if(voiceFor[minaVideoLanguage]){
     var exists=Array.from(voice.options).some(function(o){return o.value===voiceFor[minaVideoLanguage]});
     if(exists) voice.value=voiceFor[minaVideoLanguage];
-    else if(help) help.textContent="The selected language's Piper model may not be available in this build. You can still paste and edit text in that language.";
+    if(help) help.textContent="Seçili ses: "+speakerFor[minaVideoLanguage]+". Her dil kendi ses modelini kullanır; arayüz dili seslendirmeyi değiştirmez.";
   }
   if(minaVideoLanguage==="ku" && help){
     var kuHelp={tr:"Kurmancî metnini buraya yapıştırabilirsin. Bu sürümde yerleşik Kurmancî Piper sesi yok; ses için harici WAV kullanman gerekir. Otomatik çeviri yapılmaz.",en:"You can paste Kurmanji text here. This build has no built-in Kurmanji Piper voice; external WAV audio is needed. No automatic translation is performed.",de:"Du kannst hier Kurmandschi-Text einfügen. Diese Version enthält keine integrierte Kurmandschi-Piper-Stimme; dafür wird eine externe WAV-Datei benötigt. Keine automatische Übersetzung.",ku:"Tu dikarî nivîsa Kurmancî li vir pêve bikî. Di vê guhertoyê de dengê Piper yê Kurmancî tune ye; ji bo dengê WAV-ya derveyî pêwîst e. Wergerandina bixweber tune ye."};
