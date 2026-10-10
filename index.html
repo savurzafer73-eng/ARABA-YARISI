@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mina Video AI V51.12.4 — GeldStory Studio</title>
+<title>Mina Video AI V51.12.3 FIXED — GeldStory Studio</title>
 
 <style>
 *{box-sizing:border-box}
@@ -47,6 +47,9 @@ button{cursor:pointer}
   color:#aab4c5;
 }
 
+.languageBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;max-width:520px}
+.languageBar label{margin:0;min-width:180px;font-size:12px}
+.languageBar select{max-width:260px}
 .badge{
   display:inline-block;
   margin-top:12px;
@@ -475,10 +478,19 @@ canvas{
 <div class="app">
 
 <div class="header">
-<h1>🎬 Mina Video AI V51.12.4</h1>
+<h1>🎬 Mina Video AI V51.12.3 FIXED</h1>
 <p>GeldStory Studio — German Documentary Video Creator</p>
 <div class="badge">
 Piper TTS • WAV • Smart Scenes • Character Director • Clean 16:9 Render
+</div>
+<div class="languageBar" aria-label="Language settings">
+  <label for="interfaceLanguage" id="interfaceLanguageLabel">Arayüz dili / Interface language</label>
+  <select id="interfaceLanguage" onchange="applyInterfaceLanguage(this.value)">
+    <option value="tr">🇹🇷 Türkçe</option>
+    <option value="en">🇬🇧 English</option>
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="ku">☀️ Kurdî (Kurmancî)</option>
+  </select>
 </div>
 </div>
 
@@ -489,8 +501,15 @@ Piper TTS • WAV • Smart Scenes • Character Director • Clean 16:9 Render
 
 <div class="panel">
 <h2>📝 Hikâye</h2>
-
-<textarea id="story" placeholder="Almanca hikâyeni buraya yapıştır..."></textarea>
+<label for="videoLanguage" id="videoLanguageLabel">Video / senaryo dili</label>
+<select id="videoLanguage" onchange="setVideoLanguage(this.value)">
+  <option value="de">🇩🇪 Deutsch — Almanca</option>
+  <option value="en">🇬🇧 English — İngilizce</option>
+  <option value="tr">🇹🇷 Türkçe</option>
+  <option value="ku">☀️ Kurdî — Kurmancî</option>
+</select>
+<div class="help" id="videoLanguageHelp">Hikâyeyi seçtiğin dilde yapıştır. Bu ayar ses modelini seçer; çevrimiçi çeviri yapmaz.</div>
+<textarea id="story" placeholder="Hikâyeni seçtiğin dilde buraya yapıştır..."></textarea>
 
 <div class="row" style="margin-top:10px;">
 <button class="btn primary" onclick="createScenes()">
@@ -508,14 +527,14 @@ Kısa cümleler otomatik gruplanır. Uzun hikâyelerde sahne sınırı yoktur.
 </div>
 
 <div class="panel">
-<h2>🎙️ Almanca Piper TTS</h2>
+<h2 id="ttsHeading">🎙️ Piper TTS / Seslendirme</h2>
 
 <label>Ses</label>
 
 <select id="voiceId">
-<option value="de_DE-thorsten-medium">
-Deutsch — Thorsten Medium
-</option>
+<option value="de_DE-thorsten-medium">Deutsch — Thorsten Medium</option>
+<option value="en_US-lessac-medium">English — Lessac Medium</option>
+<option value="tr_TR-dfki-medium">Türkçe — DFKI Medium</option>
 </select>
 
 <div class="row">
@@ -666,7 +685,7 @@ Karakter otomatik modda.
 <div>
 <label>Görsel motoru</label>
 <select id="imageMode">
-<option value="zimage">Z-IMAGE FAST — SAHNE YAZISINI GÖRSELE ÇEVİR — TEK GÖRSEL</option>
+<option value="zimage">Z-IMAGE FAST</option>
 <option value="realistic">REALISTIC</option>
 <option value="flux">FLUX FAST</option>
 </select>
@@ -732,12 +751,6 @@ onclick="renderVideo()">
 style="width:100%;"
 onclick="previewCurrentVideo()">
 ▶️ ÖNİZLEME
-</button>
-
-<button id="downloadVideoBtn" class="btn gold"
-style="width:100%;margin-top:8px;"
-onclick="downloadRenderedVideo()" disabled>
-⬇️ VİDEOYU İNDİR
 </button>
 </div>
 
@@ -809,7 +822,7 @@ Sahne görselleri burada görünecek.
 "use strict";
 
 /* =========================================================
-   MINA VIDEO AI V51.12.3
+   MINA VIDEO AI V51.12.3 FIXED
    ========================================================= */
 
 var scenes=[];
@@ -817,8 +830,6 @@ var ttsModule=null;
 var ttsLoadingPromise=null;
 var characterLocked=false;
 var previewRunning=false;
-var lastRenderedBlob=null;
-var renderActive=false;
 
 
 /* =========================================================
@@ -1581,90 +1592,83 @@ function getShot(index){
    PROMPT
    ========================================================= */
 
-function zImageSingleFrameBlock(){
-  return "GENERATE EXACTLY ONE LARGE IMAGE. ONE SINGLE CONTINUOUS REAL-WORLD SCENE. ONE CAMERA VIEW. ONE MOMENT IN TIME. ONE PRIMARY VISUAL EVENT. ONE MAIN SUBJECT OR ONE CLEAR GROUP. ONE SINGLE COHERENT PHOTOGRAPHIC COMPOSITION. DO NOT CREATE A COLLAGE. DO NOT CREATE A GRID. DO NOT CREATE A CONTACT SHEET. DO NOT CREATE A STORYBOARD. DO NOT CREATE A MONTAGE. DO NOT CREATE PANELS. DO NOT CREATE A SPLIT SCREEN. DO NOT CREATE MULTIPLE VIEWS. DO NOT CREATE MULTIPLE SCENES. DO NOT CREATE MULTIPLE MOMENTS. DO NOT CREATE MULTIPLE SMALL IMAGES. DO NOT CREATE THUMBNAILS. DO NOT DUPLICATE PEOPLE OR SUBJECTS. DO NOT CREATE PICTURE-IN-PICTURE. DO NOT CREATE A COMPOSITE LAYOUT. FILL THE ENTIRE FRAME WITH ONE CONTINUOUS ENVIRONMENT. 16:9 LANDSCAPE. FULL FRAME. EDGE-TO-EDGE CINEMATIC IMAGE. KEEP THE MAIN SUBJECT AND FACE COMFORTABLY INSIDE THE CENTRAL SAFE AREA. NO BLACK BORDERS. ";
-}
-
-function cleanPromptValue(value,fallback){
-  var v=String(value==null?"":value).trim();
-  if(!v || v.toLowerCase()==="undefined" || v.toLowerCase()==="null") return fallback;
-  return v;
-}
-
 function buildPrompt(text,index){
 
-  var sceneText=String(text||"").trim();
-  var a=analyzeScene(sceneText);
+  var sceneText=String(text||"")
+    .replace(/\s+/g," ")
+    .trim();
+
   var shot=getShot(index);
   var mode=$("imageMode") ? $("imageMode").value : "zimage";
-  var frame=formatPromptText();
 
   /*
-    V51.12.5 — SCENE-FIRST Z-IMAGE DIRECTOR
-    The original German scene text is now explicitly included in the prompt.
-    The semantic analysis is used as visual reinforcement, not as a replacement
-    for the actual scene description.
+    IMPORTANT:
+    ForVideo/Z-Image is already a text-to-image generator.
+    We therefore send ONE concise visual description.
+    We do NOT ask for variants, grids, storyboards or batches.
   */
-  if(mode==="zimage"){
-
-    return [
-      "CREATE ONE SINGLE LARGE PHOTOREALISTIC CINEMATIC DOCUMENTARY IMAGE.",
-      "THE ORIGINAL SCENE DESCRIPTION BELOW IS THE PRIMARY VISUAL INSTRUCTION.",
-      "VISUALIZE THE EXACT ACTION, PEOPLE, PLACE, OBJECTS AND MOMENT DESCRIBED IN THE SCENE.",
-      "ORIGINAL SCENE DESCRIPTION: ["+sceneText+"].",
-      "IMPORTANT: THE SCENE DESCRIPTION IS IN GERMAN. UNDERSTAND IT AND VISUALIZE IT; DO NOT RENDER THE GERMAN WORDS AS TEXT IN THE IMAGE.",
-      characterPrompt(),
-      "VISUAL EVENT: "+cleanPromptValue(a.event,"the exact action described in the scene")+".",
-      "LOCATION: "+cleanPromptValue(a.location,"a believable real-world location")+".",
-      "ENVIRONMENT: "+cleanPromptValue(a.environmentDetails,"authentic realistic environmental details")+".",
-      "IMPORTANT PROPS: "+cleanPromptValue(a.props,"objects relevant to the described action")+".",
-      "BACKGROUND: "+cleanPromptValue(a.background,"subtle realistic background details")+".",
-      "EMOTION: "+cleanPromptValue(a.emotion,"natural authentic emotion")+".",
-      "PERIOD: "+cleanPromptValue(a.period,"historically appropriate period")+".",
-      "LIGHTING: "+cleanPromptValue(a.lighting,"natural cinematic documentary lighting")+".",
-      "CAMERA: "+shot.camera+".",
-      "LENS: "+shot.lens+".",
-      "COMPOSITION: "+shot.composition+".",
-      frame+".",
-      "ONE CONTINUOUS REAL-WORLD SCENE. ONE MOMENT IN TIME. ONE CAMERA VIEW. ONE COHERENT COMPOSITION.",
-      "SHOW THE MAIN ACTION CLEARLY AND MAKE THE SUBJECTS AND IMPORTANT OBJECTS LARGE ENOUGH TO READ VISUALLY.",
-      "NATURAL REALISTIC PERSPECTIVE, REALISTIC SKIN, BELIEVABLE ANATOMY, AUTHENTIC PERIOD CLOTHING, REALISTIC MATERIALS.",
-      "NO COLLAGE, NO GRID, NO CONTACT SHEET, NO STORYBOARD, NO SPLIT SCREEN, NO MULTI-PANEL IMAGE, NO MONTAGE, NO MULTIPLE SMALL IMAGES, NO DUPLICATE PEOPLE, NO DUPLICATE SCENES.",
-      "NO TEXT, NO LETTERS, NO WORDS, NO NUMBERS, NO LOGOS, NO WATERMARKS. VISUAL ONLY."
-    ].join(" ");
-  }
 
   var prompt=
-    "Photorealistic cinematic documentary photograph. "+
-    "ORIGINAL SCENE DESCRIPTION: "+sceneText+". "+
-    "Visualize the exact action, people, location and objects described in this scene. "+
+    "Create one single photorealistic cinematic documentary photograph. "+
+    "Visualize exactly this scene: \""+sceneText+"\". "+
+    "Show one continuous moment, one coherent camera view, one main visual event. "+
     characterPrompt()+" "+
-    "MAIN VISUAL EVENT: "+a.event+". "+
-    "LOCATION: "+a.location+". "+
-    "ENVIRONMENT: "+a.environmentDetails+". "+
-    "PROPS: "+a.props+". "+
-    "BACKGROUND: "+a.background+". "+
-    "SPATIAL RELATIONSHIP: "+a.spatial+". "+
-    "EMOTION: "+a.emotion+". "+
-    "PERIOD: "+a.period+". "+
-    "LIGHTING: "+a.lighting+". "+
-    "CAMERA: "+shot.camera+". "+
-    "LENS: "+shot.lens+". "+
-    "COMPOSITION: "+shot.composition+". "+
-    frame+". "+
-    "ONE SINGLE LARGE IMAGE. ONE CONTINUOUS SCENE. ONE COHERENT CAMERA VIEW. "+
-    "NO COLLAGE. NO GRID. NO CONTACT SHEET. NO STORYBOARD. NO SPLIT SCREEN. NO MULTIPLE SMALL IMAGES. "+
-    "NO DUPLICATE PEOPLE OR SCENES. "+
-    "NO TEXT. NO LETTERS. NO WORDS. NO LOGOS. NO WATERMARKS. VISUAL ONLY. ";
-
-  if(mode==="flux"){
-    prompt+="FLUX FAST. Strong subject separation and environmental storytelling.";
-  }else{
-    prompt+="Premium realistic photography, natural lens rendering, authentic documentary realism.";
-  }
+    "Camera: "+shot.camera+". "+
+    "Lens: "+shot.lens+". "+
+    "Composition: wide cinematic framing, subject fully visible, safe margins, natural perspective. "+
+    "16:9 landscape, full frame, realistic skin, realistic clothing and materials, documentary photography. "+
+    "No text, no letters, no numbers, no logo, no watermark. "+
+    "Do not create a collage, grid, storyboard, contact sheet, split screen, montage, panels, tiles, or multiple images. "+
+    "Return one image only.";
 
   return prompt;
 }
+
+function openForVideo(index){
+
+  if(!scenes[index]) return;
+
+  var prompt=buildPrompt(scenes[index].text,index);
+  scenes[index].prompt=prompt;
+
+  copyTextToClipboard(prompt);
+
+  window.open(
+    "https://forvideo.ai/z-image",
+    "_blank",
+    "noopener,noreferrer"
+  );
+
+  status(
+    "🌐 Sahne "+scenes[index].id+
+    " hazır. TEK görsel promptu panoya kopyalandı. ForVideo'da 16:9 seç ve Generate'a bir kez bas."
+  );
+}
+
+async function copyTextToClipboard(text){
+
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch(e){
+    try{
+      var ta=document.createElement("textarea");
+      ta.value=text;
+      ta.style.position="fixed";
+      ta.style.left="-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      return true;
+    }catch(err){
+      return false;
+    }
+  }
+}
+
+
 /* =========================================================
    SCENE CREATION — FIXED
    ========================================================= */
@@ -1682,7 +1686,7 @@ function createScenes(){
     if(!text){
 
       alert(
-        "Önce Almanca hikâyeyi yaz veya örnek hikâyeyi yükle."
+        (minaInterfaceLanguage==="en"?"Enter a story or load the sample story first.":minaInterfaceLanguage==="de"?"Gib zuerst eine Geschichte ein oder lade das Beispiel.":minaInterfaceLanguage==="ku"?"Pêşî çîrokek binivîse an çîroka mînak bar bike.":"Önce hikâyeyi yaz veya örnek hikâyeyi yükle.")
       );
 
       status(
@@ -1770,7 +1774,11 @@ function createScenes(){
         );
 
         prompt=
-          "Photorealistic cinematic documentary photograph. ONE SINGLE LARGE IMAGE. ONE SINGLE CONTINUOUS SCENE. ONE CAMERA VIEW. ONE PRIMARY VISUAL EVENT. 16:9 LANDSCAPE FULL FRAME. Main subject clearly visible with generous safe margins. NO COLLAGE. NO GRID. NO CONTACT SHEET. NO STORYBOARD. NO MULTIPLE SMALL IMAGES. NO DUPLICATE SUBJECTS. NO BLACK BORDERS. "+
+          "Photorealistic cinematic documentary scene. "+
+          "16:9 landscape full-screen composition. "+
+          "Main subject clearly visible. "+
+          "Wide safe framing. "+
+          "No black borders. "+
           noTextBlock()+".";
       }
 
@@ -1791,8 +1799,6 @@ function createScenes(){
         imageWidth:0,
 
         imageHeight:0,
-
-        bgColor:"#111827",
 
         audioBlob:null,
 
@@ -1883,8 +1889,7 @@ function escapeHTML(text){
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+    .replace(/"/g,"&quot;");
 }
 
 function motionOptions(selected){
@@ -2037,12 +2042,12 @@ function renderScenes(){
       '📋 Prompt Kopyala'+
       '</button>'+
 
-      '<button class="btn small primary" onclick="copyZImagePrompt('+i+')">'+
-      '🖼️ Z-IMAGE TEK GÖRSEL'+
+      '<button class="btn small" onclick="generateImagePlaceholder('+i+')">'+
+      '🖼️ TEK GÖRSEL PROMPTU'+
       '</button>'+
 
-      '<button class="btn small" onclick="generateImagePlaceholder('+i+')">'+
-      '🖼️ Görsel Üretim Bilgisi'+
+      '<button class="btn small" onclick="openForVideo('+i+')">'+
+      '🌐 FORVIDEO Z-IMAGE'+
       '</button>'+
 
       '<button class="btn small danger" onclick="removeScene('+i+')">'+
@@ -2175,36 +2180,31 @@ async function copyPrompt(index){
   }
 }
 
-async function copyZImagePrompt(index){
-
-  if(!scenes[index]) return;
-
-  var originalMode=$("imageMode") ? $("imageMode").value : "zimage";
-  var prompt;
-
-  try{
-    prompt=buildPrompt(scenes[index].text,index);
-  }catch(e){
-    prompt=scenes[index].prompt;
-  }
-
-  try{
-    await navigator.clipboard.writeText(prompt);
-    status("🖼️ Z-Image TEK GÖRSEL promptu kopyalandı. ForVideo Z-Image'de 16:9 seç ve sadece bir kez Generate'e bas.");
-  }catch(error){
-    alert(prompt);
-  }
-}
-
 function generateImagePlaceholder(index){
 
   if(!scenes[index]) return;
 
-  alert(
-    "Sahne "+
-    scenes[index].id+
-    " için görsel promptu hazır.\n\n"+
-    scenes[index].prompt
+  var prompt=buildPrompt(
+    scenes[index].text,
+    index
+  );
+
+  scenes[index].prompt=prompt;
+
+  var copied=copyTextToClipboard(prompt);
+
+  var message=
+    "SAHNE "+scenes[index].id+" — TEK GÖRSEL PROMPTU\n\n"+
+    prompt+
+    "\n\n"+
+    "ForVideo: Z-Image → 16:9 → Generate (bir kez).";
+
+  alert(message);
+
+  status(
+    copied
+      ? "📋 Tek görsel promptu kopyalandı."
+      : "⚠️ Prompt hazır; otomatik kopyalama başarısız oldu."
   );
 }
 
@@ -2299,8 +2299,6 @@ function uploadSceneImage(index,input){
     scene.imageHeight=
       img.naturalHeight||
       img.height;
-
-    scene.bgColor=getImageBackgroundColor(img);
 
     renderScenes();
     renderGallery();
@@ -2493,7 +2491,7 @@ async function testPiper(){
       await tts.predict(
         {
           text:
-            "Hallo. Dies ist ein Test für GeldStory.",
+            (minaVideoLanguage==="en"?"Hello. This is a voice test for GeldStory.":minaVideoLanguage==="tr"?"Merhaba. Bu GeldStory için bir ses testidir.":minaVideoLanguage==="ku"?"Silav. Ev ceribandina dengê ye.":"Hallo. Dies ist ein Test für GeldStory."),
           voiceId:
             voiceId
         },
@@ -3290,47 +3288,13 @@ function resizeCanvas(){
   Duplicate background yok.
 */
 
-function getImageBackgroundColor(img){
-
-  if(!img) return "#111827";
-
-  if(img.__minaBgColor){
-    return img.__minaBgColor;
-  }
-
-  var c=document.createElement("canvas");
-  c.width=1;
-  c.height=1;
-
-  try{
-    var x=c.getContext("2d",{willReadFrequently:true});
-    x.drawImage(img,0,0,1,1);
-    var p=x.getImageData(0,0,1,1).data;
-    img.__minaBgColor="rgb("+p[0]+","+p[1]+","+p[2]+")";
-  }catch(e){
-    img.__minaBgColor="#111827";
-  }
-
-  c.width=0;
-  c.height=0;
-
-  return img.__minaBgColor;
-}
-
-function waitNextFrame(){
-  return new Promise(function(resolve){
-    requestAnimationFrame(resolve);
-  });
-}
-
 function drawCleanImage(
   ctx,
   img,
   W,
   H,
   motionProgress,
-  motion,
-  bgColor
+  motion
 ){
 
   ctx.save();
@@ -3401,10 +3365,19 @@ function drawCleanImage(
     Görselin ortalama kenar rengini yaklaşık olarak
     kullanarak 16:9 alanı temiz doldurur.
   */
-  var bg=
-    bgColor||
-    img.__minaBgColor||
-    "#111827";
+  var bg="#111827";
+
+  try{
+    var sample=document.createElement("canvas");
+    sample.width=1;
+    sample.height=1;
+    var sctx=sample.getContext("2d",{willReadFrequently:true});
+    sctx.drawImage(img,0,0,1,1);
+    var px=sctx.getImageData(0,0,1,1).data;
+    bg="rgb("+px[0]+","+px[1]+","+px[2]+")";
+  }catch(e){
+    bg="#111827";
+  }
 
   ctx.fillStyle=bg;
   ctx.fillRect(0,0,W,H);
@@ -3868,39 +3841,42 @@ async function createRenderAudioGraph(){
    RENDER
    ========================================================= */
 
-async async function renderVideo(){
-
-  if(renderActive){
-    status("⏳ Render zaten çalışıyor. Lütfen bitmesini bekle.");
-    return;
-  }
+async function renderVideo(){
 
   if(!scenes.length){
-    alert("Önce sahneleri oluştur.");
+
+    alert(
+      "Önce sahneleri oluştur."
+    );
+
     return;
   }
-
-  renderActive=true;
-  lastRenderedBlob=null;
-
-  if($("downloadVideoBtn")){
-    $("downloadVideoBtn").disabled=true;
-  }
-
-  var audioContext=null;
-  var canvasStream=null;
-  var combinedStream=null;
-  var recorder=null;
 
   try{
 
-    status("🎬 Render hazırlanıyor...");
+    status(
+      "🎬 Render hazırlanıyor..."
+    );
+
     setProgress(0);
+
     resizeCanvas();
 
-    for(var i=0;i<scenes.length;i++){
+    /*
+      WAV kontrol
+    */
 
-      if(!scenes[i].audioBlob||!scenes[i].audioURL||!scenes[i].duration){
+    for(
+      var i=0;
+      i<scenes.length;
+      i++
+    ){
+
+      if(
+        !scenes[i].audioBlob||
+        !scenes[i].audioURL||
+        !scenes[i].duration
+      ){
 
         status(
           "🔊 Eksik ses: Sahne "+
@@ -3908,341 +3884,434 @@ async async function renderVideo(){
           " otomatik seslendiriliyor..."
         );
 
-        var ok=await generateSceneVoice(i);
+        var ok=
+          await generateSceneVoice(i);
 
         if(!ok){
+
           throw new Error(
-            "Sahne "+scenes[i].id+" için WAV oluşturulamadı."
+            "Sahne "+
+            scenes[i].id+
+            " için WAV oluşturulamadı."
           );
         }
       }
 
-      await decodeSceneAudio(scenes[i]);
-
-      if(!scenes[i].audioBuffer){
-        throw new Error("Sahne "+scenes[i].id+" ses çözülemedi.");
-      }
-
-      scenes[i].duration=scenes[i].audioBuffer.duration;
+      await decodeSceneAudio(
+        scenes[i]
+      );
     }
 
-    for(var j=0;j<scenes.length;j++){
+    /*
+      Görsel kontrolü
+    */
+
+    for(
+      var j=0;
+      j<scenes.length;
+      j++
+    ){
+
       if(!scenes[j].imageObject){
+
         throw new Error(
-          "Sahne "+scenes[j].id+
+          "Sahne "+
+          scenes[j].id+
           " için görsel yok. Her sahneye görsel yükle."
         );
-      }
-
-      if(!scenes[j].bgColor){
-        scenes[j].bgColor=getImageBackgroundColor(scenes[j].imageObject);
       }
     }
 
     var canvas=$("canvas");
-    var ctx=canvas.getContext("2d");
-    var fps=Number($("fps").value)||30;
 
-    var graph=await createRenderAudioGraph();
-    audioContext=graph.audioContext;
-    var audioDestination=graph.destination;
+    var ctx=
+      canvas.getContext("2d");
+
+    var fps=
+      Number($("fps").value);
+
+    var graph=
+      await createRenderAudioGraph();
+
+    var audioContext=
+      graph.audioContext;
+
+    var audioDestination=
+      graph.destination;
 
     await audioContext.resume();
 
-    canvasStream=canvas.captureStream(fps);
-    combinedStream=new MediaStream();
+    var canvasStream=
+      canvas.captureStream(fps);
 
-    canvasStream.getVideoTracks().forEach(function(track){
-      combinedStream.addTrack(track);
-    });
+    var combinedStream=
+      new MediaStream();
 
-    audioDestination.stream.getAudioTracks().forEach(function(track){
-      combinedStream.addTrack(track);
-    });
+    canvasStream
+      .getVideoTracks()
+      .forEach(function(track){
+        combinedStream.addTrack(track);
+      });
+
+    audioDestination
+      .stream
+      .getAudioTracks()
+      .forEach(function(track){
+        combinedStream.addTrack(track);
+      });
 
     var mime="";
 
-    if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8,opus")){
-      mime="video/webm;codecs=vp8,opus";
-    }else if(MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")){
-      mime="video/webm;codecs=vp9,opus";
-    }else if(MediaRecorder.isTypeSupported("video/webm")){
+    if(
+      MediaRecorder.isTypeSupported(
+        "video/webm;codecs=vp8,opus"
+      )
+    ){
+
+      mime=
+        "video/webm;codecs=vp8,opus";
+
+    }else if(
+      MediaRecorder.isTypeSupported(
+        "video/webm;codecs=vp9,opus"
+      )
+    ){
+
+      mime=
+        "video/webm;codecs=vp9,opus";
+
+    }else if(
+      MediaRecorder.isTypeSupported(
+        "video/webm"
+      )
+    ){
+
       mime="video/webm";
     }
 
     if(!mime){
-      throw new Error("Tarayıcı WebM MediaRecorder desteklemiyor.");
+
+      throw new Error(
+        "Tarayıcı WebM MediaRecorder desteklemiyor."
+      );
     }
 
-    log("Render MIME: "+mime);
+    log(
+      "Render MIME: "+mime
+    );
 
-    recorder=new MediaRecorder(combinedStream,{
-      mimeType:mime,
-      videoBitsPerSecond:6000000
-    });
+    var recorder=
+      new MediaRecorder(
+        combinedStream,
+        {
+          mimeType:mime,
+          videoBitsPerSecond:6000000
+        }
+      );
 
     var chunks=[];
 
-    var stoppedPromise=new Promise(function(resolve){
-      recorder.ondataavailable=function(event){
-        if(event.data&&event.data.size>0){
-          chunks.push(event.data);
-        }
-      };
-      recorder.onerror=function(event){
-        log("MediaRecorder error: "+(event.error?event.error.message:"bilinmeyen hata"));
-      };
-      recorder.onstop=function(){
-        resolve();
-      };
-    });
+    var stoppedPromise=
+      new Promise(function(resolve){
+
+        recorder.ondataavailable=
+          function(event){
+
+            if(
+              event.data&&
+              event.data.size>0
+            ){
+
+              chunks.push(
+                event.data
+              );
+            }
+          };
+
+        recorder.onstop=
+          function(){
+            resolve();
+          };
+      });
+
+    recorder.start(1000);
 
     var totalDuration=0;
 
-    for(var td=0;td<scenes.length;td++){
-      scenes[td]._renderStart=totalDuration;
-      scenes[td]._renderDuration=scenes[td].audioBuffer.duration;
-      scenes[td].duration=scenes[td]._renderDuration;
-      totalDuration+=scenes[td]._renderDuration;
+    for(
+      var td=0;
+      td<scenes.length;
+      td++
+    ){
+
+      totalDuration+=
+        scenes[td].duration;
     }
 
-    if(!totalDuration||!isFinite(totalDuration)){
-      throw new Error("Toplam video süresi okunamadı.");
-    }
+    var elapsedTotal=0;
 
-    /* İlk kareyi recorder başlamadan önce hazırla. */
-    drawCleanImage(
-      ctx,
-      scenes[0].imageObject,
-      canvas.width,
-      canvas.height,
-      0,
-      scenes[0].motion,
-      scenes[0].bgColor
-    );
-    drawGeldStoryLogo(ctx,canvas.width,canvas.height);
-    drawSubtitle(ctx,scenes[0].text,canvas.width,canvas.height);
-    await waitNextFrame();
+    for(
+      var sIndex=0;
+      sIndex<scenes.length;
+      sIndex++
+    ){
 
-    /* Tüm sesleri tek ortak AudioContext zaman çizelgesine yerleştir. */
-    var audioStart=audioContext.currentTime+0.08;
+      var scene=
+        scenes[sIndex];
 
-    for(var si=0;si<scenes.length;si++){
-      var sc=audioContext.createBufferSource();
-      sc.buffer=scenes[si].audioBuffer;
-      sc.connect(audioDestination);
-      scenes[si]._renderSource=sc;
-      sc.start(audioStart+scenes[si]._renderStart);
-    }
+      status(
+        "🎬 Render: Sahne "+
+        scene.id+
+        "/"+
+        scenes.length
+      );
 
-    recorder.start(250);
+      var source=
+        audioContext.createBufferSource();
 
-    var renderFinished=false;
-    var renderError=null;
+      source.buffer=
+        scene.audioBuffer;
 
-    function renderFrame(){
+      var gain=
+        audioContext.createGain();
 
-      if(renderFinished) return;
+      gain.gain.value=1;
 
-      var timeline=audioContext.currentTime-audioStart;
-      var safeTimeline=Math.max(0,timeline);
+      source.connect(gain);
+      gain.connect(audioDestination);
 
-      if(safeTimeline>=totalDuration){
-        renderFinished=true;
-        return;
-      }
+      var startTime=
+        performance.now();
 
-      var activeIndex=scenes.length-1;
+      var finished=false;
 
-      for(var k=0;k<scenes.length;k++){
-        var st=scenes[k]._renderStart;
-        var en=st+scenes[k]._renderDuration;
-        if(safeTimeline<en){
-          activeIndex=k;
-          break;
-        }
-      }
+      var endedResolve;
 
-      var scene=scenes[activeIndex];
-      var local=Math.max(0,safeTimeline-scene._renderStart);
-      var p=scene._renderDuration>0
-        ?Math.min(1,local/scene._renderDuration)
-        :0;
+      var endedPromise=
+        new Promise(function(resolve){
+          endedResolve=resolve;
+        });
 
-      try{
+      source.onended=
+        function(){
+
+          if(!finished){
+
+            finished=true;
+
+            endedResolve();
+          }
+        };
+
+      source.start();
+
+      while(!finished){
+
+        var elapsed=
+          (
+            performance.now()-
+            startTime
+          )/1000;
+
+        var p=
+          Math.min(
+            1,
+            elapsed/
+            scene.duration
+          );
+
         drawCleanImage(
           ctx,
           scene.imageObject,
           canvas.width,
           canvas.height,
           p,
-          scene.motion,
-          scene.bgColor
+          scene.motion
         );
 
-        drawGeldStoryLogo(ctx,canvas.width,canvas.height);
-        drawSubtitle(ctx,scene.text,canvas.width,canvas.height);
+        drawGeldStoryLogo(
+          ctx,
+          canvas.width,
+          canvas.height
+        );
 
-        setProgress((safeTimeline/totalDuration)*100);
+        drawSubtitle(
+          ctx,
+          scene.text,
+          canvas.width,
+          canvas.height
+        );
+
+        var overall=
+          (
+            elapsedTotal+
+            Math.min(
+              scene.duration,
+              elapsed
+            )
+          )/
+          totalDuration*
+          100;
+
+        setProgress(overall);
 
         $("previewScene").textContent=
-          "Sahne: "+scene.id+"/"+scenes.length;
+          "Sahne: "+
+          scene.id+
+          "/"+
+          scenes.length;
 
         $("previewClock").textContent=
-          formatTime(Math.min(totalDuration,safeTimeline))+" / "+formatTime(totalDuration);
+          formatTime(
+            elapsedTotal+
+            Math.min(
+              scene.duration,
+              elapsed
+            )
+          )+
+          " / "+
+          formatTime(totalDuration);
 
-      }catch(e){
-        renderError=e;
-        renderFinished=true;
-        return;
+        await sleep(15);
       }
 
-      requestAnimationFrame(renderFrame);
+      await endedPromise;
+
+      elapsedTotal+=
+        scene.duration;
+
+      try{
+        source.disconnect();
+      }catch(e){}
+
+      try{
+        gain.disconnect();
+      }catch(e){}
+
+      drawCleanImage(
+        ctx,
+        scene.imageObject,
+        canvas.width,
+        canvas.height,
+        1,
+        scene.motion
+      );
+
+      drawGeldStoryLogo(
+        ctx,
+        canvas.width,
+        canvas.height
+      );
+
+      drawSubtitle(
+        ctx,
+        scene.text,
+        canvas.width,
+        canvas.height
+      );
+
+      await sleep(40);
     }
 
-    /* Recorder ve ses saati birlikte ilerlesin. */
-    await waitNextFrame();
-    renderFrame();
+    await sleep(250);
 
-    while(!renderFinished){
-      await sleep(50);
-    }
-
-    if(renderError){
-      throw renderError;
-    }
-
-    /* Son kare + MediaRecorder flush payı. */
-    var lastScene=scenes[scenes.length-1];
-    drawCleanImage(
-      ctx,
-      lastScene.imageObject,
-      canvas.width,
-      canvas.height,
-      1,
-      lastScene.motion,
-      lastScene.bgColor
-    );
-    drawGeldStoryLogo(ctx,canvas.width,canvas.height);
-    drawSubtitle(ctx,lastScene.text,canvas.width,canvas.height);
-    setProgress(100);
-
-    await waitNextFrame();
-    await waitNextFrame();
-    await sleep(120);
-
-    if(recorder.state!=="inactive"){
-      recorder.stop();
-    }
+    recorder.stop();
 
     await stoppedPromise;
 
-    if(canvasStream){
-      canvasStream.getTracks().forEach(function(track){
-        try{track.stop();}catch(e){}
-      });
-    }
+    try{
+      canvasStream
+        .getTracks()
+        .forEach(function(track){
+          track.stop();
+        });
+    }catch(e){}
 
-    if(audioDestination&&audioDestination.stream){
-      audioDestination.stream.getTracks().forEach(function(track){
-        try{track.stop();}catch(e){}
-      });
-    }
+    try{
+      audioDestination
+        .stream
+        .getTracks()
+        .forEach(function(track){
+          track.stop();
+        });
+    }catch(e){}
 
-    if(audioContext){
-      try{await audioContext.close();}catch(e){}
-    }
+    try{
+      await audioContext.close();
+    }catch(e){}
 
-    var videoBlob=new Blob(chunks,{type:"video/webm"});
+    var videoBlob=
+      new Blob(
+        chunks,
+        {
+          type:"video/webm"
+        }
+      );
 
-    if(!videoBlob.size){
-      throw new Error("Video dosyası boş oluştu.");
-    }
+    var url=
+      URL.createObjectURL(
+        videoBlob
+      );
 
-    lastRenderedBlob=videoBlob;
+    var a=
+      document.createElement("a");
 
-    if($("downloadVideoBtn")){
-      $("downloadVideoBtn").disabled=false;
-    }
-
-    /* Eski davranış korunuyor: hazır olunca otomatik indirme de denenir. */
-    var url=URL.createObjectURL(videoBlob);
-    var a=document.createElement("a");
     a.href=url;
-    a.download="GeldStory_V51_12_5_"+Date.now()+".webm";
+
+    a.download=
+      "GeldStory_V51_12_3_"+
+      Date.now()+
+      ".webm";
+
     document.body.appendChild(a);
+
     a.click();
+
     a.remove();
+
     setTimeout(function(){
-      try{URL.revokeObjectURL(url);}catch(e){}
+
+      try{
+        URL.revokeObjectURL(url);
+      }catch(e){}
+
     },10000);
 
+    setProgress(100);
+
     status(
-      "🎉 VİDEO HAZIR! ⬇️ VİDEOYU İNDİR butonu da aktif edildi."
+      "🎉 VİDEO HAZIR! WebM dosyası oluşturuldu."
     );
 
   }catch(error){
 
-    console.error("RENDER ERROR",error);
-
-    try{
-      if(recorder&&recorder.state!=="inactive") recorder.stop();
-    }catch(e){}
-
-    try{
-      if(canvasStream){
-        canvasStream.getTracks().forEach(function(track){try{track.stop();}catch(e){}});
-      }
-    }catch(e){}
-
-    try{
-      if(audioContext) await audioContext.close();
-    }catch(e){}
-
-    setProgress(0);
+    console.error(
+      "RENDER ERROR",
+      error
+    );
 
     status(
       "❌ RENDER HATASI: "+
-      (error.message||error)
+      (
+        error.message||
+        error
+      )
     );
 
     alert(
       "Render hatası:\n\n"+
-      (error.message||error)
+      (
+        error.message||
+        error
+      )
     );
-
-  }finally{
-    for(var ci=0;ci<scenes.length;ci++){
-      delete scenes[ci]._renderStart;
-      delete scenes[ci]._renderDuration;
-      delete scenes[ci]._renderSource;
-    }
-    renderActive=false;
   }
 }
 
-function downloadRenderedVideo(){
 
-  if(!lastRenderedBlob){
-    alert("Önce videoyu render et.");
-    return;
-  }
-
-  var url=URL.createObjectURL(lastRenderedBlob);
-  var a=document.createElement("a");
-  a.href=url;
-  a.download="GeldStory_V51_12_5_"+Date.now()+".webm";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  setTimeout(function(){
-    try{URL.revokeObjectURL(url);}catch(e){}
-  },10000);
-
-  status("⬇️ Video indirme başlatıldı.");
-}
-
+/* =========================================================
+   PREVIEW
+   ========================================================= */
 
 async function previewCurrentVideo(){
 
@@ -4331,8 +4400,7 @@ async function previewCurrentVideo(){
           $("canvas").width,
           $("canvas").height,
           p,
-          scene.motion,
-          scene.bgColor
+          scene.motion
         );
 
         drawGeldStoryLogo(
@@ -4556,12 +4624,113 @@ $("charClothing").addEventListener(
   }
 );
 
+/* =========================================================
+   MULTILINGUAL LAYER — V51.13
+   Interface: Turkish, English, German, Kurmanji Kurdish.
+   Video language is a content/voice selection, not an online translator.
+   ========================================================= */
+var minaInterfaceLanguage = "tr";
+var minaVideoLanguage = "de";
+var minaTranslationMap = {
+  "📝 Hikâye": {en:"📝 Story",de:"📝 Geschichte",ku:"📝 Çîrok"},
+  "🎬 SAHNELERİ OLUŞTUR": {en:"🎬 CREATE SCENES",de:"🎬 SZENEN ERSTELLEN",ku:"🎬 DÎMENAN ÇÊKE"},
+  "📖 ÖRNEK HİKÂYE": {en:"📖 LOAD SAMPLE STORY",de:"📖 BEISPIELGESCHICHTE",ku:"📖 ÇÎROKA MÎNAK BAR BIKE"},
+  "Kısa cümleler otomatik gruplanır. Uzun hikâyelerde sahne sınırı yoktur.": {en:"Short sentences are grouped automatically. Long stories have no scene limit.",de:"Kurze Sätze werden automatisch gruppiert. Lange Geschichten haben keine Szenengrenze.",ku:"Hevokên kurt bixweber tên komkirin. Ji bo çîrokên dirêj sînorê dîmenan tune ye."},
+  "🎙️ Piper TTS / Seslendirme": {en:"🎙️ Piper TTS / Voiceover",de:"🎙️ Piper TTS / Sprachaufnahme",ku:"🎙️ Piper TTS / Dengkirin"},
+  "Ses": {en:"Voice",de:"Stimme",ku:"Deng"},
+  "🔊 PIPER TEST SESİ": {en:"🔊 TEST PIPER VOICE",de:"🔊 PIPER-TESTSTIMME",ku:"🔊 DENGA TESTÊ PIPER"},
+  "⚙️ PIPER YÜKLE": {en:"⚙️ LOAD PIPER",de:"⚙️ PIPER LADEN",ku:"⚙️ PIPER BAR BIKE"},
+  "İlk çalıştırmada Almanca ses modeli tarayıcıya indirilebilir.\nSonraki kullanımlarda önbellekten kullanılabilir.": {en:"The selected voice model may download in the browser on first use. Later uses may load from cache.",de:"Das gewählte Sprachmodell kann beim ersten Start im Browser geladen werden. Später kann es aus dem Cache kommen.",ku:"Modela dengê hilbijartî dikare di yekem bikaranînê de li gerokê were daxistin. Paşê dibe ku ji bîrgehê were barkirin."},
+  "👤 Character Director": {en:"👤 Character Director",de:"👤 Charakter-Regie",ku:"👤 Rêvebirina Karakterê"},
+  "Cinsiyet": {en:"Gender",de:"Geschlecht",ku:"Zayend"}, "Otomatik": {en:"Automatic",de:"Automatisch",ku:"Bixweber"},
+  "Kadın": {en:"Female",de:"Weiblich",ku:"Jin"}, "Erkek": {en:"Male",de:"Männlich",ku:"Mêr"},
+  "Yaş": {en:"Age",de:"Alter",ku:"Temen"}, "Genç": {en:"Young",de:"Jung",ku:"Ciwan"}, "Yetişkin": {en:"Adult",de:"Erwachsen",ku:"Mezin"}, "Orta yaş": {en:"Middle-aged",de:"Mittleren Alters",ku:"Temenê navîn"}, "Yaşlı": {en:"Elderly",de:"Älter",ku:"Pîr"},
+  "Saç": {en:"Hair",de:"Haare",ku:"Por",}, "Saç uzunluğu": {en:"Hair length",de:"Haarlänge",ku:"Dirêjahiya porê"}, "Göz": {en:"Eyes",de:"Augen",ku:"Çav"}, "Vücut": {en:"Build",de:"Körperbau",ku:"Avahiya laş"}, "Kıyafet": {en:"Clothing",de:"Kleidung",ku:"Cil û berg"},
+  "Siyah": {en:"Black",de:"Schwarz",ku:"Reş"}, "Koyu kahverengi": {en:"Dark brown",de:"Dunkelbraun",ku:"Qehweyî tarî"}, "Kahverengi": {en:"Brown",de:"Braun",ku:"Qehweyî"}, "Sarışın": {en:"Blonde",de:"Blond",ku:"Por zer"}, "Kızıl": {en:"Red",de:"Rot",ku:"Sor"}, "Gri": {en:"Gray",de:"Grau",ku:"Gewr"}, "Kısa": {en:"Short",de:"Kurz",ku:"Kurt"}, "Orta": {en:"Medium",de:"Mittel",ku:"Navîn"}, "Uzun": {en:"Long",de:"Lang",ku:"Dirêj"}, "Mavi": {en:"Blue",de:"Blau",ku:"Şîn"}, "Yeşil": {en:"Green",de:"Grün",ku:"Kesk"}, "Zayıf": {en:"Slim",de:"Schlank",ku:"Tenik"}, "Normal": {en:"Average",de:"Durchschnittlich",ku:"Asayî"}, "Atletik": {en:"Athletic",de:"Athletisch",ku:"Werzişvan"}, "Geniş/kuvvetli": {en:"Broad / strong",de:"Breit / kräftig",ku:"Fireh / bihêz"},
+  "🧠 HİKÂYEDEN ALGILA": {en:"🧠 DETECT FROM STORY",de:"🧠 AUS DER GESCHICHTE ERKENNEN",ku:"🧠 JI ÇÎROKÊ NAS BIKE"}, "🔒 KARAKTERİ KİLİTLE": {en:"🔒 LOCK CHARACTER",de:"🔒 CHARAKTER SPERREN",ku:"🔒 KARAKTERÊ QUFIL BIKE"}, "🔓 KİLİDİ AÇ": {en:"🔓 UNLOCK",de:"🔓 ENTRIEGELN",ku:"🔓 QUFILÊ VEKЕ"}, "Karakter otomatik modda.": {en:"Character is in automatic mode.",de:"Der Charakter ist im Automatikmodus.",ku:"Karakter di moda bixweber de ye."},
+  "🎥 Video Ayarları": {en:"🎥 Video Settings",de:"🎥 Videoeinstellungen",ku:"🎥 Mîhengên Vîdyoyê"}, "Format": {en:"Format",de:"Format",ku:"Format"}, "Görsel motoru": {en:"Image engine",de:"Bildgenerator",ku:"Motora wêneyê"}, "Altyazı": {en:"Subtitles",de:"Untertitel",ku:"Binnivîs"}, "Videoya Almanca altyazı ekle / çıkar": {en:"Add / remove subtitles in the selected story language",de:"Untertitel in der gewählten Inhaltssprache ein-/ausschalten",ku:"Binnivîsên bi zimanê çîrokê zêde bike / rake"}, "AÇIK": {en:"ON",de:"AN",ku:"VEKIRÎ"}, "KAPALI": {en:"OFF",de:"AUS",ku:"GIRTÎ"}, "GeldStory logosunu sağ üstte göster": {en:"Show GeldStory logo at top right",de:"GeldStory-Logo oben rechts anzeigen",ku:"Logoya GeldStory li jora rastê nîşan bide"}, "Logo boyutu": {en:"Logo size",de:"Logogröße",ku:"Mezinahiya logoyê"}, "Logo opaklığı": {en:"Logo opacity",de:"Logo-Deckkraft",ku:"Tarîbûna logoyê"},
+  "⚙️ İşlemler": {en:"⚙️ Actions",de:"⚙️ Aktionen",ku:"⚙️ Kiryar"}, "🔊 TÜM SAHNELERİ SESLENDİR": {en:"🔊 GENERATE VOICE FOR ALL SCENES",de:"🔊 ALLE SZENEN VERTONEN",ku:"🔊 JI BO HEMÛ DÎMENAN DENG ÇÊKE"}, "🎬 VİDEOYU RENDER ET": {en:"🎬 RENDER VIDEO",de:"🎬 VIDEO RENDERN",ku:"🎬 VÎDYoyê RENDER BIKE"}, "▶️ ÖNİZLEME": {en:"▶️ PREVIEW",de:"▶️ VORSCHAU",ku:"▶️ PÊŞDÎTIN"}, "📊 Durum": {en:"📊 Status",de:"📊 Status",ku:"📊 Rewş"}, "Hazır.": {en:"Ready.",de:"Bereit.",ku:"Amade."}, "Teknik log": {en:"Technical log",de:"Technisches Protokoll",ku:"Loga teknîkî"}, "🎞️ Sahne Yönetimi": {en:"🎞️ Scene Manager",de:"🎞️ Szenenverwaltung",ku:"🎞️ Rêveberiya Dîmenan"}, "Henüz sahne oluşturulmadı.": {en:"No scenes created yet.",de:"Noch keine Szenen erstellt.",ku:"Hêj tu dîmen nehatine çêkirin."}, "🖼️ Görsel Galerisi": {en:"🖼️ Image Gallery",de:"🖼️ Bildergalerie",ku:"🖼️ Galeriya Wêneyan"}, "Sahne görselleri burada görünecek.": {en:"Scene images will appear here.",de:"Szenenbilder erscheinen hier.",ku:"Wêneyên dîmenan dê li vir xuya bibin."}, "🎬 Video Önizleme": {en:"🎬 Video Preview",de:"🎬 Videovorschau",ku:"🎬 Pêşdîtina Vîdyoyê"}, "Sahne: -": {en:"Scene: -",de:"Szene: -",ku:"Dîmen: -"}, "⏹ Durdur": {en:"⏹ Stop",de:"⏹ Stoppen",ku:"⏹ Bisekinîne"},
+  "Arayüz dili / Interface language": {en:"Interface language",de:"Oberflächensprache",ku:"Zimanê navrûyê"}, "Video / senaryo dili": {en:"Video / script language",de:"Video- / Skriptsprache",ku:"Zimanê vîdyoyê / senaryoyê"}, "Hikâyeyi seçtiğin dilde yapıştır. Bu ayar ses modelini seçer; çevrimiçi çeviri yapmaz.": {en:"Paste your story in the selected language. This selects a voice model; it does not translate online.",de:"Füge deine Geschichte in der gewählten Sprache ein. Diese Einstellung wählt ein Sprachmodell, übersetzt aber nicht online.",ku:"Çîroka xwe bi zimanê hilbijartî ve lê zêde bike. Ev mîheng modela dengê hilbijêre; wergerandina serhêl nake."}
+};
+function minaTextLanguage(lang){
+  return {tr:"tr",en:"en",de:"de",ku:"ku"}[lang]||"tr";
+}
+function translateStaticText(root,lang){
+  if(lang==="tr"){
+    // Restore original text by reloading only when switching back from a translated UI.
+    // Instead, use cached originals collected at first scan.
+  }
+  var nodes=root.querySelectorAll("body *:not(script):not(style):not(textarea):not(input)");
+  nodes.forEach(function(el){
+    if(el.children.length) return;
+    if(el.closest("#story")||el.closest(".sceneText")||el.closest(".log")||el.id==="status") return;
+    if(!el.dataset.minaOriginalText) el.dataset.minaOriginalText=el.textContent;
+    var original=el.dataset.minaOriginalText.trim();
+    if(!original) return;
+    if(lang==="tr") el.textContent=el.dataset.minaOriginalText;
+    else if(minaTranslationMap[original]&&minaTranslationMap[original][lang]) el.textContent=minaTranslationMap[original][lang];
+  });
+  var attrs=["placeholder","title","aria-label"];
+  root.querySelectorAll("input,textarea,option").forEach(function(el){
+    attrs.forEach(function(attr){
+      if(!el.hasAttribute(attr)) return;
+      var key="minaOriginal_"+attr;
+      if(!el.dataset[key]) el.dataset[key]=el.getAttribute(attr);
+      var original=el.dataset[key];
+      if(lang==="tr") el.setAttribute(attr,original);
+      else if(minaTranslationMap[original]&&minaTranslationMap[original][lang]) el.setAttribute(attr,minaTranslationMap[original][lang]);
+    });
+  });
+  var label=document.getElementById("interfaceLanguageLabel");
+  if(label) label.textContent=lang==="en"?"Interface language":lang==="de"?"Oberflächensprache":lang==="ku"?"Zimanê navrûyê":"Arayüz dili / Interface language";
+  document.documentElement.lang=lang==="ku"?"ku":lang;
+}
+function applyInterfaceLanguage(lang){
+  minaInterfaceLanguage=lang||"tr";
+  translateStaticText(document,minaInterfaceLanguage);
+  // Re-render dynamic scene controls so their labels follow the selected UI language.
+  if(typeof renderScenes==="function" && scenes.length) renderScenes();
+  translateStaticText(document,minaInterfaceLanguage);
+  if(typeof syncSubtitleToggle==="function") syncSubtitleToggle();
+  var vh=document.getElementById("videoLanguageHelp");
+  if(vh){
+    var help={tr:"Hikâyeyi seçtiğin dilde yapıştır. Bu ayar ses modelini seçer; çevrimiçi çeviri yapmaz.",en:"Paste your story in the selected language. This selects a voice model; it does not translate online.",de:"Füge deine Geschichte in der gewählten Sprache ein. Diese Einstellung wählt ein Sprachmodell, übersetzt aber nicht online.",ku:"Çîroka xwe bi zimanê hilbijartî ve lê zêde bike. Ev mîheng modela dengê hilbijêre; wergerandina serhêl nake."};
+    vh.textContent=help[minaInterfaceLanguage]||help.tr;
+  }
+}
+function setVideoLanguage(lang){
+  minaVideoLanguage=lang||"de";
+  var voice=document.getElementById("voiceId");
+  var help=document.getElementById("videoLanguageHelp");
+  var voiceFor={de:"de_DE-thorsten-medium",en:"en_US-lessac-medium",tr:"tr_TR-dfki-medium"};
+  if(voiceFor[minaVideoLanguage]){
+    var exists=Array.from(voice.options).some(function(o){return o.value===voiceFor[minaVideoLanguage]});
+    if(exists) voice.value=voiceFor[minaVideoLanguage];
+    else if(help) help.textContent="The selected language's Piper model may not be available in this build. You can still paste and edit text in that language.";
+  }
+  if(minaVideoLanguage==="ku" && help){
+    var kuHelp={tr:"Kurmancî metnini buraya yapıştırabilirsin. Bu sürümde yerleşik Kurmancî Piper sesi yok; ses için harici WAV kullanman gerekir. Otomatik çeviri yapılmaz.",en:"You can paste Kurmanji text here. This build has no built-in Kurmanji Piper voice; external WAV audio is needed. No automatic translation is performed.",de:"Du kannst hier Kurmandschi-Text einfügen. Diese Version enthält keine integrierte Kurmandschi-Piper-Stimme; dafür wird eine externe WAV-Datei benötigt. Keine automatische Übersetzung.",ku:"Tu dikarî nivîsa Kurmancî li vir pêve bikî. Di vê guhertoyê de dengê Piper yê Kurmancî tune ye; ji bo dengê WAV-ya derveyî pêwîst e. Wergerandina bixweber tune ye."};
+    help.textContent=kuHelp[minaInterfaceLanguage]||kuHelp.tr;
+  } else if(help){
+    var normalHelp={tr:"Hikâyeyi seçtiğin dilde yapıştır. Bu ayar ses modelini seçer; çevrimiçi çeviri yapmaz.",en:"Paste your story in the selected language. This selects a voice model; it does not translate online.",de:"Füge deine Geschichte in der gewählten Sprache ein. Diese Einstellung wählt ein Sprachmodell, übersetzt aber nicht online.",ku:"Çîroka xwe bi zimanê hilbijartî ve lê zêde bike. Ev mîheng modela dengê hilbijêre; wergerandina serhêl nake."};
+    help.textContent=normalHelp[minaInterfaceLanguage]||normalHelp.tr;
+  }
+}
+// Store the original static strings before any language switch; later scene renderings
+// are handled by the same exact-match dictionary without touching user-written story text.
+window.addEventListener("DOMContentLoaded",function(){
+  document.querySelectorAll("body *:not(script):not(style):not(textarea):not(input)").forEach(function(el){if(!el.dataset.minaOriginalText)el.dataset.minaOriginalText=el.textContent;});
+  document.querySelectorAll("input,textarea,option").forEach(function(el){["placeholder","title","aria-label"].forEach(function(a){if(el.hasAttribute(a)&&!el.dataset["minaOriginal_"+a])el.dataset["minaOriginal_"+a]=el.getAttribute(a);});});
+});
+
 syncCharacterUI();
 syncSubtitleToggle();
 resizeCanvas();
+applyInterfaceLanguage("tr");
+setVideoLanguage("de");
 
 status(
-  "🟢 Mina Video AI V51.12.4 hazır. Altyazı varsayılan olarak KAPALI."
+  "🟢 Mina Video AI V51.12.3 FIXED hazır. Altyazı varsayılan olarak KAPALI."
 );
 
 </script>
