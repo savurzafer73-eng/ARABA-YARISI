@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mina Video AI V51.14 MULTI-LANGUAGE VOICES — GeldStory Studio</title>
+<title>Mina Video AI V51.15 MULTILINGUAL FIX — GeldStory Studio</title>
 
 <style>
 *{box-sizing:border-box}
@@ -478,7 +478,7 @@ canvas{
 <div class="app">
 
 <div class="header">
-<h1>🎬 Mina Video AI V51.12.3 FIXED</h1>
+<h1>🎬 Mina Video AI V51.15 — MULTILINGUAL FIX</h1>
 <p>GeldStory Studio — German Documentary Video Creator</p>
 <div class="badge">
 Piper TTS • WAV • Smart Scenes • Character Director • Clean 16:9 Render
@@ -556,8 +556,7 @@ Kısa cümleler otomatik gruplanır. Uzun hikâyelerde sahne sınırı yoktur.
 </div>
 
 <div class="help">
-İlk çalıştırmada Almanca ses modeli tarayıcıya indirilebilir.
-Sonraki kullanımlarda önbellekten kullanılabilir.
+Seçtiğin video dili ayrı konuşmacı kullanır: Almanca Thorsten, İngilizce Lessac, Türkçe DFKI. İlk kullanımda ilgili ses modeli indirilebilir; internet bağlantısı gerekir.
 </div>
 </div>
 
@@ -822,7 +821,7 @@ Sahne görselleri burada görünecek.
 "use strict";
 
 /* =========================================================
-   MINA VIDEO AI V51.12.3 FIXED
+   MINA VIDEO AI V51.15 MULTILINGUAL FIX
    ========================================================= */
 
 var scenes=[];
@@ -2454,11 +2453,27 @@ async function loadTTS(){
         );
       }
 
-      ttsModule=
-        mod.default||mod;
+      // Bazı ESM paketleri fonksiyonları doğrudan, bazıları default altında sunar.
+      // İkisini birleştirerek predict() dışa aktarımını kaybetmeyelim.
+      var defaultApi = mod.default;
+      ttsModule = {};
+      Object.keys(mod).forEach(function(key){
+        if(key !== "default") ttsModule[key] = mod[key];
+      });
+      if(defaultApi && (typeof defaultApi === "object" || typeof defaultApi === "function")){
+        Object.keys(defaultApi).forEach(function(key){
+          if(typeof ttsModule[key] === "undefined") ttsModule[key] = defaultApi[key];
+        });
+        if(typeof defaultApi.predict === "function" && typeof ttsModule.predict !== "function"){
+          ttsModule.predict = defaultApi.predict.bind(defaultApi);
+        }
+      }
+      if(typeof ttsModule.predict !== "function"){
+        throw new Error("Piper paketi yüklendi ancak predict() fonksiyonu bulunamadı. Tarayıcı önbelleğini temizleyip yeniden deneyin.");
+      }
 
       log(
-        "Piper modülü başarıyla yüklendi."
+        "Piper modülü başarıyla yüklendi; predict() hazır."
       );
 
       status(
@@ -2489,28 +2504,48 @@ async function loadTTS(){
 }
 
 function normalizePiperResult(result){
-
+  // Piper paketinin farklı sürümleri Blob veya binary veri döndürebilir.
   if(result instanceof Blob){
     return result;
   }
 
-  if(
-    result &&
-    result.audio instanceof Blob
-  ){
-    return result.audio;
+  var candidate = result;
+  if(result && typeof result === "object"){
+    var keys = ["audio", "blob", "wav", "data", "buffer", "audioData"];
+    for(var i=0;i<keys.length;i++){
+      var value = result[keys[i]];
+      if(value instanceof Blob){ return value; }
+      if(value instanceof ArrayBuffer || ArrayBuffer.isView(value)){ candidate = value; break; }
+    }
   }
 
-  if(
-    result &&
-    result.blob instanceof Blob
-  ){
-    return result.blob;
+  if(candidate instanceof ArrayBuffer){
+    if(candidate.byteLength < 12) throw new Error("Piper çok kısa bir ses verisi döndürdü.");
+    return new Blob([candidate], {type:"audio/wav"});
   }
 
-  throw new Error(
-    "Piper WAV verisi alınamadı."
-  );
+  if(ArrayBuffer.isView(candidate)){
+    var copy = candidate.buffer.slice(candidate.byteOffset, candidate.byteOffset + candidate.byteLength);
+    if(copy.byteLength < 12) throw new Error("Piper çok kısa bir ses verisi döndürdü.");
+    return new Blob([copy], {type:"audio/wav"});
+  }
+
+  if(typeof candidate === "string" && candidate.indexOf("data:audio/") === 0){
+    var comma = candidate.indexOf(",");
+    if(comma > -1){
+      var header = candidate.slice(0,comma);
+      var payload = candidate.slice(comma+1);
+      if(header.indexOf(";base64") > -1){
+        var raw = atob(payload);
+        var bytes = new Uint8Array(raw.length);
+        for(var j=0;j<raw.length;j++) bytes[j] = raw.charCodeAt(j);
+        return new Blob([bytes], {type:header.slice(5).split(";")[0] || "audio/wav"});
+      }
+    }
+  }
+
+  var detail = result && typeof result === "object" ? Object.keys(result).join(", ") : typeof result;
+  throw new Error("Piper WAV verisi tanınamadı. Dönen veri türü: " + detail + ". Ses modeli indirilememiş veya Piper paketi uyumsuz olabilir.");
 }
 
 // Her içerik dili kendi konuşmacısını kullanır; arayüz dili bundan bağımsızdır.
@@ -3085,6 +3120,8 @@ async function generateSceneVoice(index){
 
   try{
 
+    scene.ttsError = "";
+
     status(
       "🔊 Sahne "+
       scene.id+
@@ -3234,6 +3271,8 @@ async function generateSceneVoice(index){
       error
     );
 
+    scene.ttsError = error && error.message ? error.message : String(error);
+
     log(
       "TTS ERROR: "+
       (
@@ -3286,7 +3325,8 @@ async function generateAllVoices(){
         throw new Error(
           "Sahne "+
           (i+1)+
-          " için ses oluşturulamadı."
+          " için ses oluşturulamadı" +
+          (scenes[i] && scenes[i].ttsError ? ": " + scenes[i].ttsError : ".")
         );
       }
 
